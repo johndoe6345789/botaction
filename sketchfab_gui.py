@@ -14,10 +14,11 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QTextEdit, QGroupBox, QFormLayout,
     QProgressBar, QFileDialog, QTabWidget, QTreeWidget, QTreeWidgetItem,
-    QSplitter, QMessageBox, QStatusBar, QFrame, QScrollArea
+    QSplitter, QMessageBox, QStatusBar, QFrame, QScrollArea, QMenu,
+    QAbstractItemView
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize
-from PyQt6.QtGui import QPixmap, QFont, QIcon, QPalette, QColor
+from PyQt6.QtGui import QPixmap, QFont, QIcon, QPalette, QColor, QAction, QClipboard
 
 from sketchfab_fetcher import SketchfabFetcher
 
@@ -155,6 +156,121 @@ class DownloadWorker(QThread):
             self.error.emit(str(e))
 
 
+class CopyableTreeWidget(QTreeWidget):
+    """Tree widget with copy functionality via double-click and right-click menu."""
+
+    def __init__(self):
+        super().__init__()
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.show_context_menu)
+        self.itemDoubleClicked.connect(self.copy_item_value)
+
+        # Make items editable for selection/copy
+        self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+
+    def show_context_menu(self, position):
+        """Show right-click context menu."""
+        item = self.itemAt(position)
+        if not item:
+            return
+
+        menu = QMenu(self)
+
+        # Copy value action
+        copy_value_action = QAction("Copy Value", self)
+        copy_value_action.triggered.connect(lambda: self.copy_text(item.text(1)))
+        menu.addAction(copy_value_action)
+
+        # Copy property name action
+        copy_name_action = QAction("Copy Property Name", self)
+        copy_name_action.triggered.connect(lambda: self.copy_text(item.text(0)))
+        menu.addAction(copy_name_action)
+
+        # Copy both action
+        copy_both_action = QAction("Copy Both (Name: Value)", self)
+        copy_both_action.triggered.connect(
+            lambda: self.copy_text(f"{item.text(0)}: {item.text(1)}")
+        )
+        menu.addAction(copy_both_action)
+
+        menu.addSeparator()
+
+        # Copy all children values
+        if item.childCount() > 0:
+            copy_all_action = QAction("Copy All Child Values", self)
+            copy_all_action.triggered.connect(lambda: self.copy_all_children(item))
+            menu.addAction(copy_all_action)
+
+        menu.exec(self.mapToGlobal(position))
+
+    def copy_item_value(self, item, column):
+        """Copy item value on double-click."""
+        text = item.text(column)
+        if text:
+            self.copy_text(text)
+            # Show feedback in status bar if we can find it
+            main_window = self.window()
+            if hasattr(main_window, 'status_bar'):
+                main_window.status_bar.showMessage(f"Copied: {text[:50]}{'...' if len(text) > 50 else ''}", 2000)
+
+    def copy_text(self, text: str):
+        """Copy text to clipboard."""
+        clipboard = QApplication.clipboard()
+        clipboard.setText(text)
+
+    def copy_all_children(self, item):
+        """Copy all child item values."""
+        lines = []
+        for i in range(item.childCount()):
+            child = item.child(i)
+            lines.append(f"{child.text(0)}: {child.text(1)}")
+        self.copy_text("\n".join(lines))
+
+
+class CopyableLabel(QLabel):
+    """Label that can be copied via double-click or right-click."""
+
+    def __init__(self, text: str = "-"):
+        super().__init__(text)
+        self.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse |
+            Qt.TextInteractionFlag.TextSelectableByKeyboard
+        )
+        self.setCursor(Qt.CursorShape.IBeamCursor)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.show_context_menu)
+
+    def show_context_menu(self, position):
+        """Show right-click context menu."""
+        menu = QMenu(self)
+
+        copy_action = QAction("Copy", self)
+        copy_action.triggered.connect(self.copy_text)
+        menu.addAction(copy_action)
+
+        select_all_action = QAction("Select All", self)
+        select_all_action.triggered.connect(self.select_all)
+        menu.addAction(select_all_action)
+
+        menu.exec(self.mapToGlobal(position))
+
+    def copy_text(self):
+        """Copy label text to clipboard."""
+        clipboard = QApplication.clipboard()
+        selected = self.selectedText()
+        clipboard.setText(selected if selected else self.text())
+
+    def select_all(self):
+        """Select all text."""
+        self.setSelection(0, len(self.text()))
+
+    def mouseDoubleClickEvent(self, event):
+        """Select all on double-click."""
+        self.setSelection(0, len(self.text()))
+        super().mouseDoubleClickEvent(event)
+
+
 class ThumbnailLabel(QLabel):
     """Custom label for displaying thumbnails."""
 
@@ -200,17 +316,17 @@ class ModelInfoPanel(QGroupBox):
         layout = QFormLayout()
         layout.setSpacing(8)
 
-        self.name_label = QLabel("-")
+        self.name_label = CopyableLabel("-")
         self.name_label.setWordWrap(True)
         self.name_label.setFont(QFont("", 12, QFont.Weight.Bold))
 
-        self.author_label = QLabel("-")
-        self.views_label = QLabel("-")
-        self.likes_label = QLabel("-")
-        self.faces_label = QLabel("-")
-        self.vertices_label = QLabel("-")
-        self.downloadable_label = QLabel("-")
-        self.license_label = QLabel("-")
+        self.author_label = CopyableLabel("-")
+        self.views_label = CopyableLabel("-")
+        self.likes_label = CopyableLabel("-")
+        self.faces_label = CopyableLabel("-")
+        self.vertices_label = CopyableLabel("-")
+        self.downloadable_label = CopyableLabel("-")
+        self.license_label = CopyableLabel("-")
 
         layout.addRow("Name:", self.name_label)
         layout.addRow("Author:", self.author_label)
@@ -269,10 +385,11 @@ class EncryptionInfoPanel(QGroupBox):
     def setup_ui(self):
         layout = QVBoxLayout()
 
-        self.tree = QTreeWidget()
+        self.tree = CopyableTreeWidget()
         self.tree.setHeaderLabels(["Property", "Value"])
         self.tree.setColumnWidth(0, 150)
         self.tree.setAlternatingRowColors(True)
+        self.tree.setWordWrap(True)
 
         layout.addWidget(self.tree)
         self.setLayout(layout)
@@ -287,24 +404,29 @@ class EncryptionInfoPanel(QGroupBox):
             return
 
         for file_data in encryption_info.get('files', []):
-            file_item = QTreeWidgetItem([f"File: {file_data.get('uid', 'unknown')[:8]}...", ""])
+            file_uid = file_data.get('uid', 'unknown')
+            file_item = QTreeWidgetItem([f"File: {file_uid}", ""])
 
-            # Add file properties
+            # Add file properties - full values, no ellipsis
+            QTreeWidgetItem(file_item, ["UID", file_uid])
             QTreeWidgetItem(file_item, ["Encrypted", str(file_data.get('encrypted', False))])
             QTreeWidgetItem(file_item, ["Model Size", f"{file_data.get('model_size', 0):,} bytes"])
             QTreeWidgetItem(file_item, ["OSGJS Size", f"{file_data.get('osgjs_size', 0):,} bytes"])
-            QTreeWidgetItem(file_item, ["URL", file_data.get('url', '-')[:50] + "..."])
+            QTreeWidgetItem(file_item, ["URL", file_data.get('url', '-')])
 
             if file_data.get('key_material'):
                 km = file_data['key_material']
                 key_item = QTreeWidgetItem(file_item, ["Key Material", ""])
                 QTreeWidgetItem(key_item, ["Length", f"{km.get('raw_length', 0)} bytes"])
-                QTreeWidgetItem(key_item, ["Key (32 bytes)", km.get('potential_key', '-')[:32] + "..."])
+                QTreeWidgetItem(key_item, ["Key (32 bytes)", km.get('potential_key', '-')])
                 QTreeWidgetItem(key_item, ["IV (16 bytes)", km.get('potential_iv', '-')])
                 key_item.setExpanded(True)
 
             self.tree.addTopLevelItem(file_item)
             file_item.setExpanded(True)
+
+        # Resize columns to fit content
+        self.tree.resizeColumnToContents(0)
 
     def clear(self):
         """Clear the tree."""
@@ -321,9 +443,10 @@ class FileListPanel(QGroupBox):
     def setup_ui(self):
         layout = QVBoxLayout()
 
-        self.tree = QTreeWidget()
+        self.tree = CopyableTreeWidget()
         self.tree.setHeaderLabels(["Type", "URL / Info"])
         self.tree.setColumnWidth(0, 120)
+        self.tree.setWordWrap(True)
 
         layout.addWidget(self.tree)
         self.setLayout(layout)
@@ -338,7 +461,7 @@ class FileListPanel(QGroupBox):
         for file_info in embed_config.get('files', []):
             file_item = QTreeWidgetItem([
                 "Model File",
-                file_info.get('osgjsUrl', '-')[:60] + "..."
+                file_info.get('osgjsUrl', '-')
             ])
 
             QTreeWidgetItem(file_item, ["UID", file_info.get('uid', '-')])
@@ -353,12 +476,15 @@ class FileListPanel(QGroupBox):
         thumbnails = embed_config.get('thumbnails', {}).get('images', [])
         if thumbnails:
             thumb_parent = QTreeWidgetItem(["Thumbnails", f"{len(thumbnails)} available"])
-            for thumb in thumbnails[:5]:
+            for thumb in thumbnails:
                 QTreeWidgetItem(thumb_parent, [
                     f"{thumb.get('width')}x{thumb.get('height')}",
-                    thumb.get('url', '-')[:50] + "..."
+                    thumb.get('url', '-')
                 ])
             self.tree.addTopLevelItem(thumb_parent)
+
+        # Resize columns to fit content
+        self.tree.resizeColumnToContents(0)
 
     def clear(self):
         """Clear the tree."""
@@ -603,6 +729,24 @@ class MainWindow(QMainWindow):
             }
             QScrollBar::handle:vertical:hover {
                 background-color: #666;
+            }
+            QMenu {
+                background-color: #2a2a2a;
+                border: 1px solid #444;
+                border-radius: 4px;
+                padding: 4px;
+            }
+            QMenu::item {
+                padding: 6px 20px;
+                border-radius: 2px;
+            }
+            QMenu::item:selected {
+                background-color: #094771;
+            }
+            QMenu::separator {
+                height: 1px;
+                background-color: #444;
+                margin: 4px 0;
             }
         """)
 
