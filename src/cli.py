@@ -214,6 +214,50 @@ def cmd_export(args):
         return 1
 
 
+def cmd_demo(args):
+    """Launch a demonstration script."""
+    demos = {
+        'decryption': 'demos/demo_decryption.py',
+        'viewer': 'demos/demo_viewer.py',
+        'inspect': 'demos/inspect_model.py'
+    }
+    
+    if args.demo_name not in demos:
+        print(f"Error: Unknown demo '{args.demo_name}'. Available: {', '.join(demos.keys())}")
+        return 1
+    
+    demo_path = Path(__file__).parent / demos[args.demo_name]
+    if not demo_path.exists():
+        print(f"Error: Demo file not found: {demo_path}")
+        return 1
+    
+    print(f"Launching demo: {args.demo_name}")
+    try:
+        import subprocess
+        result = subprocess.run([sys.executable, str(demo_path)])
+        return result.returncode
+    except Exception as e:
+        print(f"Error launching demo: {e}")
+        return 1
+
+
+def cmd_gui(args):
+    """Launch the graphical user interface."""
+    gui_path = Path(__file__).parent / 'sketchfab_gui.py'
+    if not gui_path.exists():
+        print(f"Error: GUI file not found: {gui_path}")
+        return 1
+    
+    print("Launching GUI...")
+    try:
+        import subprocess
+        result = subprocess.run([sys.executable, str(gui_path)])
+        return result.returncode
+    except Exception as e:
+        print(f"Error launching GUI: {e}")
+        return 1
+
+
 def cmd_info(args):
     """Show information about available commands."""
     print("Sketchfab Model Tools CLI")
@@ -224,6 +268,8 @@ def cmd_info(args):
     print("  decrypt  - Decrypt an encrypted .binz file")
     print("  inspect  - Inspect a .binz file structure")
     print("  export   - Export decrypted model to 3MF format")
+    print("  demo     - Launch demonstration scripts")
+    print("  gui      - Launch graphical user interface")
     print("  info     - Show this help information")
     print()
     print("Use 'sketchfab-cli <command> --help' for command-specific help.")
@@ -271,6 +317,16 @@ def main():
     export_parser.add_argument('--output', required=True,
                               help='Output .3mf file path')
     export_parser.set_defaults(func=cmd_export)
+
+    # Demo command
+    demo_parser = subparsers.add_parser('demo', help='Launch demonstration scripts')
+    demo_parser.add_argument('demo_name', choices=['decryption', 'viewer', 'inspect'],
+                            help='Name of the demo to launch')
+    demo_parser.set_defaults(func=cmd_demo)
+
+    # GUI command
+    gui_parser = subparsers.add_parser('gui', help='Launch graphical user interface')
+    gui_parser.set_defaults(func=cmd_gui)
 
     # Info command
     info_parser = subparsers.add_parser('info', help='Show information')
