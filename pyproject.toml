@@ -23,6 +23,7 @@ classifiers = [
 ]
 dependencies = [
     "requests",
+    "beautifulsoup4",
     "numpy",
     "pycryptodome",
     "PyQt6",
@@ -36,7 +37,7 @@ dev = [
 ]
 
 [project.scripts]
-sketchfab-cli = "src.cli:main"
+sketchfab-cli = "cli:main"
 
 [project.urls]
 Homepage = "https://github.com/yourusername/sketchfab-tools"

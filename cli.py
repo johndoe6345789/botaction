@@ -10,13 +10,14 @@ import argparse
 import sys
 import json
 from pathlib import Path
+import http.cookiejar
 
 # Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-from .sketchfab_fetcher import SketchfabFetcher
-from .model_decryptor import SketchfabDecryptor, decrypt_model
-from .binz_reader import BinzReader
+from src.sketchfab_fetcher import SketchfabFetcher
+from src.model_decryptor import SketchfabDecryptor, decrypt_model
+from src.binz_reader import BinzReader
 
 
 def cmd_fetch(args):
@@ -184,7 +185,7 @@ def cmd_inspect(args):
 def cmd_export(args):
     """Export decrypted model to 3MF format."""
     try:
-        from .export_3mf import Model3MFExporter
+        from src.export_3mf import Model3MFExporter
     except ImportError:
         print("Error: Could not import 3MF exporter")
         return 1
@@ -268,11 +269,137 @@ def cmd_info(args):
     print("  decrypt  - Decrypt an encrypted .binz file")
     print("  inspect  - Inspect a .binz file structure")
     print("  export   - Export decrypted model to 3MF format")
+    print("  scrape   - Scrape webpage content using requests and BeautifulSoup")
+    print("  session  - Demonstrate session management with cookiejar")
     print("  demo     - Launch demonstration scripts")
     print("  gui      - Launch graphical user interface")
     print("  info     - Show this help information")
     print()
     print("Use 'sketchfab-cli <command> --help' for command-specific help.")
+
+
+def cmd_scrape(args):
+    """Scrape webpage content using requests and BeautifulSoup."""
+    try:
+        import requests
+        from bs4 import BeautifulSoup
+    except ImportError as e:
+        print(f"Error: Missing required packages: {e}")
+        print("Install with: pip install requests beautifulsoup4")
+        return 1
+
+    print(f"Scraping: {args.url}")
+
+    try:
+        # Make request
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        response = requests.get(args.url, headers=headers, timeout=10)
+        response.raise_for_status()
+
+        # Parse with BeautifulSoup
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        if args.title:
+            title = soup.title.string if soup.title else "No title found"
+            print(f"Title: {title}")
+
+        if args.links:
+            links = soup.find_all('a', href=True)
+            print(f"Found {len(links)} links:")
+            for i, link in enumerate(links[:args.max_links]):
+                print(f"  {i+1}. {link.get('href')} - {link.get_text().strip()[:50]}")
+
+        if args.text:
+            # Extract text content
+            for script in soup(["script", "style"]):
+                script.decompose()
+            text = soup.get_text()
+            lines = [line.strip() for line in text.splitlines() if line.strip()]
+            print(f"Text content ({len(lines)} lines):")
+            for line in lines[:args.max_lines]:
+                print(f"  {line}")
+
+        if args.save_html:
+            output_path = Path(args.save_html)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(str(soup))
+            print(f"HTML saved to: {output_path}")
+
+        return 0
+
+    except requests.RequestException as e:
+        print(f"Request error: {e}")
+        return 1
+    except Exception as e:
+        print(f"Error: {e}")
+        return 1
+
+
+def cmd_session(args):
+    """Demonstrate session management with cookiejar."""
+    try:
+        import requests
+        from bs4 import BeautifulSoup
+    except ImportError as e:
+        print(f"Error: Missing required packages: {e}")
+        print("Install with: pip install requests beautifulsoup4")
+        return 1
+
+    print("Demonstrating session management with cookiejar...")
+
+    try:
+        # Create a cookiejar and session
+        jar = http.cookiejar.CookieJar()
+        session = requests.Session()
+        session.cookies = jar
+
+        # First request to establish session
+        print(f"Making initial request to: {args.url}")
+        response1 = session.get(args.url, timeout=10)
+        response1.raise_for_status()
+
+        print(f"Initial response status: {response1.status_code}")
+        print(f"Cookies received: {len(jar)}")
+
+        # List cookies
+        for cookie in jar:
+            print(f"  {cookie.name}: {cookie.value}")
+
+        # Optional second request to demonstrate persistence
+        if args.follow_link:
+            soup = BeautifulSoup(response1.content, 'html.parser')
+            first_link = soup.find('a', href=True)
+            if first_link:
+                next_url = first_link['href']
+                if not next_url.startswith('http'):
+                    from urllib.parse import urljoin
+                    next_url = urljoin(args.url, next_url)
+
+                print(f"\nFollowing link to: {next_url}")
+                response2 = session.get(next_url, timeout=10)
+                response2.raise_for_status()
+                print(f"Follow-up response status: {response2.status_code}")
+                print(f"Cookies after follow-up: {len(jar)}")
+            else:
+                print("No links found to follow")
+
+        # Save cookies if requested
+        if args.save_cookies:
+            cookie_file = Path(args.save_cookies)
+            jar.save(cookie_file, ignore_discard=True, ignore_expires=True)
+            print(f"Cookies saved to: {cookie_file}")
+
+        return 0
+
+    except requests.RequestException as e:
+        print(f"Request error: {e}")
+        return 1
+    except Exception as e:
+        print(f"Error: {e}")
+        return 1
 
 
 def main():
@@ -331,6 +458,32 @@ def main():
     # Info command
     info_parser = subparsers.add_parser('info', help='Show information')
     info_parser.set_defaults(func=cmd_info)
+
+    # Scrape command
+    scrape_parser = subparsers.add_parser('scrape', help='Scrape webpage with requests and BeautifulSoup')
+    scrape_parser.add_argument('url', help='URL to scrape')
+    scrape_parser.add_argument('--title', action='store_true',
+                              help='Extract and display page title')
+    scrape_parser.add_argument('--links', action='store_true',
+                              help='Extract and display links')
+    scrape_parser.add_argument('--text', action='store_true',
+                              help='Extract and display text content')
+    scrape_parser.add_argument('--max-links', type=int, default=10,
+                              help='Maximum number of links to display (default: 10)')
+    scrape_parser.add_argument('--max-lines', type=int, default=20,
+                              help='Maximum number of text lines to display (default: 20)')
+    scrape_parser.add_argument('--save-html', 
+                              help='Save parsed HTML to file')
+    scrape_parser.set_defaults(func=cmd_scrape)
+
+    # Session command
+    session_parser = subparsers.add_parser('session', help='Demonstrate session management with cookiejar')
+    session_parser.add_argument('url', help='URL to start session with')
+    session_parser.add_argument('--follow-link', action='store_true',
+                               help='Follow the first link found on the page')
+    session_parser.add_argument('--save-cookies',
+                               help='Save cookies to file (Mozilla format)')
+    session_parser.set_defaults(func=cmd_session)
 
     # Parse args
     args = parser.parse_args()
