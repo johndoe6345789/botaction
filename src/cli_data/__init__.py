@@ -303,3 +303,53 @@ def get_arguments_config():
 def get_commands():
     """Load command definitions."""
     return load_json('arguments.json')['commands']
+
+
+def get_strings_config():
+    """Load strings configuration."""
+    return load_json('strings.json')
+
+
+def get_demos():
+    """Load demo paths."""
+    return load_json('strings.json')['demos']
+
+
+def get_info_strings():
+    """Load info command strings."""
+    return load_json('strings.json')['info']
+
+
+def get_messages():
+    """Load message templates."""
+    return load_json('strings.json')['messages']
+
+
+def get_labels():
+    """Load UI labels."""
+    return load_json('strings.json')['labels']
+
+
+def get_symbols():
+    """Load symbols/icons."""
+    return load_json('strings.json')['symbols']
+
+
+def get_config_options():
+    """Load config command options."""
+    return load_json('strings.json')['config_options']
+
+
+def get_api_options():
+    """Load api command options."""
+    return load_json('strings.json')['api_options']
+
+
+def get_design_options():
+    """Load design command options."""
+    return load_json('strings.json')['design_options']
+
+
+def get_layout_options():
+    """Load layout command options."""
+    return load_json('strings.json')['layout_options']

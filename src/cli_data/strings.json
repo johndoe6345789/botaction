@@ -1,0 +1,363 @@
+{
+  "demos": {
+    "decryption": "demos/demo_decryption.py",
+    "viewer": "demos/demo_viewer.py",
+    "inspect": "demos/inspect_model.py"
+  },
+  "info": {
+    "title": "Sketchfab Model Tools CLI",
+    "separator": "=",
+    "separator_length": 65,
+    "sections": {
+      "core": {
+        "title": "Core Commands:",
+        "commands": [
+          {"name": "fetch", "description": "Fetch model info and download files from Sketchfab"},
+          {"name": "decrypt", "description": "Decrypt an encrypted .binz file"},
+          {"name": "inspect", "description": "Inspect a .binz file structure"},
+          {"name": "export", "description": "Export decrypted model to 3MF format"},
+          {"name": "viewer", "description": "Launch 3D model viewer"}
+        ]
+      },
+      "search": {
+        "title": "Search & Discovery Commands:",
+        "commands": [
+          {"name": "search", "description": "Search for models on Sketchfab"},
+          {"name": "user", "description": "Look up a Sketchfab user"},
+          {"name": "stats", "description": "Fetch and display model statistics from API"},
+          {"name": "categories", "description": "Display model categories"},
+          {"name": "share", "description": "Generate social sharing URLs for a model"}
+        ]
+      },
+      "url_embed": {
+        "title": "URL & Embed Commands:",
+        "commands": [
+          {"name": "embed", "description": "Generate embed URL or iframe code for a model"},
+          {"name": "parse-url", "description": "Parse and analyze Sketchfab URLs"},
+          {"name": "thumbnail", "description": "Generate thumbnail URLs for a model"}
+        ]
+      },
+      "config_design": {
+        "title": "Configuration & Design Commands:",
+        "commands": [
+          {"name": "config", "description": "Display or generate viewer configuration"},
+          {"name": "api", "description": "Display API endpoint information and utilities"},
+          {"name": "ai-info", "description": "Show information about Sketchfab AI tools"},
+          {"name": "tiers", "description": "Display subscription tier information"},
+          {"name": "design", "description": "Show design system (colors, typography, gradients)"},
+          {"name": "layout", "description": "Show responsive breakpoints and spacing"},
+          {"name": "brands", "description": "Show brand/social media colors"},
+          {"name": "validate", "description": "Validate input values (username, email, model_id, url)"}
+        ]
+      },
+      "utility": {
+        "title": "Utility Commands:",
+        "commands": [
+          {"name": "string", "description": "String manipulation (slugify, camelCase, kebab-case)"},
+          {"name": "filesize", "description": "Format file sizes in human-readable format"},
+          {"name": "markdown", "description": "Display markdown syntax reference"},
+          {"name": "dates", "description": "Display date format patterns"}
+        ]
+      },
+      "reference": {
+        "title": "Reference Commands:",
+        "commands": [
+          {"name": "licenses", "description": "Display Creative Commons license information"},
+          {"name": "webgl", "description": "Show WebGL error types and troubleshooting"},
+          {"name": "animation", "description": "Show spring animation presets and physics"},
+          {"name": "privacy", "description": "Display cookie consent categories (GDPR/OneTrust)"},
+          {"name": "model-fields", "description": "Show model property field definitions"},
+          {"name": "grid", "description": "Display responsive grid column configurations"},
+          {"name": "placements", "description": "Show UI popup placement options"}
+        ]
+      },
+      "scraping": {
+        "title": "Web Scraping Commands:",
+        "commands": [
+          {"name": "scrape", "description": "Scrape webpage content using requests/BeautifulSoup"},
+          {"name": "session", "description": "Demonstrate session management with cookiejar"},
+          {"name": "download-js", "description": "Download all JavaScript files from a website"}
+        ]
+      },
+      "other": {
+        "title": "Other Commands:",
+        "commands": [
+          {"name": "demo", "description": "Launch demonstration scripts"},
+          {"name": "gui", "description": "Launch graphical user interface"},
+          {"name": "info", "description": "Show this help information"}
+        ]
+      }
+    },
+    "footer": "Use 'python cli.py <command> --help' for command-specific help."
+  },
+  "messages": {
+    "fetch": {
+      "fetching": "Fetching model from: {url}",
+      "error": "Error: {error}",
+      "model": "Model: {name}",
+      "author": "Author: {username}",
+      "views": "Views: {count:,}",
+      "likes": "Likes: {count:,}",
+      "downloading": "Downloading files to: {output_dir}",
+      "downloaded": "Downloaded: {count} files",
+      "metadata_saved": "Metadata saved to: {meta_file}"
+    },
+    "decrypt": {
+      "decrypting": "Decrypting: {name}",
+      "error_binz_not_found": "Error: .binz file not found: {path}",
+      "error_params_not_found": "Error: params file not found: {path}",
+      "error_need_key": "Error: Must provide --key or --params-file",
+      "error_pycryptodome": "Error: PyCryptodome required for manual key decryption",
+      "decrypted_bytes": "Decrypted {count:,} bytes",
+      "saved_to": "Saved to: {path}",
+      "inspection_header": "Decrypted data inspection:"
+    },
+    "inspect": {
+      "inspecting": "Inspecting: {name}",
+      "size": "Size: {size:,} bytes",
+      "decompressed_size": "Decompressed size: {size:,} bytes",
+      "data_structure": "Data structure:",
+      "found_params": "Found params file: {name}",
+      "parsing_geometry": "Attempting to parse geometry...",
+      "found_vertices": "Found vertices: {count:,}",
+      "found_normals": "Found normals: {count:,}",
+      "found_uvs": "Found UVs: {count:,}",
+      "found_indices": "Found indices: {count:,}"
+    },
+    "export": {
+      "error_import": "Error: Could not import 3MF exporter",
+      "error_not_found": "Error: .binz file not found: {path}",
+      "exporting": "Exporting {name} to 3MF...",
+      "exported": "Exported to: {path}",
+      "vertices": "Vertices: {count:,}",
+      "triangles": "Triangles: {count:,}"
+    },
+    "demo": {
+      "error_unknown": "Error: Unknown demo '{name}'. Available: {available}",
+      "error_not_found": "Error: Demo file not found: {path}",
+      "launching": "Launching demo: {name}",
+      "error_launch": "Error launching demo: {error}"
+    },
+    "gui": {
+      "error_not_found": "Error: GUI file not found: {path}",
+      "launching": "Launching GUI...",
+      "error_launch": "Error launching GUI: {error}"
+    },
+    "viewer": {
+      "error_packages": "Error: Missing required packages for viewer: {error}",
+      "install_hint": "Install with: pip install PyQt6 PyOpenGL",
+      "launching": "Launching 3D Model Viewer...",
+      "window_title": "Sketchfab Model Viewer",
+      "loading_model": "Loading model: {path}",
+      "model_loaded": "Model loaded successfully: {vertices:,} vertices, {triangles:,} triangles",
+      "load_failed": "Failed to load model: {path}",
+      "not_found": "Model file not found: {path}",
+      "error_launch": "Error launching viewer: {error}"
+    },
+    "scrape": {
+      "scraping": "Scraping: {url}",
+      "title": "Title: {title}",
+      "found_links": "Found {count} links:",
+      "text_content": "Text content ({count} lines):",
+      "html_saved": "HTML saved to: {path}",
+      "error_packages": "Error: Missing required packages: {error}",
+      "install_hint": "Install with: pip install requests beautifulsoup4",
+      "request_error": "Request error: {error}"
+    },
+    "session": {
+      "demonstrating": "Demonstrating session management with cookiejar...",
+      "initial_request": "Making initial request to: {url}",
+      "response_status": "Initial response status: {status}",
+      "cookies_received": "Cookies received: {count}",
+      "following_link": "Following link to: {url}",
+      "followup_status": "Follow-up response status: {status}",
+      "cookies_after": "Cookies after follow-up: {count}",
+      "no_links": "No links found to follow",
+      "cookies_saved": "Cookies saved to: {path}"
+    },
+    "download_js": {
+      "downloading": "Downloading JavaScript files from: {url}",
+      "processing": "Processing: {url}",
+      "skipping_external": "Skipping external JS: {url}",
+      "downloaded_file": "Downloaded: {name} ({size} bytes)",
+      "failed_download": "Failed to download {url}: {error}",
+      "downloaded_from_json": "Downloaded from JSON: {name} ({size} bytes)",
+      "found_api": "Found API endpoint in JSON: {url}",
+      "json_parse_error": "Could not parse JSON from {url}",
+      "completed": "Completed! Downloaded {count} JavaScript files to {dir}",
+      "processed_pages": "Processed {count} pages"
+    }
+  },
+  "labels": {
+    "error": "Error:",
+    "model_id": "Model ID:",
+    "embed_url": "Embed URL:",
+    "iframe_code": "iFrame Code:",
+    "copied": "Copied to clipboard!",
+    "install_pyperclip": "(Install pyperclip to enable clipboard copy: pip install pyperclip)",
+    "quality_presets": "Quality Presets:",
+    "environment_presets": "Environment Presets:",
+    "embed_options": "Embed URL Options:",
+    "material_options": "Material Display Options:",
+    "api_endpoints": "Sketchfab API Endpoints:",
+    "base_url": "Base URL:",
+    "api_url": "API URL:",
+    "curl_command": "cURL command:",
+    "download_formats": "Available Download Formats:",
+    "visibility_types": "Visibility Types:",
+    "api_info_commands": "API Information Commands:",
+    "ai_tools": "Sketchfab AI Tools",
+    "ai_actions": "Supported AI Actions:",
+    "ai_providers": "AI Providers:",
+    "text_to_3d": "Text-to-3D Providers:",
+    "image_to_3d": "Image-to-3D Providers:",
+    "parsing": "Parsing:",
+    "url_components": "URL Components:",
+    "scheme": "Scheme:",
+    "host": "Host:",
+    "path": "Path:",
+    "query": "Query:",
+    "query_params": "Query Parameters:",
+    "fragment": "Fragment:",
+    "extracted_model_id": "Extracted Model ID:",
+    "direct_url": "Direct URL:",
+    "api_url_label": "API URL:",
+    "embed_options_detected": "Embed Options Detected:",
+    "model_info": "Model Information:",
+    "stats": "Stats:",
+    "properties": "Properties:",
+    "downloadable": "Downloadable:",
+    "animated": "Animated:",
+    "staff_pick": "Staff Pick:",
+    "license": "License:",
+    "categories": "Categories:",
+    "tags": "Tags:",
+    "raw_json": "Raw JSON:",
+    "found_results": "Found {count:,} results:",
+    "user_info": "User Information:",
+    "username": "Username:",
+    "display_name": "Display Name:",
+    "uid": "UID:",
+    "bio": "Bio:",
+    "location": "Location:",
+    "website": "Website:",
+    "models": "Models:",
+    "followers": "Followers:",
+    "following": "Following:",
+    "status": "Status:",
+    "verified": "Verified",
+    "pro_account": "Pro Account",
+    "staff": "Staff",
+    "profile_url": "Profile URL:",
+    "models_url": "Models URL:",
+    "recent_models": "Recent Models ({count} shown):",
+    "thumbnail_urls": "Thumbnail URLs for model:",
+    "standard_thumbnails": "Standard Thumbnails:",
+    "alternative_formats": "Alternative Formats:",
+    "actual_thumbnails": "Actual Thumbnails from API ({count} available):",
+    "subscription_tiers": "Sketchfab Subscription Tiers",
+    "badge_color": "Badge Color:",
+    "features": "Features:",
+    "visibility_by_tier": "Visibility Options by Tier:",
+    "valid": "Valid {type}: {value}",
+    "invalid": "Invalid {type}: {value}",
+    "expected_pattern": "Expected pattern:",
+    "model_categories": "Sketchfab Model Categories",
+    "total": "Total:",
+    "use_slugs_hint": "Use these slugs with: python cli.py search --category <slug> <query>",
+    "design_system": "Sketchfab Design System",
+    "color_palette": "Sketchfab Color Palette",
+    "typography_scale": "Sketchfab Typography Scale",
+    "gradient_presets": "Sketchfab Gradient Presets",
+    "shadow_presets": "Sketchfab Shadow Presets",
+    "notification_types": "Sketchfab Notification Types",
+    "quick_stats": "Quick Stats:",
+    "themes": "Themes:",
+    "colors_per_theme": "Colors per theme:",
+    "typography_levels": "Typography levels:",
+    "gradient_preset_count": "Gradient presets:",
+    "shadow_preset_count": "Shadow presets:",
+    "notification_type_count": "Notification types:",
+    "original": "Original:",
+    "slug": "Slug:",
+    "camelcase": "camelCase:",
+    "kebabcase": "kebab-case:",
+    "snakecase": "snake_case:",
+    "titlecase": "Title Case:",
+    "responsive_breakpoints": "Responsive Breakpoints",
+    "layout_dimensions": "Layout Dimensions",
+    "spacing_scale": "Spacing Scale",
+    "css_custom_props": "CSS Custom Properties:",
+    "layout_responsive": "Layout & Responsive Design",
+    "breakpoints": "Breakpoints:",
+    "spacing_levels": "Spacing levels:",
+    "layout_components": "Layout components:",
+    "social_sharing": "Social Sharing URLs for Model:",
+    "model_url": "Model URL:",
+    "direct_link_for": "Direct link for {platform}:",
+    "markdown_reference": "Markdown Syntax Reference",
+    "based_on_editor": "(Based on Sketchfab's markdown editor toolbar)",
+    "examples": "Examples:",
+    "brand_colors": "Brand & Social Media Colors",
+    "usage_in_css": "Usage in CSS:",
+    "date_format_patterns": "Date Format Patterns",
+    "based_on_dayjs": "(Based on Day.js patterns used by Sketchfab)",
+    "format_patterns": "Format Patterns:",
+    "dayjs_tokens": "Day.js Token Reference:",
+    "cc_licenses": "Creative Commons Licenses",
+    "used_for_licensing": "(Used for model licensing on Sketchfab)",
+    "permission_types": "Permission Types:",
+    "webgl_errors": "WebGL Error Types & Troubleshooting",
+    "webgl_detection": "WebGL Detection Code:",
+    "spring_animation": "Spring Animation Presets",
+    "physics_based": "(Physics-based animation configurations)",
+    "spring_formula": "Spring Physics Formula:",
+    "js_implementation": "JavaScript Implementation:",
+    "cookie_consent": "Cookie Consent Categories",
+    "onetrust_gdpr": "(OneTrust/GDPR consent management)",
+    "usage_pattern": "Usage Pattern:",
+    "model_props": "Model Property Fields",
+    "field_definitions": "(Field definitions for model metadata)",
+    "user_profile_groups": "User Profile Field Groups:",
+    "responsive_grid": "Responsive Grid Configuration",
+    "css_grid_impl": "CSS Grid Implementation:",
+    "popup_placements": "Popup/Tooltip Placements",
+    "floating_ui": "(Floating UI positioning options)",
+    "usage_example": "Usage Example (Floating UI):"
+  },
+  "symbols": {
+    "checkmark": "\u2713",
+    "cross": "\u2717",
+    "star": "\u2605",
+    "lightning": "\u26a1",
+    "circle": "\u25cb",
+    "block": "\u2588"
+  },
+  "config_options": [
+    "--list-presets       Show quality and environment presets",
+    "--list-embed-options Show embed URL parameters",
+    "--list-materials     Show material display options",
+    "--generate           Generate viewer configuration JSON"
+  ],
+  "api_options": [
+    "--list-endpoints   Show all API endpoints",
+    "--build-url NAME   Build a specific API URL",
+    "--formats          Show download formats",
+    "--visibility       Show visibility types"
+  ],
+  "design_options": [
+    "--colors         Show color palettes (light/dark themes)",
+    "--typography     Show typography scale",
+    "--gradients      Show gradient presets",
+    "--shadows        Show shadow presets",
+    "--notifications  Show notification type colors",
+    "--generate-css   Generate CSS variables",
+    "                 Use with --theme light|dark"
+  ],
+  "layout_options": [
+    "--breakpoints    Show responsive breakpoints",
+    "--dimensions     Show layout dimensions",
+    "--spacing        Show spacing scale",
+    "--generate-scss  Generate SCSS variables"
+  ]
+}

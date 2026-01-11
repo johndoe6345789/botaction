@@ -39,7 +39,8 @@ from cli_data import (
     get_markdown_toolbar, get_report_reasons, get_share_platforms,
     get_emoji_categories, get_licenses, get_webgl_errors,
     get_consent_categories, get_spring_presets, get_popup_placements,
-    get_commands
+    get_commands, get_demos, get_info_strings, get_labels, get_symbols,
+    get_config_options, get_api_options, get_design_options, get_layout_options
 )
 
 # =============================================================================
@@ -383,21 +384,17 @@ def cmd_export(args):
 
 def cmd_demo(args):
     """Launch a demonstration script."""
-    demos = {
-        'decryption': 'demos/demo_decryption.py',
-        'viewer': 'demos/demo_viewer.py',
-        'inspect': 'demos/inspect_model.py'
-    }
-    
+    demos = get_demos()
+
     if args.demo_name not in demos:
         print(f"Error: Unknown demo '{args.demo_name}'. Available: {', '.join(demos.keys())}")
         return 1
-    
+
     demo_path = Path(__file__).parent / demos[args.demo_name]
     if not demo_path.exists():
         print(f"Error: Demo file not found: {demo_path}")
         return 1
-    
+
     print(f"Launching demo: {args.demo_name}")
     try:
         import subprocess
@@ -489,63 +486,20 @@ def cmd_viewer(args):
 
 def cmd_info(args):
     """Show information about available commands."""
-    print("Sketchfab Model Tools CLI")
-    print("=" * 65)
+    info = get_info_strings()
+    sep = info['separator'] * info['separator_length']
+
+    print(info['title'])
+    print(sep)
     print()
-    print("Core Commands:")
-    print("  fetch       - Fetch model info and download files from Sketchfab")
-    print("  decrypt     - Decrypt an encrypted .binz file")
-    print("  inspect     - Inspect a .binz file structure")
-    print("  export      - Export decrypted model to 3MF format")
-    print("  viewer      - Launch 3D model viewer")
-    print()
-    print("Search & Discovery Commands:")
-    print("  search      - Search for models on Sketchfab")
-    print("  user        - Look up a Sketchfab user")
-    print("  stats       - Fetch and display model statistics from API")
-    print("  categories  - Display model categories")
-    print("  share       - Generate social sharing URLs for a model")
-    print()
-    print("URL & Embed Commands:")
-    print("  embed       - Generate embed URL or iframe code for a model")
-    print("  parse-url   - Parse and analyze Sketchfab URLs")
-    print("  thumbnail   - Generate thumbnail URLs for a model")
-    print()
-    print("Configuration & Design Commands:")
-    print("  config      - Display or generate viewer configuration")
-    print("  api         - Display API endpoint information and utilities")
-    print("  ai-info     - Show information about Sketchfab AI tools")
-    print("  tiers       - Display subscription tier information")
-    print("  design      - Show design system (colors, typography, gradients)")
-    print("  layout      - Show responsive breakpoints and spacing")
-    print("  brands      - Show brand/social media colors")
-    print("  validate    - Validate input values (username, email, model_id, url)")
-    print()
-    print("Utility Commands:")
-    print("  string      - String manipulation (slugify, camelCase, kebab-case)")
-    print("  filesize    - Format file sizes in human-readable format")
-    print("  markdown    - Display markdown syntax reference")
-    print("  dates       - Display date format patterns")
-    print()
-    print("Reference Commands:")
-    print("  licenses    - Display Creative Commons license information")
-    print("  webgl       - Show WebGL error types and troubleshooting")
-    print("  animation   - Show spring animation presets and physics")
-    print("  privacy     - Display cookie consent categories (GDPR/OneTrust)")
-    print("  model-fields- Show model property field definitions")
-    print("  grid        - Display responsive grid column configurations")
-    print("  placements  - Show UI popup placement options")
-    print()
-    print("Web Scraping Commands:")
-    print("  scrape      - Scrape webpage content using requests/BeautifulSoup")
-    print("  session     - Demonstrate session management with cookiejar")
-    print("  download-js - Download all JavaScript files from a website")
-    print()
-    print("Other Commands:")
-    print("  demo        - Launch demonstration scripts")
-    print("  gui         - Launch graphical user interface")
-    print("  info        - Show this help information")
-    print()
+
+    # Print each section
+    for section_key, section in info['sections'].items():
+        print(section['title'])
+        for cmd in section['commands']:
+            print(f"  {cmd['name']:14}- {cmd['description']}")
+        print()
+
     print("Configuration Constants (from JS analysis):")
     print(f"  API Base URL: {SKETCHFAB_API_BASE}")
     print(f"  Embed Options: {len(EMBED_OPTIONS)} parameters available")
@@ -558,7 +512,7 @@ def cmd_info(args):
     print(f"  License Types: {len(LICENSE_TYPES)} Creative Commons licenses")
     print(f"  Spring Presets: {len(SPRING_PRESETS)} animation configs")
     print()
-    print("Use 'python cli.py <command> --help' for command-specific help.")
+    print(info['footer'])
 
 
 def cmd_scrape(args):
