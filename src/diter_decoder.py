@@ -76,13 +76,15 @@ def _load_key_hex(path: Path) -> Optional[str]:
     if not path.exists():
         return None
     text = path.read_text(encoding="utf-8", errors="replace")
-    raw = _extract_js_string(text)
-    if raw is None:
-        return None
-    cleaned = _clean_hex(raw)
-    if len(cleaned) < 40:
-        return None
-    return cleaned[:40].lower()
+    for match in re.finditer(r"module\\.exports\\s*=\\s*([\"'])(?P<val>.*?)(\\1)", text, re.S):
+        cleaned = _clean_hex(match.group("val"))
+        if len(cleaned) >= 40:
+            return cleaned[:40].lower()
+    for match in re.findall(r"[0-9a-fA-F]{40,}", text):
+        cleaned = _clean_hex(match)
+        if len(cleaned) >= 40:
+            return cleaned[:40].lower()
+    return None
 
 
 def _load_wasm_bytes(wasm_path: Optional[Path], wasm_b64_path: Optional[Path]) -> bytes:
