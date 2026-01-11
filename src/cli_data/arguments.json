@@ -35,7 +35,7 @@
       ]
     },
     "diter-decode": {
-      "help": "Decode DITER-compressed .binz file using Python",
+      "help": "Decode DITER-compressed .binz file",
       "func": "cmd_diter_decode",
       "arguments": [
         {"name": "binz_file", "help": "Path to .binz file"},
@@ -44,7 +44,8 @@
         {"name": "--wasm", "default": "downloads/diter_wasm_blob.wasm", "help": "Path to DITER WASM binary"},
         {"name": "--wasm-b64", "default": "downloads/diter_wasm_blob.js", "help": "Path to DITER WASM base64 JS"},
         {"name": "--key-hex", "help": "DITER key in hex (40 chars)"},
-        {"name": "--key-source", "default": "downloads/diter_standalone_deob.js", "help": "JS file to parse for the DITER key"}
+        {"name": "--key-source", "default": "downloads/diter_standalone_deob.js", "help": "JS file to parse for the DITER key"},
+        {"name": "--decoder", "default": "python", "choices": ["node", "python", "c"], "help": "DITER decoder to use"}
       ]
     },
     "inspect": {
@@ -65,7 +66,7 @@
         {"name": "--geometry", "help": "Path to model_file.binz (STL)"},
         {"name": "--params", "help": "Path to params.json for DITER decode (STL)"},
         {"name": "--force-decode", "action": "store_true", "help": "Force re-decode file.binz with DITER"},
-        {"name": "--decoder", "default": "node", "choices": ["node", "python"], "help": "DITER decoder to use"},
+        {"name": "--decoder", "default": "node", "choices": ["node", "python", "c"], "help": "DITER decoder to use"},
         {"name": "--screenshot", "help": "Output PNG path for STL preview"}
       ]
     },

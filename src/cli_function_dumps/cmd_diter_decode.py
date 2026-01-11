@@ -1,10 +1,11 @@
 # Auto-generated extract of cli.py
 # See cli.py for shared context and imports
 from src.cli_context import *
+import subprocess
 
 
 def cmd_diter_decode(args):
-    """Decode DITER-compressed .binz using Python."""
+    """Decode DITER-compressed .binz."""
     msgs = get_messages()['diter_decode']
     symbols = get_symbols()
 
@@ -25,16 +26,49 @@ def cmd_diter_decode(args):
 
     print(msgs['decoding'].format(name=binz_path.name))
     try:
-        from src.diter_decoder import decode_diter_file
-        decoded_size = decode_diter_file(
-            binz_path,
-            params_path,
-            output_path,
-            wasm_path=wasm_path,
-            wasm_b64_path=wasm_b64_path,
-            key_hex=args.key_hex,
-            key_source=key_source,
-        )
+        decoder = (args.decoder or "python").lower()
+        if decoder == "python":
+            from src.diter_decoder import decode_diter_file
+            decoded_size = decode_diter_file(
+                binz_path,
+                params_path,
+                output_path,
+                wasm_path=wasm_path,
+                wasm_b64_path=wasm_b64_path,
+                key_hex=args.key_hex,
+                key_source=key_source,
+            )
+        elif decoder == "node":
+            root = Path(__file__).resolve().parents[2]
+            script_path = root / "scripts" / "diter_decode.js"
+            if not script_path.exists():
+                raise RuntimeError(f"DITER decoder not found at {script_path}")
+            cmd = [
+                "node",
+                str(script_path),
+                "--binz",
+                str(binz_path),
+                "--params",
+                str(params_path),
+                "--out",
+                str(output_path),
+            ]
+            subprocess.run(cmd, check=True)
+            decoded_size = output_path.stat().st_size if output_path.exists() else 0
+        elif decoder == "c":
+            from src.diter_decoder_c import decode_diter_file
+            if not wasm_path or not wasm_path.exists():
+                raise RuntimeError("WASM binary required for C decoder.")
+            decoded_size = decode_diter_file(
+                binz_path,
+                params_path,
+                output_path,
+                wasm_path=wasm_path,
+                key_hex=args.key_hex,
+                key_source=key_source,
+            )
+        else:
+            raise RuntimeError(f"Unknown decoder: {decoder}")
     except Exception as exc:
         print(msgs['error_decode_failed'].format(error=exc))
         return 1
