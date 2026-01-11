@@ -223,6 +223,125 @@ class SketchfabFetcher:
 
         return result
 
+    def download_model_files(self, model_id: str, output_dir: str = '.') -> Dict[str, str]:
+        """
+        Download model files (encrypted .binz and any available assets).
+
+        Args:
+            model_id: Sketchfab model ID
+            output_dir: Directory to save files
+
+        Returns:
+            Dict mapping file type to local path
+        """
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+        downloaded = {}
+
+        # Get embed config for file URLs
+        config = self.fetch_embed_config(model_id)
+        if not config or 'files' not in config:
+            print("Could not get file configuration")
+            return downloaded
+
+        for file_info in config['files']:
+            file_uid = file_info.get('uid', 'unknown')
+            binz_url = file_info.get('osgjsUrl')
+
+            if binz_url:
+                print(f"Downloading: {binz_url}")
+                try:
+                    response = self.session.get(binz_url)
+                    if response.status_code == 200:
+                        filename = f"{model_id}_{file_uid}.binz"
+                        filepath = output_path / filename
+                        with open(filepath, 'wb') as f:
+                            f.write(response.content)
+                        downloaded['binz'] = str(filepath)
+                        print(f"  Saved: {filepath} ({len(response.content)} bytes)")
+
+                        # Also save encryption params
+                        params = file_info.get('p', [])
+                        if params:
+                            params_file = output_path / f"{model_id}_{file_uid}_params.json"
+                            with open(params_file, 'w') as f:
+                                json.dump(params, f, indent=2)
+                            downloaded['params'] = str(params_file)
+                            print(f"  Params: {params_file}")
+                except Exception as e:
+                    print(f"  Failed: {e}")
+
+        # Try to get thumbnails
+        api_data = self.fetch_model_api(model_id)
+        if api_data:
+            thumbnails = api_data.get('thumbnails', {}).get('images', [])
+            if thumbnails:
+                # Get largest thumbnail
+                largest = max(thumbnails, key=lambda x: x.get('width', 0))
+                thumb_url = largest.get('url')
+                if thumb_url:
+                    try:
+                        response = self.session.get(thumb_url)
+                        if response.status_code == 200:
+                            ext = thumb_url.split('.')[-1].split('?')[0]
+                            thumb_path = output_path / f"{model_id}_thumbnail.{ext}"
+                            with open(thumb_path, 'wb') as f:
+                                f.write(response.content)
+                            downloaded['thumbnail'] = str(thumb_path)
+                            print(f"  Thumbnail: {thumb_path}")
+                    except:
+                        pass
+
+        return downloaded
+
+    def get_encryption_info(self, model_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Extract encryption parameters for a model.
+
+        Returns key material and encryption status.
+        """
+        config = self.fetch_embed_config(model_id)
+        if not config or 'files' not in config:
+            return None
+
+        result = {
+            'model_id': model_id,
+            'files': []
+        }
+
+        for file_info in config['files']:
+            file_data = {
+                'uid': file_info.get('uid'),
+                'url': file_info.get('osgjsUrl'),
+                'model_size': file_info.get('modelSize'),
+                'osgjs_size': file_info.get('osgjsSize'),
+                'encrypted': False,
+                'key_material': None,
+            }
+
+            params = file_info.get('p', [])
+            for p in params:
+                if p.get('d'):  # d=true means encrypted
+                    file_data['encrypted'] = True
+                    file_data['version'] = p.get('v')
+
+                    # Decode the key material
+                    b64_data = p.get('b', '').replace('\n', '')
+                    if b64_data:
+                        try:
+                            decoded = base64.b64decode(b64_data)
+                            file_data['key_material'] = {
+                                'raw_length': len(decoded),
+                                'potential_key': decoded[:32].hex(),
+                                'potential_iv': decoded[32:48].hex(),
+                            }
+                        except:
+                            pass
+
+            result['files'].append(file_data)
+
+        return result
+
 
 def main():
     url = "https://sketchfab.com/3d-models/annihilator-2000-dea4f17e94974e1fa720cbadc531ed63"
@@ -270,6 +389,32 @@ def main():
     with open(output_file, 'w') as f:
         json.dump(result, f, indent=2, default=str)
     print(f"\nFull data saved to: {output_file}")
+
+    # Show encryption info
+    print("\n" + "=" * 60)
+    print("Encryption Info")
+    print("=" * 60)
+
+    enc_info = fetcher.get_encryption_info(result['model_id'])
+    if enc_info:
+        for f in enc_info['files']:
+            print(f"\nFile UID: {f['uid']}")
+            print(f"  Encrypted: {f['encrypted']}")
+            print(f"  Model size: {f['model_size']} bytes")
+            print(f"  OSGJS size: {f['osgjs_size']} bytes")
+            if f['key_material']:
+                km = f['key_material']
+                print(f"  Key material length: {km['raw_length']} bytes")
+                print(f"  Potential key (32 bytes): {km['potential_key'][:32]}...")
+                print(f"  Potential IV (16 bytes): {km['potential_iv']}")
+
+    # Download files
+    print("\n" + "=" * 60)
+    print("Downloading Files")
+    print("=" * 60)
+
+    downloaded = fetcher.download_model_files(result['model_id'], output_dir='downloads')
+    print(f"\nDownloaded: {downloaded}")
 
     return result
 
