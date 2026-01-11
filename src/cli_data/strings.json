@@ -359,5 +359,81 @@
     "--dimensions     Show layout dimensions",
     "--spacing        Show spacing scale",
     "--generate-scss  Generate SCSS variables"
-  ]
+  ],
+  "defaults": {
+    "share_text": "Check out this 3D model on Sketchfab!"
+  },
+  "file_units": ["B", "KB", "MB", "GB", "TB", "PB"],
+  "iframe_template": "<iframe title=\"Sketchfab Model\" width=\"{width}\" height=\"{height}\" src=\"{url}\" frameborder=\"0\" allow=\"autoplay; fullscreen; xr-spatial-tracking\" allowfullscreen mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>",
+  "markdown_examples": [
+    {"syntax": "**bold text**", "result": "bold text"},
+    {"syntax": "*italic text*", "result": "italic text"},
+    {"syntax": "~~strikethrough~~", "result": "strikethrough"},
+    {"syntax": "`inline code`", "result": "inline code"},
+    {"syntax": "[link](url)", "result": "clickable link"},
+    {"syntax": "![alt](image.jpg)", "result": "embedded image"},
+    {"syntax": "> quote", "result": "blockquote"},
+    {"syntax": "- list item", "result": "bullet point"},
+    {"syntax": "1. numbered", "result": "numbered list"},
+    {"syntax": "- [ ] todo", "result": "checkbox (unchecked)"},
+    {"syntax": "- [x] done", "result": "checkbox (checked)"}
+  ],
+  "dayjs_tokens": [
+    {"token": "YYYY", "description": "4-digit year", "example": "2024"},
+    {"token": "YY", "description": "2-digit year", "example": "24"},
+    {"token": "MMMM", "description": "Full month name", "example": "January"},
+    {"token": "MMM", "description": "Abbreviated month", "example": "Jan"},
+    {"token": "MM", "description": "2-digit month", "example": "01"},
+    {"token": "DD", "description": "2-digit day", "example": "05"},
+    {"token": "D", "description": "Day of month", "example": "5"},
+    {"token": "dddd", "description": "Full weekday", "example": "Monday"},
+    {"token": "ddd", "description": "Abbreviated weekday", "example": "Mon"},
+    {"token": "HH", "description": "24-hour", "example": "14"},
+    {"token": "hh", "description": "12-hour", "example": "02"},
+    {"token": "mm", "description": "Minutes", "example": "30"},
+    {"token": "ss", "description": "Seconds", "example": "45"},
+    {"token": "A", "description": "AM/PM", "example": "PM"}
+  ],
+  "strftime_map": {
+    "YYYY": "%Y",
+    "YY": "%y",
+    "MMMM": "%B",
+    "MMM": "%b",
+    "MM": "%m",
+    "DD": "%d",
+    "D": "%d",
+    "dddd": "%A",
+    "ddd": "%a",
+    "HH": "%H",
+    "hh": "%I",
+    "mm": "%M",
+    "ss": "%S",
+    "A": "%p",
+    "a": "%p"
+  },
+  "permission_types": [
+    {"name": "commercial", "description": "Use for commercial purposes"},
+    {"name": "modify", "description": "Create derivative works"},
+    {"name": "distribute", "description": "Share and redistribute"},
+    {"name": "attribution", "description": "Credit the original author"},
+    {"name": "share-alike", "description": "Use same license for derivatives"},
+    {"name": "non-commercial", "description": "No commercial use allowed"}
+  ],
+  "spring_formulas": [
+    {"formula": "F = -k * x", "description": "Spring force"},
+    {"formula": "F = -c * v", "description": "Damping force"},
+    {"formula": "a = F / m", "description": "Acceleration"}
+  ],
+  "spring_variables": [
+    {"var": "k", "description": "stiffness (higher = bouncier)"},
+    {"var": "c", "description": "damping (higher = less oscillation)"},
+    {"var": "m", "description": "mass (default: 1)"}
+  ],
+  "code_snippets": {
+    "webgl_detection": "const canvas = document.createElement('canvas');\nconst gl = canvas.getContext('webgl2') ||\n           canvas.getContext('webgl') ||\n           canvas.getContext('experimental-webgl');\nif (!gl) {\n  // WebGL not supported\n}",
+    "spring_js": "function springStep(position, velocity, target, config, dt) {\n  const { stiffness, damping, mass = 1 } = config;\n  const springForce = -stiffness * (position - target);\n  const dampingForce = -damping * velocity;\n  const acceleration = (springForce + dampingForce) / mass;\n  return {\n    position: position + velocity * dt,\n    velocity: velocity + acceleration * dt\n  };\n}",
+    "consent_usage": "// Check consent before loading tracking\nif (OneTrust.IsActiveGroup('C0002')) {\n  // Load analytics (Performance)\n  loadGoogleAnalytics();\n}\n\nif (OneTrust.IsActiveGroup('C0004')) {\n  // Load advertising (Targeting)\n  loadFacebookPixel();\n}",
+    "css_grid": ".grid {\n  display: grid;\n  gap: 16px;\n}\n\n/* Mobile: 2 columns */\n@media (max-width: 767px) {\n  .grid { grid-template-columns: repeat(2, 1fr); }\n}\n\n/* Tablet: 3 columns */\n@media (min-width: 768px) and (max-width: 1023px) {\n  .grid { grid-template-columns: repeat(3, 1fr); }\n}\n\n/* Desktop: 4 columns */\n@media (min-width: 1024px) and (max-width: 1439px) {\n  .grid { grid-template-columns: repeat(4, 1fr); }\n}\n\n/* Wide: 5 columns */\n@media (min-width: 1440px) {\n  .grid { grid-template-columns: repeat(5, 1fr); }\n}",
+    "floating_ui": "const { x, y } = useFloating({\n  placement: 'bottom-start',\n  middleware: [\n    offset(8),\n    flip(),\n    shift({ padding: 8 })\n  ]\n});"
+  }
 }

@@ -353,3 +353,53 @@ def get_design_options():
 def get_layout_options():
     """Load layout command options."""
     return load_json('strings.json')['layout_options']
+
+
+def get_defaults():
+    """Load default values."""
+    return load_json('strings.json')['defaults']
+
+
+def get_file_units():
+    """Load file size units."""
+    return load_json('strings.json')['file_units']
+
+
+def get_iframe_template():
+    """Load iframe template."""
+    return load_json('strings.json')['iframe_template']
+
+
+def get_markdown_examples():
+    """Load markdown examples."""
+    return load_json('strings.json')['markdown_examples']
+
+
+def get_dayjs_tokens():
+    """Load Day.js token reference."""
+    return load_json('strings.json')['dayjs_tokens']
+
+
+def get_strftime_map():
+    """Load strftime mapping for Day.js patterns."""
+    return load_json('strings.json')['strftime_map']
+
+
+def get_permission_types():
+    """Load license permission types."""
+    return load_json('strings.json')['permission_types']
+
+
+def get_spring_formulas():
+    """Load spring physics formulas."""
+    return load_json('strings.json')['spring_formulas']
+
+
+def get_spring_variables():
+    """Load spring physics variables."""
+    return load_json('strings.json')['spring_variables']
+
+
+def get_code_snippets():
+    """Load code snippets."""
+    return load_json('strings.json')['code_snippets']
