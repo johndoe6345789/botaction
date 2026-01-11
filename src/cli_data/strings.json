@@ -230,6 +230,14 @@
       "saved_to": "Saved to: {path}",
       "inspection_header": "Decrypted data inspection:"
     },
+    "diter_decode": {
+      "decoding": "Decoding: {name}",
+      "error_binz_not_found": "Error: .binz file not found: {path}",
+      "error_params_not_found": "Error: params file not found: {path}",
+      "error_decode_failed": "Error: DITER decode failed: {error}",
+      "decoded_bytes": "Decoded {count:,} bytes",
+      "saved_to": "Saved to: {path}"
+    },
     "inspect": {
       "inspecting": "Inspecting: {name}",
       "size": "Size: {size:,} bytes",

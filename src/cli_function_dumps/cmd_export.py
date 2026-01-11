@@ -3,8 +3,34 @@
 from src.cli_context import *
 import subprocess
 
-def _decode_diter(binz_path: Path, params_path: Path, output_path: Path) -> bool:
+def _decode_diter(binz_path: Path, params_path: Path, output_path: Path, decoder: str = "node") -> bool:
     root = Path(__file__).resolve().parents[2]
+    if decoder == "python":
+        try:
+            from src.diter_decoder import decode_diter_file
+        except Exception as exc:
+            print(f"Error: Python DITER decoder unavailable ({exc})")
+            return False
+        wasm_path = root / "downloads" / "diter_wasm_blob.wasm"
+        wasm_b64_path = root / "downloads" / "diter_wasm_blob.js"
+        key_source = root / "downloads" / "diter_standalone_deob.js"
+        if not key_source.exists():
+            fallback = root / "downloads" / "diter_standalone.js"
+            key_source = fallback if fallback.exists() else None
+        try:
+            decode_diter_file(
+                binz_path,
+                params_path,
+                output_path,
+                wasm_path=wasm_path if wasm_path.exists() else None,
+                wasm_b64_path=wasm_b64_path if wasm_b64_path.exists() else None,
+                key_source=key_source,
+            )
+        except Exception as exc:
+            print(f"Error: Python DITER decode failed ({exc})")
+            return False
+        return True
+
     script_path = root / "scripts" / "diter_decode.js"
     if not script_path.exists():
         print(f"Error: DITER decoder not found at {script_path}")
@@ -99,7 +125,7 @@ def cmd_export(args):
             return 1
         osgjs_path = binz_path.with_suffix(".osgjs.json")
         if not osgjs_path.exists() or args.force_decode:
-            if not _decode_diter(binz_path, params_path, osgjs_path):
+            if not _decode_diter(binz_path, params_path, osgjs_path, args.decoder):
                 return 1
 
     if not osgjs_path.exists():
@@ -113,7 +139,7 @@ def cmd_export(args):
             print(msgs.get('decoding_geometry', "Decoding geometry {name} with DITER...").format(
                 name=geometry_path.name
             ))
-            if _decode_diter(geometry_path, params_path, decoded_geometry_path):
+            if _decode_diter(geometry_path, params_path, decoded_geometry_path, args.decoder):
                 print(msgs.get('geometry_decoded', "Decoded geometry saved to: {path}").format(
                     path=decoded_geometry_path
                 ))
