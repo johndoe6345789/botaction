@@ -23,7 +23,7 @@ def extract_functions(source: str):
 
 def extract_exports(header: str):
     exports = []
-    for match in re.finditer(r"^/\\* export: '([^']+)' \\*/\\s*\\n\\s*(?:void|u32)\\s+(diter_core_[A-Za-z0-9_]+)\\(", header, re.M):
+    for match in re.finditer(r"^/\* export: '([^']+)' \*/\s*\n\s*(?:void|u32)\s+(diter_core_[A-Za-z0-9_]+)\(", header, re.M):
         exports.append({
             "export_name": match.group(1),
             "function": match.group(2),
