@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,7 +50,21 @@ extern "C" {
 #define WASM_RT_MAX_CALL_STACK_DEPTH 0
 #endif
 
+#ifndef WASM_RT_CHECK_BASE
 #define WASM_RT_CHECK_BASE(mem) ((void)0)
+#endif
+
+#ifndef LIKELY
+#define LIKELY(x) (x)
+#endif
+
+#ifndef UNLIKELY
+#define UNLIKELY(x) (x)
+#endif
+
+#ifndef wasm_rt_memcpy
+#define wasm_rt_memcpy memcpy
+#endif
 
 typedef enum {
   WASM_RT_TRAP_NONE,

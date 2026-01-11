@@ -136,7 +136,9 @@ static inline bool add_overflow(uint64_t a, uint64_t b, uint64_t* resptr) {
     abort();                                                                  \
   }
 #else
+#ifndef WASM_RT_CHECK_BASE
 #define WASM_RT_CHECK_BASE(mem)
+#endif
 #endif
 
 // MEMCHECK_DEFAULT32 is an "accelerated" MEMCHECK used only for
