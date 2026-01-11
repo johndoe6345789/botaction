@@ -45,7 +45,8 @@ def build_decoder(build_dir: Path | None = None) -> Path:
     wasm2c_h = src_dir / "diter_wasm_blob_wasm2c.h"
     rt_impl = src_dir / "wasm_rt" / "wasm-rt-impl.c"
     wrapper = src_dir / "diter_decode_c.c"
-    if _needs_rebuild(exe, [wasm2c_c, wasm2c_h, rt_impl, wrapper]):
+    engine = src_dir / "diter_engine.c"
+    if _needs_rebuild(exe, [wasm2c_c, wasm2c_h, rt_impl, wrapper, engine]):
         cmd = [
             cc,
             "-O2",
@@ -57,6 +58,7 @@ def build_decoder(build_dir: Path | None = None) -> Path:
             "-o",
             str(exe),
             str(wrapper),
+            str(engine),
             str(wasm2c_c),
             str(rt_impl),
         ]
