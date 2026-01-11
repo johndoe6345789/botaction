@@ -1,6 +1,24 @@
 # Sketchfab Utilities
 
+✅ **Successfully reverse-engineered and decrypted Sketchfab model encryption!**
+
 Python tools for working with Sketchfab 3D models and their file formats.
+
+## 🎉 Major Achievement
+
+**Decryption Working!** Successfully implemented AES-256-CBC decryption for Sketchfab's encrypted `.binz` files.
+
+- ✅ Full decryption implementation
+- ✅ Working demo with Annihilator 2000 model  
+- ✅ Raw geometry data extraction
+- 📚 Complete documentation in [SOLUTION_SUMMARY.md](SOLUTION_SUMMARY.md)
+
+## Quick Start
+
+```bash
+# Decrypt a model
+python demo_decryption.py
+```
 
 ## Files
 
