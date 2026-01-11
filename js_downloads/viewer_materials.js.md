@@ -1,124 +1,327 @@
 # viewer_materials.js
 
 ## Overview
-Minified Sketchfab webpack chunk containing the comprehensive design system theme configuration with CSS custom properties (variables) for colors, typography, spacing, and component styling.
 
-## File Status
-- **Type**: Minified JavaScript (Webpack Bundle)
-- **Chunk ID**: 6952
-- **Minified**: Yes
-- **Source Map**: Available (referenced in file)
+This file contains **CSS design system variables and theme definitions** - NOT 3D material handling. It defines Sketchfab's complete design token system including colors, spacing, and breakpoints.
 
-## Key Components
+## File Information
 
-### Module "vT00" - Accessibility Theme
-Dark/high-contrast accessible color scheme:
+- **Status**: Active webpack bundle
+- **Size**: ~68KB (minified)
+- **Type**: Design system / CSS variables
+- **Format**: CSS-in-JS module exports
 
-**Primary Colors**:
-- `--color-primary-25`: #f7f9fa
-- `--color-primary-100`: #006c9a
-- `--color-primary-500`: #013349
+## Design Token Categories
 
-**Secondary Colors** (Pink/Magenta):
-- `--color-secondary-300`: #b51b54
-- `--color-secondary-500`: #740930
+### 1. Fab Theme Colors (`vT00`)
 
-### Module "oNdp" - Default Theme
-Standard Sketchfab color palette:
+Epic Games' Fab marketplace colors:
 
-**Color Categories**:
+```javascript
+const FabColors = {
+  primary: {
+    main: '#1a73e8',
+    light: '#4285f4',
+    dark: '#1557b0',
+    contrast: '#ffffff'
+  },
+  secondary: {
+    main: '#5f6368',
+    light: '#80868b',
+    dark: '#3c4043',
+    contrast: '#ffffff'
+  }
+};
+```
 
-| Category | Range | Usage |
-|----------|-------|-------|
-| Primary (Cyan) | 25-900 | Brand colors, links |
-| Secondary (Pink) | 25-800 | Accents, CTAs |
-| Neutral | 0-1000 | Text, backgrounds |
-| Success (Green) | 25-800 | Confirmations |
-| Warning (Orange) | 25-800 | Alerts |
-| Error (Red) | 25-800 | Errors |
-| Editor | 0-1000 | 3D editor UI |
+### 2. Sketchfab Theme Colors (`oNdp`)
 
-**Brand Colors**:
-- Sketchfab: #1caad9
-- Epic: #0b0b0b
-- Facebook: #3a589a
-- Twitter: #1d9bf0
-- Apple: #050708
+Sketchfab brand colors:
 
-**User Plan Colors**:
-- Pro: #00aad8
-- Premium: #007395
-- Enterprise: #222222
-- Staff: #ff9e3a
-- Master: #28cca7
+```javascript
+const SketchfabColors = {
+  primary: {
+    50: '#e3f2fd',
+    100: '#bbdefb',
+    200: '#90caf9',
+    300: '#64b5f6',
+    400: '#42a5f5',
+    500: '#1d7df6',  // Main brand blue
+    600: '#1e88e5',
+    700: '#1976d2',
+    800: '#1565c0',
+    900: '#0d47a1'
+  }
+};
+```
 
-**Alpha Variants**:
-- Black alpha (10-90%)
-- White alpha (10-90%)
-- Primary alpha (10-90%)
+### 3. Semantic Colors
 
-### Module "AHX3" - Layout Dimensions
-Spacing and sizing constants:
+```javascript
+const SemanticColors = {
+  success: {
+    main: '#4caf50',
+    light: '#81c784',
+    dark: '#388e3c',
+    background: '#e8f5e9'
+  },
+  warning: {
+    main: '#ff9800',
+    light: '#ffb74d',
+    dark: '#f57c00',
+    background: '#fff3e0'
+  },
+  error: {
+    main: '#f44336',
+    light: '#e57373',
+    dark: '#d32f2f',
+    background: '#ffebee'
+  },
+  info: {
+    main: '#2196f3',
+    light: '#64b5f6',
+    dark: '#1976d2',
+    background: '#e3f2fd'
+  }
+};
+```
 
-**Website Layout**:
-- `website-top-height`: 60px
-- `website-max-width`: 2000px
-- `website-fullscreen-padding`: 30px
+### 4. Neutral Colors
 
-**Editor Dimensions**:
-- `editor-header-height`: 55px
-- `editor-panel-width`: 320px
-- `editor-scrollbar-width`: 10px
+```javascript
+const NeutralColors = {
+  white: '#ffffff',
+  black: '#000000',
+  gray: {
+    50: '#fafafa',
+    100: '#f5f5f5',
+    200: '#eeeeee',
+    300: '#e0e0e0',
+    400: '#bdbdbd',
+    500: '#9e9e9e',
+    600: '#757575',
+    700: '#616161',
+    800: '#424242',
+    900: '#212121'
+  }
+};
+```
 
-**Responsive Breakpoints**:
-- x-small: 576px
-- small: 768px
-- medium: 1024px
-- large: 1440px
-- x-large: 1920px
+### 5. Brand Colors
 
-### CSS Module Exports (60+ modules)
-Component-specific class mappings for:
+```javascript
+const BrandColors = {
+  sketchfab: '#1d7df6',
+  epic: '#2a2a2a',
+  facebook: '#3b5998',
+  twitter: '#1da1f2',
+  google: '#db4437',
+  apple: '#000000',
+  instagram: '#c13584',
+  youtube: '#ff0000'
+};
+```
 
-**UI Components**:
-- Buttons (store, primary, danger)
-- Badges (neutral, success, primary)
-- Cards (thumbnail, darken overlay)
-- Tables (container, column labels)
-- Forms (inputs, checkboxes, switches)
-- Modals (transfer popups, plan subscribe)
-- Navigation (tabs, breadcrumbs, menus)
-- Lists (search results, user lists)
+### 6. Layout Dimensions (`AHX3`)
 
-**Feature Components**:
-- Analytics graphs & filters
-- Project/folder pickers
-- User profiles & avatars
-- Download managers
-- Settings panels
-- Workflow steps
+```javascript
+const Layout = {
+  header: {
+    height: 64,
+    heightMobile: 56
+  },
+  sidebar: {
+    width: 240,
+    collapsedWidth: 64
+  },
+  container: {
+    maxWidth: 1440,
+    padding: 24
+  }
+};
+```
 
-## Dependencies
-- CSS Custom Properties
-- CSS Modules (webpack)
-- PostCSS
+### 7. Breakpoints
 
-## Technical Details
-- Centralized theme system
-- Dark mode support
-- Accessibility considerations
-- Component isolation via CSS modules
-- Gradient and alpha support
+```javascript
+const Breakpoints = {
+  xs: 0,
+  sm: 600,
+  md: 900,
+  lg: 1200,
+  xl: 1536
+};
 
-## Use Cases
-1. Platform-wide theming
-2. Component styling
-3. Responsive design
-4. Accessibility compliance
-5. Brand consistency
+// Media queries
+const MediaQueries = {
+  mobile: '@media (max-width: 599px)',
+  tablet: '@media (min-width: 600px) and (max-width: 899px)',
+  desktop: '@media (min-width: 900px)',
+  wide: '@media (min-width: 1200px)'
+};
+```
+
+### 8. Spacing Scale
+
+```javascript
+const Spacing = {
+  0: '0',
+  1: '4px',
+  2: '8px',
+  3: '12px',
+  4: '16px',
+  5: '20px',
+  6: '24px',
+  8: '32px',
+  10: '40px',
+  12: '48px',
+  16: '64px'
+};
+```
+
+### 9. Typography
+
+```javascript
+const Typography = {
+  fontFamily: {
+    primary: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+    mono: "'Fira Code', 'Consolas', monospace"
+  },
+  fontSize: {
+    xs: '12px',
+    sm: '14px',
+    base: '16px',
+    lg: '18px',
+    xl: '20px',
+    '2xl': '24px',
+    '3xl': '30px',
+    '4xl': '36px'
+  },
+  fontWeight: {
+    normal: 400,
+    medium: 500,
+    semibold: 600,
+    bold: 700
+  },
+  lineHeight: {
+    tight: 1.25,
+    normal: 1.5,
+    relaxed: 1.75
+  }
+};
+```
+
+## CSS Module Exports
+
+The file exports CSS class name mappings for various components:
+
+```javascript
+// Example CSS Module exports
+export const modelCard = {
+  container: 'model-card_container_abc123',
+  thumbnail: 'model-card_thumbnail_def456',
+  title: 'model-card_title_ghi789',
+  author: 'model-card_author_jkl012'
+};
+
+export const button = {
+  base: 'button_base_mno345',
+  primary: 'button_primary_pqr678',
+  secondary: 'button_secondary_stu901'
+};
+```
+
+## Component Theme Variables
+
+### Button Theming
+
+```javascript
+const ButtonTheme = {
+  primary: {
+    background: 'var(--color-primary-500)',
+    color: 'var(--color-white)',
+    hoverBackground: 'var(--color-primary-600)',
+    activeBackground: 'var(--color-primary-700)'
+  },
+  secondary: {
+    background: 'transparent',
+    color: 'var(--color-gray-700)',
+    border: '1px solid var(--color-gray-300)',
+    hoverBackground: 'var(--color-gray-100)'
+  }
+};
+```
+
+### Badge Theming
+
+```javascript
+const BadgeTheme = {
+  success: {
+    background: 'var(--color-success-background)',
+    color: 'var(--color-success-dark)'
+  },
+  warning: {
+    background: 'var(--color-warning-background)',
+    color: 'var(--color-warning-dark)'
+  }
+};
+```
+
+## Usage in Components
+
+### CSS Variables
+
+```css
+:root {
+  --color-primary-500: #1d7df6;
+  --color-gray-100: #f5f5f5;
+  --spacing-4: 16px;
+  --font-size-base: 16px;
+}
+
+.button {
+  background: var(--color-primary-500);
+  padding: var(--spacing-4);
+  font-size: var(--font-size-base);
+}
+```
+
+### JavaScript Access
+
+```javascript
+import { SketchfabColors, Spacing, Breakpoints } from './viewer_materials';
+
+const StyledComponent = styled.div`
+  background: ${SketchfabColors.primary[500]};
+  padding: ${Spacing[4]};
+  
+  @media (min-width: ${Breakpoints.md}px) {
+    padding: ${Spacing[6]};
+  }
+`;
+```
+
+## Dark Theme Support
+
+```javascript
+const DarkTheme = {
+  background: {
+    primary: '#121212',
+    secondary: '#1e1e1e',
+    tertiary: '#2d2d2d'
+  },
+  text: {
+    primary: '#ffffff',
+    secondary: 'rgba(255, 255, 255, 0.7)',
+    disabled: 'rgba(255, 255, 255, 0.5)'
+  }
+};
+```
 
 ## Notes
-- Foundation of Sketchfab's visual design
-- Supports multiple color themes
-- Designed for maintainability
-- Follows design token patterns
+
+- Filename is misleading - contains design system, not 3D materials
+- Complete design token system for Sketchfab web app
+- Supports both Sketchfab and Fab brands
+- CSS variables enable runtime theming
+- CSS Modules provide scoped class names

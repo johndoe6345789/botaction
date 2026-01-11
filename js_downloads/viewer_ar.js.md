@@ -1,145 +1,281 @@
 # viewer_ar.js
 
 ## Overview
-Minified Sketchfab webpack chunk containing the Axios HTTP client library and supporting utilities for making API requests with interceptors, cancellation, and various data transformers.
 
-## File Status
-- **Type**: Minified JavaScript (Webpack Bundle)
-- **Chunk ID**: 7065
-- **Minified**: Yes
-- **License**: Available in separate LICENSE.txt file
-- **Source Map**: Available (referenced in file)
+This file contains **HTTP client (Axios) and date utilities (Day.js)** - NOT AR (Augmented Reality) functionality. It provides API request handling and date formatting for Sketchfab.
 
-## Key Components
+## File Information
 
-### Axios HTTP Client
-Complete HTTP client implementation:
+- **Status**: Active webpack bundle
+- **Size**: ~78KB (minified)
+- **Type**: HTTP and date libraries
+- **Libraries**: Axios, Day.js, isMobile
 
-**Core Features**:
-- Promise-based requests
-- Request/response interceptors
-- Automatic JSON transformation
-- CSRF protection
-- Request cancellation
+## Core Components
 
-### Module "ntQ3" - Main Axios Export
+### 1. Axios HTTP Client (`keQT/ntQ3`)
 
-**API Methods**:
+Full-featured HTTP client:
+
 ```javascript
-axios.get(url, config)
-axios.post(url, data, config)
-axios.put(url, data, config)
-axios.patch(url, data, config)
-axios.delete(url, config)
-axios.head(url, config)
-axios.options(url, config)
+// GET request
+axios.get('/api/models')
+  .then(response => response.data)
+  .catch(error => console.error(error));
+
+// POST request
+axios.post('/api/models', { name: 'Model' })
+  .then(response => response.data);
+
+// Full configuration
+axios({
+  method: 'get',
+  url: '/api/models',
+  params: { page: 1, limit: 20 },
+  headers: { 'Authorization': 'Bearer token' },
+  timeout: 5000
+});
 ```
 
-**Factory Methods**:
-- `axios.create(config)` - Create custom instance
-- `axios.all(promises)` - Parallel requests
-- `axios.spread(callback)` - Spread array to args
+### Request Configuration
 
-### Module "waLb" - XHR Adapter
-XMLHttpRequest-based transport:
-
-**Features**:
-- Progress events (download/upload)
-- Timeout handling
-- Authentication (Basic auth)
-- FormData support
-- Response types (text, json, blob, etc.)
-
-### Module "g/4l" - Axios Class
-Core Axios constructor:
-
-**Properties**:
-- `defaults` - Default configuration
-- `interceptors.request` - Request interceptors
-- `interceptors.response` - Response interceptors
-
-**Methods**:
-- `request(config)` - Make request
-- Chain of interceptors → dispatch → transform
-
-### Module "Lo+a" - Cancel Token
-Request cancellation support:
-
-**Cancel Class**:
 ```javascript
-{
-  message: string,
-  __CANCEL__: true
+const config = {
+  // URL
+  url: '/api/endpoint',
+  baseURL: 'https://api.sketchfab.com',
+  
+  // Method
+  method: 'get',  // get, post, put, delete, patch
+  
+  // Parameters
+  params: { key: 'value' },  // URL query params
+  data: { key: 'value' },    // Request body
+  
+  // Headers
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer token'
+  },
+  
+  // Timeout
+  timeout: 10000,
+  
+  // Response type
+  responseType: 'json',  // json, blob, arraybuffer, text
+  
+  // Upload/download progress
+  onUploadProgress: (progressEvent) => { },
+  onDownloadProgress: (progressEvent) => { }
+};
+```
+
+### Interceptors
+
+```javascript
+// Request interceptor
+axios.interceptors.request.use(
+  config => {
+    config.headers.Authorization = `Bearer ${getToken()}`;
+    return config;
+  },
+  error => Promise.reject(error)
+);
+
+// Response interceptor
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      redirectToLogin();
+    }
+    return Promise.reject(error);
+  }
+);
+```
+
+### Instance Creation
+
+```javascript
+const api = axios.create({
+  baseURL: 'https://api.sketchfab.com/v3',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+```
+
+### 2. XMLHttpRequest Wrapper (`waLb`)
+
+Low-level XHR utilities:
+
+```javascript
+// For cases where Axios isn't suitable
+const xhr = new XMLHttpRequest();
+xhr.open('GET', '/api/models');
+xhr.setRequestHeader('Authorization', 'Bearer token');
+xhr.onload = function() {
+  if (xhr.status === 200) {
+    console.log(JSON.parse(xhr.responseText));
+  }
+};
+xhr.send();
+```
+
+### 3. Day.js Date Library (`SHI0`)
+
+Lightweight date manipulation:
+
+```javascript
+// Current date
+dayjs();
+dayjs(new Date());
+dayjs('2023-01-15');
+dayjs(1673740800000);  // Unix timestamp
+
+// Formatting
+dayjs().format('YYYY-MM-DD');         // '2023-01-15'
+dayjs().format('MMMM D, YYYY');       // 'January 15, 2023'
+dayjs().format('MMM D, YYYY h:mm A'); // 'Jan 15, 2023 3:30 PM'
+
+// Relative time
+dayjs().fromNow();     // '2 hours ago'
+dayjs().toNow();       // 'in 2 hours'
+
+// Manipulation
+dayjs().add(1, 'day');
+dayjs().subtract(1, 'week');
+dayjs().startOf('month');
+dayjs().endOf('year');
+
+// Comparison
+dayjs('2023-01-15').isBefore('2023-01-20');
+dayjs('2023-01-15').isAfter('2023-01-10');
+dayjs('2023-01-15').isSame('2023-01-15', 'day');
+```
+
+### Day.js Plugins
+
+```javascript
+// Relative time plugin
+dayjs.extend(relativeTime);
+dayjs().fromNow();  // '2 days ago'
+
+// Duration plugin
+dayjs.extend(duration);
+dayjs.duration(3600000).humanize();  // '1 hour'
+
+// UTC plugin
+dayjs.extend(utc);
+dayjs.utc().format();
+
+// Timezone plugin
+dayjs.extend(timezone);
+dayjs().tz('America/New_York');
+```
+
+### 4. isMobile Detection (`K9VK`)
+
+Device type detection:
+
+```javascript
+const isMobile = require('ismobilejs');
+
+// Check device type
+isMobile.phone;    // true if phone
+isMobile.tablet;   // true if tablet
+isMobile.any;      // true if any mobile device
+
+// Check specific platforms
+isMobile.apple.phone;
+isMobile.apple.tablet;
+isMobile.android.phone;
+isMobile.android.tablet;
+isMobile.windows.phone;
+isMobile.windows.tablet;
+
+// Usage in Sketchfab
+if (isMobile.any) {
+  // Show mobile-optimized UI
+  showMobileViewer();
+} else {
+  // Show full desktop viewer
+  showDesktopViewer();
 }
 ```
 
-**CancelToken**:
-- `source()` - Create token/cancel pair
-- `throwIfRequested()` - Check if cancelled
+## Sketchfab API Usage
 
-### Module "sxAL" - Interceptor Manager
-Manages request/response interceptors:
+### Model API
 
-**Methods**:
-- `use(fulfilled, rejected)` - Add interceptor
-- `eject(id)` - Remove interceptor
-- `forEach(fn)` - Iterate handlers
+```javascript
+// Get model
+const model = await axios.get(`/v3/models/${modelId}`);
 
-### Module "bDWl" - Default Configuration
-Default Axios settings:
+// Search models
+const results = await axios.get('/v3/search', {
+  params: {
+    type: 'models',
+    q: 'car',
+    sort_by: '-likeCount'
+  }
+});
 
-| Setting | Default |
-|---------|---------|
-| `timeout` | 0 |
-| `xsrfCookieName` | "XSRF-TOKEN" |
-| `xsrfHeaderName` | "X-XSRF-TOKEN" |
-| `maxContentLength` | -1 |
-| `validateStatus` | 200-299 |
-| `headers.Accept` | "application/json, text/plain" |
+// Like model
+await axios.post(`/v3/models/${modelId}/like`);
+```
 
-### Additional Libraries
+### Upload API
 
-**Day.js** - Date manipulation:
-- Parsing and formatting
-- Relative time
-- UTC support
-- Min/max operations
+```javascript
+// Upload with progress
+const response = await axios.post('/v3/models', formData, {
+  headers: {
+    'Content-Type': 'multipart/form-data'
+  },
+  onUploadProgress: (progressEvent) => {
+    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+    updateProgressBar(percent);
+  }
+});
+```
 
-**isMobile** - Device detection:
-- Apple devices (iPhone, iPad, iPod)
-- Android
-- Amazon devices
-- Windows Phone
-- Other (BlackBerry, Opera Mini, etc.)
+### Date Formatting
 
-**Redux** - State management:
-- `createStore`
-- `combineReducers`
-- `compose`
-- `applyMiddleware`
+```javascript
+// Model timestamps
+const createdAt = dayjs(model.createdAt).format('MMM D, YYYY');
+const updatedAt = dayjs(model.updatedAt).fromNow();
 
-## Dependencies
-- Promise library
-- Browser APIs (XMLHttpRequest)
-- Cookie utilities
-- URL utilities
+// Comment timestamps
+const commentTime = dayjs(comment.createdAt).fromNow();  // '2 hours ago'
+```
 
-## Technical Details
-- Promise-based async/await
-- Interceptor chain pattern
-- CSRF token automation
-- Cross-origin support
-- Content-Type detection
+## Error Handling
 
-## Use Cases
-1. API communication
-2. File uploads
-3. Authentication requests
-4. Data fetching
-5. Form submissions
+```javascript
+try {
+  const response = await axios.get('/api/models');
+} catch (error) {
+  if (error.response) {
+    // Server responded with error status
+    console.log(error.response.status);
+    console.log(error.response.data);
+  } else if (error.request) {
+    // Request made but no response
+    console.log('Network error');
+  } else {
+    // Error setting up request
+    console.log(error.message);
+  }
+}
+```
 
 ## Notes
-- Industry-standard HTTP client
-- Comprehensive error handling
-- Request/response transformation
-- Browser and Node.js support
+
+- Filename is misleading - contains HTTP/date libs, not AR code
+- Axios is the primary HTTP client for API calls
+- Day.js handles date formatting and manipulation
+- isMobile provides device detection
+- All used throughout Sketchfab's web application

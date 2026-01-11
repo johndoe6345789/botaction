@@ -1,189 +1,335 @@
 # viewer_audio.js
 
 ## Overview
-Minified Sketchfab webpack chunk containing UI components for model information display, popups, comment systems, metadata editing, and store model cards with comprehensive feature sets.
 
-## File Status
-- **Type**: Minified JavaScript (Webpack Bundle)
-- **Chunk ID**: 9559
-- **Minified**: Yes
-- **Source Map**: Available (referenced in file)
+This file contains **comment system and interaction components** - NOT audio handling. It provides comment editing, emoji support, popup systems, and model information display.
 
-## Key Components
+## File Information
 
-### Module "uo4Z" - Prevent Page Scroll
-Touch/wheel scroll containment utility:
-- Prevents parent scroll on touch devices
-- Handles wheel events
-- Touch start/move/end management
+- **Status**: Active webpack bundle
+- **Size**: ~82KB (minified)
+- **Type**: Comment and interaction UI
+- **Framework**: React
 
-### Module "l5lH" - Natural Sort
-Human-friendly string comparison:
-- Numeric-aware sorting
-- Date recognition
-- Case-insensitive option
+## Core Components
 
-### Module "xesV" - Comment Placeholder
-Loading skeleton for comments:
-- Rounded avatar placeholder
-- Text line placeholders
-- CSS class: `c-list-item-placeholder --comment`
+### 1. Scroll Prevention (`uo4Z`)
 
-### Module "isBB" - Popup Base
-Generic popup component:
+Prevents body scroll when modals are open:
 
-**Options**:
-- `child` - Content component
-- `title` - Header title
-- `className` - Additional classes
-- `isClosable` - Show close button
-- `width` - Popup width
+```javascript
+// Disable body scroll
+disableBodyScroll(modalElement);
 
-### Module "qlM8" - Model Information Popup
-Model details display popup:
-- Uses base popup wrapper
-- Shows model metadata
-- Inspect model action
+// Re-enable body scroll
+enableBodyScroll(modalElement);
 
-### Module "Qbh+" - Popup Factory
-Higher-order component for popups:
-- Wraps content in popup shell
-- Provides popup controller methods
-- Methods: continue, cancel, open, close, remove, show, hide, resize, autofocus
+// Clear all scroll locks
+clearAllBodyScrollLocks();
 
-### Module "zoil" - Twemoji Integration
-Emoji parsing with Twemoji:
-- CDN: `cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2`
-- Returns parsed HTML
+// Usage
+function Modal({ isOpen, children }) {
+  const ref = useRef();
+  
+  useEffect(() => {
+    if (isOpen) {
+      disableBodyScroll(ref.current);
+      return () => enableBodyScroll(ref.current);
+    }
+  }, [isOpen]);
+  
+  return <div ref={ref}>{children}</div>;
+}
+```
 
-### Module "Q63v" - Description Display
-Model description component:
-- Markdown rendered content
-- Edit link for owners
-- Empty state handling
+### 2. Natural Sort (`l5lH`)
 
-### Module "bWE4" - Comment Editor
-Rich comment input component:
+Human-friendly sorting:
 
-**Features**:
-- @mention autocomplete
-- Emoji picker integration
-- Debounced user search
-- Textarea auto-resize
-- Touch/keyboard support
+```javascript
+const items = ['item2', 'item10', 'item1'];
 
-**Props**:
-- `value` - Current text
-- `onChange` - Text change handler
-- `placeholder` - Input placeholder
-- `orgUid` - Organization context
-- `autofocus` - Auto-focus on mount
+// Standard sort (wrong order)
+items.sort();  // ['item1', 'item10', 'item2']
 
-### Module "Nhfk" - Emoji Utilities
-Emoji text processing:
-- `:emoji:` syntax parsing
-- Search emoji by name
-- Convert shortcodes to unicode
-- Smile/heart shortcuts
+// Natural sort (correct order)
+items.sort(naturalSort);  // ['item1', 'item2', 'item10']
 
-### Module "TUnU" - Deleted User Name
-Display for deleted users:
-- Shows "Deleted user" text
-- No link/interaction
+// With locale
+naturalSort('ä', 'z', { locale: 'de' });  // Correct German sorting
+```
 
-### Module "4z7H" - Report Link (Legacy)
-Report abuse link to FAQ:
-- Builds URL with parameters
-- Opens in new tab
+### 3. Comment Editor (`bWE4`)
 
-### Module "u3Zj" - Store Model Card
-E-commerce model card:
+Rich text comment editor:
 
-**Features**:
-- Schema.org 3DModel markup
-- Star rating display
-- Review count
-- Price display
-- Add to cart button
-- 360° preview on hover
+```javascript
+<CommentEditor
+  value={comment}
+  onChange={setComment}
+  placeholder="Write a comment..."
+  maxLength={2000}
+  onSubmit={handleSubmit}
+  onCancel={handleCancel}
+  mentions={users}           // @mention support
+  emojis={true}             // Emoji picker
+  formatting={['bold', 'italic', 'link']}
+/>
+```
 
-### Module "NYqo" - Report Link (DSA)
-Digital Services Act compliant reporting:
-- Links to Fab report system
-- Content type/URL/ID params
+### Features
 
-### Module "EZio" - Cart Provider
-Shopping cart state management:
-- Add to cart functionality
-- Purchase status check
-- Cart limit handling
-- Loading states
+```javascript
+// Mention autocomplete
+// Type @ to trigger user autocomplete
+// @username → linked mention
 
-### Module "xtOe" - Processing Status
-Model processing/reprocess detection:
-- Version polling
-- Reupload vs reprocess context
-- Status tracking
+// Emoji support
+// Type : to trigger emoji autocomplete
+// :smile: → 😊
 
-### Module "XOQx" - License Display
-Creative Commons license view:
-- License label/fullname
-- Requirements display
-- Learn more link
-- Material variant
+// Basic formatting
+// **bold** → bold
+// *italic* → italic
+// [link](url) → link
+```
 
-### Module "5Y1a" - Comment Body
-Comment text renderer:
-- Deleted comment handling
-- URL linkification
-- Emoji parsing
-- Empty message state
+### 4. Emoji Picker (`zoil`)
 
-### Module "5+EH" - Comment System
-Full comment implementation:
-- Comment form
-- Comment list
-- Pagination
-- Delete/reply actions
-- Optimistic updates
+Emoji selection interface:
 
-### Module "zmmp" - Version Review
-Model version comparison UI:
-- Side-by-side preview
-- Accept/decline actions
-- Reupload vs reprocess labels
+```javascript
+<EmojiPicker
+  onSelect={(emoji) => insertEmoji(emoji)}
+  recent={recentEmojis}
+  categories={['people', 'nature', 'food', 'activity', 'travel', 'objects']}
+/>
+```
 
-### Module "nd6d" - Model Information
-Comprehensive model details:
-- Geometry stats (triangles, vertices)
-- Format information
-- Texture/material counts
-- License display
-- File sizes
+### 5. Popup System (`isBB/qlM8`)
 
-## Dependencies
-- React (components, hooks, refs)
-- Redux (state management)
-- jQuery (autocomplete)
-- Nunjucks (templates)
-- Day.js (dates)
+Modal and popup components:
 
-## Technical Details
-- Component composition
-- HOC pattern for popups
-- Optimistic UI updates
-- Schema.org structured data
-- Suspense/lazy loading
+```javascript
+// Basic popup
+<Popup
+  isOpen={isOpen}
+  onClose={handleClose}
+  title="Popup Title"
+  footer={
+    <>
+      <Button onClick={handleCancel}>Cancel</Button>
+      <Button onClick={handleConfirm} primary>Confirm</Button>
+    </>
+  }
+>
+  <p>Popup content here</p>
+</Popup>
 
-## Use Cases
-1. Model page information
-2. Comment systems
-3. Store product cards
-4. Version management
-5. Report functionality
+// Confirmation dialog
+const confirmed = await confirm({
+  title: 'Delete Comment',
+  message: 'Are you sure you want to delete this comment?',
+  confirmLabel: 'Delete',
+  cancelLabel: 'Cancel',
+  destructive: true
+});
+```
+
+### 6. Model Information Display
+
+Model metadata component:
+
+```javascript
+<ModelInfo
+  model={model}
+  showStats={true}
+  showAuthor={true}
+  showTags={true}
+/>
+
+// Displays:
+// - Model name
+// - Author with avatar
+// - View/like/download counts
+// - Tags
+// - License info
+// - Creation date
+```
+
+### 7. Comment Thread
+
+Threaded comment display:
+
+```javascript
+<CommentThread
+  comments={comments}
+  modelId={modelId}
+  currentUser={user}
+  onReply={handleReply}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+  onLike={handleLike}
+/>
+```
+
+### Comment Structure
+
+```javascript
+const comment = {
+  uid: 'comment-123',
+  body: 'Great model!',
+  user: {
+    uid: 'user-456',
+    displayName: 'John Doe',
+    avatar: 'https://...'
+  },
+  createdAt: '2023-01-15T10:30:00Z',
+  updatedAt: null,
+  likeCount: 5,
+  isLiked: false,
+  replies: [
+    // Nested comments
+  ]
+};
+```
+
+## Popup Types
+
+### Modal
+
+```javascript
+<Modal
+  isOpen={isOpen}
+  onClose={handleClose}
+  size="medium"  // 'small' | 'medium' | 'large' | 'fullscreen'
+  closeOnOverlayClick={true}
+  closeOnEscape={true}
+>
+  {content}
+</Modal>
+```
+
+### Tooltip
+
+```javascript
+<Tooltip content="This is a tooltip" placement="top">
+  <Button>Hover me</Button>
+</Tooltip>
+```
+
+### Dropdown
+
+```javascript
+<Dropdown
+  trigger={<Button>Click me</Button>}
+  isOpen={isOpen}
+  onClose={handleClose}
+>
+  <DropdownItem onClick={handleOption1}>Option 1</DropdownItem>
+  <DropdownItem onClick={handleOption2}>Option 2</DropdownItem>
+</Dropdown>
+```
+
+## Comment Actions
+
+### Like/Unlike
+
+```javascript
+const handleLike = async (commentId) => {
+  if (comment.isLiked) {
+    await api.unlikeComment(commentId);
+  } else {
+    await api.likeComment(commentId);
+  }
+};
+```
+
+### Reply
+
+```javascript
+const handleReply = (parentId) => {
+  setReplyingTo(parentId);
+  focusCommentEditor();
+};
+```
+
+### Delete
+
+```javascript
+const handleDelete = async (commentId) => {
+  const confirmed = await confirm({
+    title: 'Delete Comment',
+    message: 'Are you sure?',
+    destructive: true
+  });
+  
+  if (confirmed) {
+    await api.deleteComment(commentId);
+    removeComment(commentId);
+  }
+};
+```
+
+## Usage Examples
+
+### Comment Section
+
+```jsx
+function CommentSection({ modelId }) {
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const user = useCurrentUser();
+  
+  const handleSubmit = async () => {
+    const comment = await api.createComment(modelId, newComment);
+    setComments([comment, ...comments]);
+    setNewComment('');
+  };
+  
+  return (
+    <div className="comment-section">
+      {user && (
+        <CommentEditor
+          value={newComment}
+          onChange={setNewComment}
+          onSubmit={handleSubmit}
+        />
+      )}
+      <CommentThread
+        comments={comments}
+        modelId={modelId}
+        currentUser={user}
+      />
+    </div>
+  );
+}
+```
+
+## CSS Classes
+
+```css
+.comment-editor { }
+.comment-editor__textarea { }
+.comment-editor__toolbar { }
+.comment-editor__emoji-picker { }
+
+.comment-thread { }
+.comment-thread__item { }
+.comment-thread__replies { }
+
+.popup { }
+.popup__overlay { }
+.popup__content { }
+.popup__header { }
+.popup__body { }
+.popup__footer { }
+```
 
 ## Notes
-- Major UI component library
-- E-commerce integration
-- Accessibility considerations
-- DSA compliance features
+
+- Filename is misleading - contains comment system, not audio
+- Full comment CRUD functionality
+- Emoji and mention support
+- Accessible popup system with focus management
+- Integrates with Sketchfab's API

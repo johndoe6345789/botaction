@@ -1,102 +1,312 @@
 # viewer_controls.js
 
 ## Overview
-Floating UI positioning library for creating tooltips, popovers, dropdowns, and other floating elements with intelligent positioning and collision detection.
 
-## File Status
-- **Type**: Minified Sketchfab Webpack Bundle
-- **Webpack Chunk ID**: 1612
-- **Source Map**: `2a63f2db655c1f7e6b86930c0195af16-v2.js.map`
+This file contains **Floating UI positioning system** for tooltips, dropdowns, and popovers. It's NOT related to 3D viewer controls despite its filename.
 
-## Key Components
+## File Information
 
-### Module Exports (7oK2)
-| Export | Description |
-|--------|-------------|
-| `YF` | `useFloating` - React hook for floating element positioning |
-| `x7` | Arrow middleware for tooltip arrows |
+- **Status**: Active webpack bundle
+- **Size**: ~89KB (minified)
+- **Type**: UI positioning library
+- **Library**: Floating UI (similar to Popper.js)
 
-### Floating UI Core (dx2a)
-| Export | Description |
-|--------|-------------|
-| `JB` | Convert rect to viewport-relative |
-| `RR` | Flip middleware |
-| `cv` | Offset middleware |
-| `dp` | Size middleware |
-| `oo` | Core compute position function |
-| `uY` | Shift middleware |
-| `x7` | Arrow positioning |
+## Core Functionality
 
-### Placement Calculations
+### 1. useFloating Hook (`7oK2`)
+
+Main positioning hook:
+
 ```javascript
-// Supported placements
-"top", "bottom", "left", "right"
-// With alignment
-"top-start", "top-end", "bottom-start", "bottom-end"
-"left-start", "left-end", "right-start", "right-end"
+const { x, y, strategy, refs, update } = useFloating({
+  placement: 'bottom-start',  // Position relative to reference
+  middleware: [
+    offset(8),                 // Distance from reference
+    flip(),                    // Flip to opposite side if needed
+    shift({ padding: 8 }),     // Shift to stay in viewport
+    arrow({ element: arrowRef })
+  ]
+});
+
+// Returns:
+// x, y: Computed position coordinates
+// strategy: 'absolute' or 'fixed'
+// refs: { reference, floating }
+// update: Function to recalculate position
 ```
 
-### Middleware System
-1. **Offset** - Add distance between reference and floating element
-2. **Flip** - Change placement when there's insufficient space
-3. **Shift** - Move along axis to fit in viewport
-4. **Arrow** - Position arrow element
-5. **Size** - Resize floating element to fit
+### 2. Placement Options
 
-### Platform Utilities (wA4o)
-| Function | Description |
-|----------|-------------|
-| `Me` | `autoUpdate` - Reposition on scroll/resize |
-| `oo` | `computePosition` - Calculate position |
-| `getClippingRect` | Get clipping boundaries |
-| `getOffsetParent` | Find offset parent element |
-| `getDimensions` | Get element dimensions |
-| `isElement` | Check if DOM element |
-| `isRTL` | Check right-to-left direction |
-
-## React Integration
 ```javascript
-// useFloating hook
-const {
-  x, y,           // Position coordinates
-  strategy,       // 'absolute' | 'fixed'
-  placement,      // Final placement
-  middlewareData, // Data from middleware
-  refs,           // Reference and floating refs
-  update          // Manual update function
-} = useFloating({
-  middleware: [...],
-  placement: 'bottom',
-  strategy: 'absolute',
-  whileElementsMounted: autoUpdate
+const placements = [
+  'top', 'top-start', 'top-end',
+  'right', 'right-start', 'right-end',
+  'bottom', 'bottom-start', 'bottom-end',
+  'left', 'left-start', 'left-end'
+];
+```
+
+### 3. Middleware System (`dx2a`)
+
+#### offset
+
+Adds distance between reference and floating element:
+
+```javascript
+offset(8)                    // 8px gap
+offset({ mainAxis: 8 })      // Same as above
+offset({ crossAxis: 4 })     // Offset perpendicular to placement
+offset({ alignmentAxis: 4 }) // Offset along alignment axis
+```
+
+#### flip
+
+Flips to opposite placement if not enough space:
+
+```javascript
+flip()                       // Default behavior
+flip({ fallbackPlacements: ['top', 'left'] })
+flip({ fallbackStrategy: 'bestFit' })
+flip({ boundary: document.body })
+```
+
+#### shift
+
+Shifts along axis to stay in viewport:
+
+```javascript
+shift()                      // Default behavior
+shift({ padding: 8 })        // Minimum distance from boundary
+shift({ limiter: limitShift() })
+shift({ boundary: 'clippingAncestors' })
+```
+
+#### size
+
+Resizes floating element to fit:
+
+```javascript
+size({
+  apply({ availableWidth, availableHeight, elements }) {
+    Object.assign(elements.floating.style, {
+      maxWidth: `${availableWidth}px`,
+      maxHeight: `${availableHeight}px`
+    });
+  }
+})
+```
+
+#### arrow
+
+Positions arrow element:
+
+```javascript
+arrow({ element: arrowRef })
+arrow({ padding: 8 })        // Minimum distance from edges
+
+// Returns:
+// middlewareData.arrow.x: Arrow x position
+// middlewareData.arrow.y: Arrow y position
+```
+
+### 4. DOM Platform Utilities (`wA4o`)
+
+#### getClippingRect
+
+Calculates visible area:
+
+```javascript
+getClippingRect({
+  element,
+  boundary: 'clippingAncestors',  // or HTMLElement[]
+  rootBoundary: 'viewport',       // or 'document'
+  strategy: 'absolute'
+})
+// Returns: { x, y, width, height }
+```
+
+#### convertOffsetParent
+
+Handles offset parent calculations:
+
+```javascript
+convertOffsetParent(element, offsetParent)
+// Returns transformed coordinates
+```
+
+#### autoUpdate
+
+Automatically updates position on changes:
+
+```javascript
+const cleanup = autoUpdate(
+  referenceElement,
+  floatingElement,
+  updatePosition,
+  {
+    ancestorScroll: true,     // Update on ancestor scroll
+    ancestorResize: true,     // Update on ancestor resize
+    elementResize: true,      // Update on element resize
+    animationFrame: false     // Use requestAnimationFrame
+  }
+);
+
+// Call cleanup() to stop auto-updates
+```
+
+## Usage Examples
+
+### Tooltip
+
+```jsx
+function Tooltip({ label, children }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { x, y, strategy, refs, middlewareData } = useFloating({
+    placement: 'top',
+    open: isOpen,
+    middleware: [offset(8), flip(), shift({ padding: 8 })]
+  });
+  
+  return (
+    <>
+      <div
+        ref={refs.setReference}
+        onMouseEnter={() => setIsOpen(true)}
+        onMouseLeave={() => setIsOpen(false)}
+      >
+        {children}
+      </div>
+      {isOpen && (
+        <div
+          ref={refs.setFloating}
+          style={{
+            position: strategy,
+            top: y ?? 0,
+            left: x ?? 0
+          }}
+        >
+          {label}
+        </div>
+      )}
+    </>
+  );
+}
+```
+
+### Dropdown
+
+```jsx
+function Dropdown({ trigger, content }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { x, y, strategy, refs } = useFloating({
+    placement: 'bottom-start',
+    open: isOpen,
+    middleware: [
+      offset(4),
+      flip(),
+      shift({ padding: 8 }),
+      size({
+        apply({ availableHeight, elements }) {
+          elements.floating.style.maxHeight = `${availableHeight}px`;
+        }
+      })
+    ]
+  });
+  
+  useEffect(() => {
+    if (isOpen) {
+      return autoUpdate(refs.reference.current, refs.floating.current, () => {
+        // Position update
+      });
+    }
+  }, [isOpen, refs]);
+  
+  return (
+    <>
+      <button ref={refs.setReference} onClick={() => setIsOpen(!isOpen)}>
+        {trigger}
+      </button>
+      {isOpen && (
+        <div
+          ref={refs.setFloating}
+          style={{ position: strategy, top: y ?? 0, left: x ?? 0 }}
+        >
+          {content}
+        </div>
+      )}
+    </>
+  );
+}
+```
+
+### With Arrow
+
+```jsx
+function Popover({ trigger, content }) {
+  const arrowRef = useRef(null);
+  const { x, y, strategy, refs, middlewareData, placement } = useFloating({
+    placement: 'top',
+    middleware: [
+      offset(12),
+      flip(),
+      shift({ padding: 8 }),
+      arrow({ element: arrowRef })
+    ]
+  });
+  
+  const arrowX = middlewareData.arrow?.x ?? 0;
+  const arrowY = middlewareData.arrow?.y ?? 0;
+  const staticSide = {
+    top: 'bottom',
+    right: 'left',
+    bottom: 'top',
+    left: 'right'
+  }[placement.split('-')[0]];
+  
+  return (
+    <>
+      <button ref={refs.setReference}>{trigger}</button>
+      <div ref={refs.setFloating} style={{ position: strategy, top: y, left: x }}>
+        {content}
+        <div
+          ref={arrowRef}
+          style={{
+            position: 'absolute',
+            left: arrowX,
+            top: arrowY,
+            [staticSide]: '-4px'
+          }}
+        />
+      </div>
+    </>
+  );
+}
+```
+
+## RTL Support
+
+Handles right-to-left languages:
+
+```javascript
+useFloating({
+  placement: 'bottom-start',  // Becomes 'bottom-end' in RTL
+  middleware: [
+    flip(),                    // Respects RTL direction
+    shift()                    // Respects RTL direction
+  ]
 });
 ```
 
-## Dependencies
-- React (useRef, useEffect, useState, useCallback, useMemo)
-- React DOM (flushSync)
-- ResizeObserver API
-- MutationObserver API (browser)
+## Performance
 
-## Technical Details
-- Collision detection with clipping ancestors
-- Support for virtual elements
-- RTL (right-to-left) language support
-- Shadow DOM compatibility
-- Scroll container detection
-- Viewport-relative positioning
-
-## Use Cases
-1. Tooltip positioning
-2. Dropdown menus
-3. Popover dialogs
-4. Context menus
-5. Autocomplete suggestions
-6. Date picker positioning
+- Uses `ResizeObserver` for efficient resize tracking
+- Passive scroll listeners
+- `requestAnimationFrame` option for smooth animations
+- Batched position updates
 
 ## Notes
-- Floating UI is the successor to Popper.js
-- Middleware is composable and extensible
-- Handles edge cases like scrolling containers
-- Performance optimized with lazy updates
-- Used throughout Sketchfab UI components
+
+- Based on Floating UI (floatingui.com)
+- Framework-agnostic core with React bindings
+- Replaces deprecated Popper.js
+- Handles complex overflow scenarios

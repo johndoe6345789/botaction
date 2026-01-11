@@ -1,221 +1,249 @@
 # viewer_vr.js
 
 ## Overview
-Minified Sketchfab webpack chunk containing DOM utilities, URL query string parsing, text/string manipulation helpers, and prefetched data management for server-side rendering optimization.
 
-## File Status
-- **Type**: Minified JavaScript (Webpack Bundle)
-- **Chunk ID**: 148
-- **Minified**: Yes
-- **Source Map**: Available (referenced in file)
+This file contains **URL parsing and query string utilities** - NOT VR (Virtual Reality) functionality. It provides URL manipulation, DOM data extraction, and string utilities.
 
-## Key Components
+## File Information
 
-### Module "t3PY" - Query String Parser
-URL query parameter parsing:
+- **Status**: Active webpack bundle
+- **Size**: ~65KB (minified)
+- **Type**: URL and string utilities
+- **Framework**: Vanilla JavaScript
 
-**Pattern**: `/[&|;]+/g` for parameter separation
+## Core Modules
 
-**parseQueryString (Qc)**:
+### 1. Query String Parsing (`t3PY`)
+
 ```javascript
-parseQueryString("?foo=bar&baz=qux")
-// => { foo: ["bar"], baz: ["qux"] }
+// Parse query string
+const params = parseQueryString('?page=1&sort=name&tags=a,b,c');
+// { page: '1', sort: 'name', tags: 'a,b,c' }
+
+// Parse with array support
+const params = parseQueryStringArrays('?tags=a&tags=b&tags=c');
+// { tags: ['a', 'b', 'c'] }
+
+// Build query string
+const qs = buildQueryString({ page: 1, sort: 'name' });
+// 'page=1&sort=name'
 ```
 
-**Features**:
-- Handles `?`, `&`, `|`, `;` separators
-- URL decodes values
-- Supports arrays (multiple same keys)
-- Converts `+` to space
+### 2. DOM Data Utilities (`45Yh`)
 
-### Module "cSHm" - Prefetch Data Store
-SSR data hydration manager:
+Extract data from DOM elements:
 
-**Methods**:
-- `get(key)` - Retrieve cached data
-- `register(key, value)` - Store data
-- `hasInitialPropsOf(component)` - Check SSR props
-- `getInitialPropsOf(component)` - Get SSR props
-- `invalidate(url)` - Clear specific cache
-- `invalidateAllMatchRegExp(pattern)` - Clear matching
-
-**Features**:
-- Reads from `window.prefetchedData`
-- Extracts from DOM `#js-dom-data-prefetched-data`
-- Query string aware invalidation
-
-### Module "45Yh" - DOM Utilities
-Comprehensive DOM helper functions:
-
-**Element Position**:
 ```javascript
-getOffset(element)
-// => { top, left, bottom, right }
+// Get data attribute
+const modelId = getDataAttribute(element, 'model-id');
+// <div data-model-id="abc123"> → 'abc123'
 
-getPosition(element)
-// => { top, left, width, height }
+// Get prefetched data
+const prefetchedData = getPrefetchedData('models');
+// Returns data from <script type="application/json" data-prefetch="models">
 
-getCenterOffset(element)
-// => offset from viewport center
+// Get config from DOM
+const config = getDomConfig('viewer-config');
+// Returns parsed JSON from data attribute
 ```
 
-**Image Loading**:
-```javascript
-loadImage(url)
-// => Promise<HTMLImageElement>
+### 3. URL Crafting Utilities (`JBVY`)
 
-preloadImage(url)
-// => Promise<null> (silent load)
+```javascript
+// Named route URLs
+const modelUrl = getUrl('models:view', { modelId: 'abc123' });
+// '/models/abc123'
+
+const searchUrl = getUrl('search', {}, { q: 'cars', category: 'vehicles' });
+// '/search?q=cars&category=vehicles'
+
+// External URLs
+const embedUrl = getEmbedUrl(modelId, { autostart: 1, ui_infos: 0 });
+// 'https://sketchfab.com/models/abc123/embed?autostart=1&ui_infos=0'
+
+// Download URLs
+const downloadUrl = getDownloadUrl(modelId, format);
+// 'https://sketchfab.com/models/abc123/download/gltf'
 ```
 
-**SVG to Canvas**:
-```javascript
-htmlToSVG(html, width, height)
-// => SVG element with foreignObject
+### URL Parsing
 
-elementToDataUrl(element, mimeType, quality)
-// => base64 data URL
+```javascript
+// Parse URL parts
+const parsed = parseUrl('https://sketchfab.com/models/abc123?view=3d#comments');
+// {
+//   protocol: 'https:',
+//   host: 'sketchfab.com',
+//   pathname: '/models/abc123',
+//   search: '?view=3d',
+//   hash: '#comments'
+// }
+
+// Get current page params
+const { modelId } = getPageParams();  // From current URL
 ```
 
-**Intersection Observer**:
+### 4. String Utilities (`1nxQ`)
+
 ```javascript
-observeVisibility(element, callback, options)
-// Returns cleanup function
-// Options: margin, threshold, visibilityThreshold
+// Sanitize string
+const safe = sanitize('<script>alert("xss")</script>');
+// '&lt;script&gt;alert("xss")&lt;/script&gt;'
+
+// Truncate string
+const truncated = truncate('Long description text...', 100);
+// 'Long description...'
+
+// Slugify
+const slug = slugify('My Model Name!');
+// 'my-model-name'
+
+// Capitalize
+const title = capitalize('hello world');
+// 'Hello world'
+
+// Camel case
+const camel = toCamelCase('some-property-name');
+// 'somePropertyName'
+
+// Kebab case
+const kebab = toKebabCase('somePropertyName');
+// 'some-property-name'
 ```
 
-**DOM Data Extraction**:
+## URL Parameter Helpers
+
+### Get/Set URL Parameters
+
 ```javascript
-getDOMData(id, type)
-// Reads from #js-dom-data-{id}
-// Types: "string" | "json"
-// Handles HTML comment encoding
+// Get single param
+const page = getUrlParam('page');  // From current URL
+const page = getUrlParam('page', '?page=2&sort=name');  // From string
+
+// Get multiple params
+const { page, sort, tags } = getUrlParams(['page', 'sort', 'tags']);
+
+// Set params (returns new URL string)
+const newUrl = setUrlParams({ page: 2, sort: 'date' });
+// '/current/path?page=2&sort=date'
+
+// Remove params
+const cleanUrl = removeUrlParams(['tracking', 'utm_source']);
 ```
 
-**Event Helpers**:
+### URL String Helpers
+
 ```javascript
-addEventListener(target, event, handler, options)
-removeEventListener(target, event, handler, options)
-// Works with both DOM and jQuery-like objects
+// Check if absolute URL
+isAbsoluteUrl('https://example.com');  // true
+isAbsoluteUrl('/relative/path');       // false
+
+// Check if external URL
+isExternalUrl('https://google.com');   // true
+isExternalUrl('/models/abc');          // false
+isExternalUrl('https://sketchfab.com/models'); // false
+
+// Get base URL
+getBaseUrl();  // 'https://sketchfab.com'
+
+// Join URL parts
+joinUrl('https://sketchfab.com', 'models', 'abc123');
+// 'https://sketchfab.com/models/abc123'
 ```
 
-**Browser Detection**:
+## Query String Type Coercion
+
 ```javascript
-isJSDOM() // Test environment
-isIE()    // Internet Explorer
+// String (default)
+const str = getUrlParam('q', 'default', String);
+
+// Number
+const page = getUrlParam('page', 1, Number);
+
+// Boolean
+const enabled = getUrlParam('autostart', false, Boolean);
+
+// Array (comma-separated)
+const tags = getUrlParam('tags', [], Array);
+// 'tags=a,b,c' → ['a', 'b', 'c']
+
+// Multiple values (repeated params)
+const tags = getUrlParams('tags[]');
+// 'tags[]=a&tags[]=b' → ['a', 'b']
 ```
 
-**Lazy Image Loading**:
+## Named Routes
+
 ```javascript
-lazyLoadImage(img, src)
-// Uses IntersectionObserver
-// Shows/hides based on visibility
+// Route definitions (conceptual)
+const routes = {
+  'models:view': '/models/:modelId',
+  'models:edit': '/models/:modelId/edit',
+  'user:profile': '/@:username',
+  'search': '/search',
+  'store:category': '/store/categories/:category'
+};
+
+// Generate URL
+getUrl('models:view', { modelId: 'abc123' });
+// '/models/abc123'
+
+getUrl('search', {}, { q: 'car', sort: '-date' });
+// '/search?q=car&sort=-date'
 ```
 
-### Module "JBVY" - Query String Utilities
-URL parameter manipulation:
+## Usage Examples
 
-**craft(params)**:
-Build query string from object:
+### Building API URLs
+
 ```javascript
-craft({ page: 1, sort: 'date' })
-// => "page=1&sort=date"
+const apiUrl = buildApiUrl('/v3/models', {
+  q: searchQuery,
+  page: currentPage,
+  sort_by: sortOrder,
+  categories: selectedCategories.join(',')
+});
 ```
 
-**string(key, defaultValue)**:
-Get single parameter value
+### Parsing Page Data
 
-**strings(key, defaultValue)**:
-Get array of values
-
-**bool(key, defaultValue)**:
-Get boolean parameter
-
-**number(key, defaultValue)**:
-Get numeric parameter
-
-**color(key, defaultValue)**:
-Get valid CSS color
-
-**vec3(key, defaultValue)**:
-Get 3D vector from comma-separated
-
-**next(key)**:
-Get sanitized redirect URL
-
-### Module "1nxQ" - String Utilities
-Text manipulation helpers:
-
-**Case Conversion**:
 ```javascript
-camelToUnderscore("fooBar")  // => "foo_bar"
-camelToHyphen("fooBar")      // => "foo-bar"
-slugify("Hello World!")      // => "hello-world"
+// On page load, extract prefetched data
+const modelData = getPrefetchedData('model');
+const userData = getPrefetchedData('user');
+const configData = getDomConfig('page-config');
+
+// Initialize with data
+initializePage(modelData, userData, configData);
 ```
 
-**HTML/Text Processing**:
+### URL Navigation
+
 ```javascript
-sanitizeHtml(html)           // Strip HTML tags
-escapeHtml(text)             // Escape special chars
-decodeHtml(encoded)          // Decode entities
-wrapParagraphs(text)         // Add <p> tags
-sanitizeWithAttrs(html, attrs) // DOMPurify whitelist
+// Update URL without reload
+const newUrl = setUrlParams({ page: 2 });
+history.pushState(null, '', newUrl);
+
+// Read current state
+const { page, sort } = getUrlParams(['page', 'sort']);
 ```
 
-**URL Linkification**:
+## Security
+
+### XSS Prevention
+
 ```javascript
-linkify(text, options)
-// Converts URLs to <a> tags
-// Converts emails to mailto:
-// Converts @mentions to profile links
-// Options: trimUrlLimit, target, noFollow
+// Always sanitize user input before displaying
+const safeDescription = sanitize(userInput);
+element.innerHTML = safeDescription;
+
+// Use text content for plain text
+element.textContent = userInput;  // Automatically escaped
 ```
-
-**Patterns**:
-- Email: `\S+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+`
-- URL: Complex URL pattern with TLDs
-- Mention: `@[a-zA-Z0-9._-]{2,30}`
-
-**Pluralization**:
-```javascript
-plural(count, singular, plural)
-// => singular if count===1, else plural
-```
-
-**Path Normalization**:
-```javascript
-normalizePath("/foo/../bar/./baz")
-// => "/bar/baz"
-```
-
-**Miscellaneous**:
-- `hexColor(str)` - Extract/validate hex color
-- `parseRange(str)` - Parse "start..end"
-- `capitalize(str)` - Uppercase first char
-- `stripNonAlpha(str)` - Remove non-letters
-
-## Dependencies
-- DOMPurify (HTML sanitization)
-- jQuery (event handling)
-- Lodash (memoize)
-- Promise library
-
-## Technical Details
-- IntersectionObserver polyfill pattern
-- HTML5 Canvas for image conversion
-- URL encoding/decoding
-- XSS prevention
-- SSR hydration
-
-## Use Cases
-1. SSR data hydration
-2. URL manipulation
-3. DOM measurement
-4. Image lazy loading
-5. Text formatting
 
 ## Notes
-- Browser compatibility helpers
-- Security-focused utilities
-- Performance optimizations
-- SEO-friendly URL handling
+
+- Filename is misleading - contains URL utilities, not VR code
+- Core utilities used throughout Sketchfab
+- Handles both frontend routing and API URL construction
+- Includes security helpers for XSS prevention

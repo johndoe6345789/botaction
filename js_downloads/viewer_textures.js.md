@@ -1,134 +1,288 @@
 # viewer_textures.js
 
 ## Overview
-Minified Sketchfab webpack chunk containing UI components for 360-degree model preview, responsive grid layouts, and model card features (staff picks, restrictions).
 
-## File Status
-- **Type**: Minified JavaScript (Webpack Bundle)
-- **Chunk ID**: 9799
-- **Minified**: Yes
-- **Source Map**: Available (referenced in file)
+This file contains **360° model preview, grid layout, and staff pick display components** - NOT texture handling code. It provides interactive preview thumbnails and grid-based model displays.
 
-## Key Components
+## File Information
 
-### Module "nnpx" - 360° Model Preview
-Interactive 360-degree image preview component:
+- **Status**: Active webpack bundle
+- **Size**: ~85KB (minified)
+- **Type**: React preview and grid components
+- **Framework**: React
 
-**Class: Model360Preview**
+## Core Components
 
-**Props**:
-| Prop | Default | Description |
-|------|---------|-------------|
-| `color` | "" | Loading bar color |
-| `previewOnDrag` | true | Enable drag interaction |
-| `targetHeight` | 400 | Target image height |
-| `modelUid` | required | Model identifier |
+### 1. Model360Preview (`nnpx`)
 
-**State**:
-- `isVisible` - Preview visibility
-- `image` - Loaded image data (width, height)
-- `containerWidth/Height` - Container dimensions
-- `loadingPercent` - Load progress (0-1)
-- `cursorX` - Current cursor position
-- `startCursorX` - Drag start position
+Interactive 360° thumbnail preview:
 
-**Methods**:
-- `onStart()` - Initialize drag/hover
-- `onMove(event)` - Handle cursor movement
-- `onEnd()` - Cleanup and hide
-- `isActive()` - Check if visible and loaded
-- `loadPreview()` - Fetch model preview images
-- `show(position)` - Display preview
+```javascript
+<Model360Preview
+  model={model}
+  spriteUrl={model.thumbnails.spriteUrl}
+  spriteCount={24}                    // Number of frames
+  width={400}
+  height={300}
+  autoRotate={false}                  // Auto-rotate on hover
+  onInteraction={handleInteraction}
+/>
 
-**Features**:
-- Debounced image loading (500ms)
-- 15-frame sprite sheet animation
-- Touch and mouse support
-- Progress indicator
-- Automatic size fitting
+// Features:
+// - Sprite sheet animation
+// - Drag to rotate
+// - Touch support
+// - Hover activation
+```
 
-### Module "AhsD" - Grid Item
-Responsive grid item wrapper:
+### Sprite Sheet Animation Logic
 
-**Component: GridItem**
+```javascript
+// Sprite sheet format:
+// - Horizontal strip of frames
+// - Each frame is the same width
+// - spriteCount determines frame positions
 
-**Props**:
-- `columns` - Number of columns to span
-- `children` - Content
-- `className` - Additional classes
+const getFramePosition = (frameIndex, spriteCount, width) => {
+  const frameWidth = width / spriteCount;
+  return -(frameIndex * frameWidth);
+};
 
-**CSS Classes**:
-- `c-grid__item`
-- `--columns-{n}` - Column span modifier
+// Mouse/touch drag to rotate:
+const handleDrag = (deltaX) => {
+  const frameChange = Math.floor(deltaX / dragSensitivity);
+  const newFrame = (currentFrame + frameChange + spriteCount) % spriteCount;
+  setCurrentFrame(newFrame);
+};
+```
 
-### Module "hpsH" - Model Grid
-Paginated grid layout for model cards:
+### 2. Grid Item Component (`AhsD`)
 
-**Component: ModelGrid**
+Individual item in grid layout:
 
-**Props**:
-| Prop | Default | Description |
-|------|---------|-------------|
-| `cards` | required | Card components array |
-| `onLoadPrevious` | - | Previous page callback |
-| `onLoadNext` | - | Next page callback |
-| `scrollableElement` | window | Scroll container |
-| `gridSize` | "normal" | Grid density |
-| `loading` | "none" | Loading state |
-| `isLoading` | false | Loading flag |
-| `hasPreviousPage` | false | Has previous |
-| `hasNextPage` | false | Has next |
-| `maxAutoLoadedPages` | 3 | Auto-load limit |
-| `emptyState` | null | Empty content |
+```javascript
+<GridItem
+  item={model}
+  renderContent={(item) => <ModelCard model={item} />}
+  aspectRatio={4/3}
+  onClick={handleClick}
+/>
+```
 
-**Features**:
-- Infinite scroll with intersection observer
-- Auto-load with page limit
-- Previous/Next buttons
-- Empty state handling
-- Schema.org itemProp support
+### 3. Grid Layout (`hpsH`)
 
-### Module "QFI+" - Model Flags
-Model status indicator badges:
+Paginated grid with infinite scroll:
 
-**Component: ModelFlags**
+```javascript
+<Grid
+  items={models}
+  renderItem={(model) => <ModelCard model={model} />}
+  columns={{ mobile: 2, tablet: 3, desktop: 4 }}
+  gap={16}
+  loadMore={handleLoadMore}
+  hasMore={hasNextPage}
+  loading={isLoading}
+  maxPages={10}                       // Auto-load up to 10 pages
+/>
 
-**Props**:
-- `model` - Model data
-- `withStaffpickFlag` - Show staff pick (default: true)
-- `withStaffpickLink` - Link to staff picks (default: false)
-- `withRestrictedFlag` - Show restricted (default: true)
-- `displayRecentlyStaffpicked` - Highlight new picks
+// Pagination options:
+// - Load more button
+// - Infinite scroll
+// - Previous/next pages
+```
 
-**Badges**:
-- **Staff Pick**: Award badge with optional link
-- **Restricted**: Link to content policy
+### 4. StaffPickFlags (`QFI+`)
 
-**Schema.org**:
-- `itemProp="award"` for staff picks
+Staff pick and content badges:
 
-## Dependencies
-- React (Component class, memo)
-- Lodash (debounce)
-- Promise library
-- Intersection Observer API
+```javascript
+<StaffPickFlags
+  isStaffPicked={model.isStaffPicked}
+  isRestricted={model.isRestricted}
+  showLabels={false}
+/>
 
-## Technical Details
-- Class-based 360 preview (lifecycle methods)
-- Functional grid components
-- Debounced API calls
-- Sprite sheet animation technique
-- Schema.org structured data
+// Displays badges:
+// - Staff Pick: Star icon
+// - Restricted: 18+ indicator
+```
 
-## Use Cases
-1. Model card 360° previews
-2. Responsive model grids
-3. Staff pick highlighting
-4. Restricted content warnings
-5. Infinite scroll galleries
+## Grid Implementation Details
+
+### Responsive Columns
+
+```javascript
+const gridColumns = {
+  mobile: {
+    breakpoint: 0,
+    columns: 2
+  },
+  tablet: {
+    breakpoint: 768,
+    columns: 3
+  },
+  desktop: {
+    breakpoint: 1024,
+    columns: 4
+  },
+  wide: {
+    breakpoint: 1440,
+    columns: 5
+  }
+};
+```
+
+### Infinite Scroll Logic
+
+```javascript
+const useGridInfiniteScroll = (containerRef, loadMore, { maxPages = 10 }) => {
+  const loadedPages = useRef(0);
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && loadedPages.current < maxPages) {
+          loadMore().then(() => {
+            loadedPages.current++;
+          });
+        }
+      },
+      { rootMargin: '400px' }
+    );
+    
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    
+    return () => observer.disconnect();
+  }, [loadMore, maxPages]);
+};
+```
+
+### Load More Button
+
+```javascript
+const LoadMoreButton = ({ onClick, loading, hasMore }) => {
+  if (!hasMore) return null;
+  
+  return (
+    <Button
+      onClick={onClick}
+      loading={loading}
+      disabled={loading}
+    >
+      Load More
+    </Button>
+  );
+};
+```
+
+## 360° Preview Technical Details
+
+### Sprite URL Format
+
+```
+https://static.sketchfab.com/models/{modelId}/thumbnails/360x270/{spriteId}.jpg
+```
+
+### Animation Performance
+
+```javascript
+// Use CSS transform for performance
+const previewStyle = {
+  backgroundImage: `url(${spriteUrl})`,
+  backgroundPosition: `${framePosition}px 0`,
+  backgroundSize: `${spriteCount * 100}% 100%`,
+  transition: isAnimating ? 'none' : 'background-position 0.1s ease'
+};
+```
+
+### Touch Handling
+
+```javascript
+const handleTouchMove = (e) => {
+  e.preventDefault();  // Prevent page scroll
+  const touch = e.touches[0];
+  const deltaX = touch.clientX - lastTouchX.current;
+  updateFrame(deltaX);
+  lastTouchX.current = touch.clientX;
+};
+```
+
+## Usage Examples
+
+### Model Grid Page
+
+```jsx
+function ModelsPage({ category }) {
+  const { models, loadMore, hasNext, loading } = useModels(category);
+  
+  return (
+    <Grid
+      items={models}
+      renderItem={(model) => (
+        <div className="model-item">
+          <Model360Preview model={model} />
+          <StaffPickFlags
+            isStaffPicked={model.isStaffPicked}
+            isRestricted={model.isRestricted}
+          />
+          <h3>{model.name}</h3>
+        </div>
+      )}
+      loadMore={loadMore}
+      hasMore={hasNext}
+      loading={loading}
+    />
+  );
+}
+```
+
+### Interactive Thumbnail
+
+```jsx
+function ModelThumbnail({ model }) {
+  const [showPreview, setShowPreview] = useState(false);
+  
+  return (
+    <div
+      onMouseEnter={() => setShowPreview(true)}
+      onMouseLeave={() => setShowPreview(false)}
+    >
+      {showPreview && model.thumbnails.spriteUrl ? (
+        <Model360Preview
+          model={model}
+          spriteUrl={model.thumbnails.spriteUrl}
+          autoRotate
+        />
+      ) : (
+        <img src={model.thumbnails.defaultUrl} alt={model.name} />
+      )}
+    </div>
+  );
+}
+```
+
+## CSS Classes
+
+```css
+.grid { }
+.grid__container { }
+.grid__item { }
+.grid__load-more { }
+
+.model-360-preview { }
+.model-360-preview--active { }
+.model-360-preview__frame { }
+
+.staff-pick-flags { }
+.staff-pick-flags__staff-pick { }
+.staff-pick-flags__restricted { }
+```
 
 ## Notes
-- 360 preview uses 15-frame sprite sheets
-- Grid supports various layouts
-- Flags follow Sketchfab content policy
-- Optimized for large model lists
+
+- Filename is misleading - contains no texture code
+- 360° preview requires sprite sheet generation
+- Grid supports responsive column counts
+- Infinite scroll is optional with configurable limits

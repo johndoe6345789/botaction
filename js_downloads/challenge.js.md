@@ -1,26 +1,186 @@
 # challenge.js
 
 ## Overview
-This is currently an empty JavaScript file that may be intended for challenge or authentication-related functionality.
 
-## File Status
-- **Status**: Empty
-- **Size**: 0 bytes
-- **Purpose**: Reserved for challenge/authentication implementation
+This file contains **AWS WAF (Web Application Firewall) bot protection code**. It's heavily obfuscated security code designed to verify that requests come from legitimate browsers rather than bots.
 
-## Potential Use Cases
-This file appears to be intended for:
-- CAPTCHA or challenge-response mechanisms
-- Authentication challenges
-- Security verification
-- Bot detection or prevention
-- Two-factor authentication challenges
+## File Information
 
-## Dependencies
-None (file is empty)
+- **Status**: Active security module
+- **Size**: ~1.35MB (minified + obfuscated)
+- **Type**: Bot protection / Challenge verification
+- **Provider**: AWS WAF
 
-## API
-No API currently defined.
+## Purpose
+
+The file implements:
+1. **Browser fingerprinting** - Collects browser characteristics
+2. **Challenge verification** - Presents and validates challenges
+3. **Token management** - Issues/validates security tokens
+4. **Bot detection** - Identifies automated traffic
+
+## Security Notice
+
+⚠️ **This file is intentionally obfuscated** to prevent bots from bypassing security checks.
+
+## Key Components
+
+### 1. AwsWafIntegration
+
+Main integration point:
+
+```javascript
+// Initialization (conceptual - actual code is obfuscated)
+window.AwsWafIntegration = {
+  init: function(config) {
+    // Set up WAF integration
+    // Register token callback
+    // Initialize fingerprinting
+  }
+};
+```
+
+### 2. Challenge Script
+
+Handles challenge-response flow:
+
+```javascript
+// Challenge types:
+// - CAPTCHA: Visual verification
+// - Silent: Invisible verification
+// - Token refresh: Periodic re-validation
+```
+
+### 3. Token Management
+
+```javascript
+// Tokens are:
+// - Issued after successful challenge
+// - Sent with subsequent requests
+// - Automatically refreshed
+// - Validated server-side
+
+// Token cookie: aws-waf-token
+```
+
+## How It Works
+
+### 1. Initial Page Load
+
+```
+Browser → Page Load → WAF Script Executes → Fingerprint Collection
+                                                    ↓
+                                           Challenge (if needed)
+                                                    ↓
+                                           Token Issued
+                                                    ↓
+                                           Requests Include Token
+```
+
+### 2. Fingerprinting Signals
+
+The script collects various browser signals (partial list):
+- User agent string
+- Screen dimensions
+- Timezone
+- Language preferences
+- Plugin information
+- Canvas fingerprint
+- WebGL renderer
+- Audio context fingerprint
+- Font enumeration
+
+### 3. Challenge Flow
+
+```javascript
+// If suspicious activity detected:
+// 1. Challenge presented (CAPTCHA or silent)
+// 2. User/browser completes challenge
+// 3. Token issued on success
+// 4. Subsequent requests authenticated
+```
+
+## Integration with Sketchfab
+
+```javascript
+// The token is included in API requests:
+// - Model downloads
+// - Upload operations
+// - Authentication requests
+// - Any protected endpoint
+
+// Headers/Cookies:
+// X-AWS-WAF-Token: <token>
+// Cookie: aws-waf-token=<token>
+```
+
+## Configuration
+
+```javascript
+// WAF is configured via:
+// - AWS WAF Console
+// - Rule groups
+// - IP reputation lists
+// - Rate limiting rules
+// - Bot control rules
+```
+
+## String Obfuscation
+
+The code uses multiple obfuscation techniques:
+- String encoding (base64, hex, character codes)
+- Function indirection
+- Control flow flattening
+- Dead code insertion
+- Variable name mangling
+
+Example of obfuscated pattern:
+```javascript
+// Obfuscated
+var _0x1234 = ['\x48\x65\x6c\x6c\x6f'];
+function _0x5678(_0x9abc) { return _0x1234[_0x9abc]; }
+
+// Deobfuscated meaning:
+var strings = ['Hello'];
+function getString(index) { return strings[index]; }
+```
+
+## Bypass Prevention
+
+The file includes countermeasures against:
+- Headless browsers (Puppeteer, Playwright)
+- Automation frameworks (Selenium)
+- CURL/wget requests
+- Modified browser environments
+- Virtualized environments
+- Known bot signatures
+
+## Performance Considerations
+
+- Runs asynchronously to not block page load
+- Challenges are progressive (silent first, then visible)
+- Token caching reduces repeated challenges
+- Fingerprinting is optimized for minimal CPU usage
+
+## Related AWS WAF Features
+
+- **Bot Control**: Managed rule group for bot detection
+- **Account Takeover Prevention**: Protects login flows
+- **Fraud Control**: Detects suspicious patterns
+- **Rate Limiting**: Prevents brute force attacks
+
+## Debugging
+
+When legitimate users see challenges:
+1. Clear browser cookies
+2. Disable VPN/proxy
+3. Ensure JavaScript is enabled
+4. Check for browser extensions blocking scripts
+5. Try a different browser
 
 ## Notes
-This is a placeholder file with no implementation. It may be used for implementing security challenges or verification mechanisms in the future.
+
+- File is auto-generated by AWS WAF
+- Updates automatically with new bot signatures
+- Size is large due to comprehensive detection logic
+- Cannot be modified without breaking security

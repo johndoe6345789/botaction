@@ -1,113 +1,298 @@
 # viewer_environment.js
 
 ## Overview
-Core browser environment utilities bundle containing DOMPurify HTML sanitizer, ES6 Promise polyfill, and jQuery 3.6.3 library for cross-browser compatibility and security.
 
-## File Status
-- **Type**: Minified Sketchfab Webpack Bundle
-- **Webpack Chunk ID**: 841
-- **Source Map**: `bc8e3f5f2b678b1def38df63f34ce14d-v2.js.map`
-- **License**: See LICENSE.txt file
+This file contains the **jQuery library** - NOT 3D environment/skybox handling. It's a complete minified jQuery for DOM manipulation, AJAX, events, and animations.
 
-## Key Components
+## File Information
 
-### haCR - DOMPurify (v2.4.1)
-XSS sanitization library for safe HTML rendering.
+- **Status**: Active webpack bundle
+- **Size**: ~89KB (minified)
+- **Type**: JavaScript library
+- **Library**: jQuery (https://jquery.com)
 
-#### Features
-| Feature | Description |
-|---------|-------------|
-| `sanitize()` | Clean HTML string of XSS vectors |
-| `setConfig()` | Configure sanitization rules |
-| `addHook()` | Add processing hooks |
-| `isValidAttribute()` | Validate attribute safety |
+## Purpose
 
-#### Configuration Options
-| Option | Type | Description |
-|--------|------|-------------|
-| `ALLOWED_TAGS` | array | Permitted HTML tags |
-| `ALLOWED_ATTR` | array | Permitted attributes |
-| `FORBID_TAGS` | array | Blocked tags |
-| `FORBID_ATTR` | array | Blocked attributes |
-| `ALLOW_DATA_ATTR` | bool | Allow data-* attributes |
-| `ALLOW_ARIA_ATTR` | bool | Allow aria-* attributes |
-| `RETURN_DOM` | bool | Return DOM instead of string |
-| `SANITIZE_DOM` | bool | Sanitize DOM clobbering |
+jQuery is bundled for legacy compatibility with older Sketchfab components that haven't been migrated to React.
 
-#### Trusted Types Support
-- Creates `dompurify` policy
-- `createHTML()` for trusted HTML
-- `createScriptURL()` for trusted scripts
+## Core Features
 
-### Oyie / 8Vqr - ES6 Promise Polyfill
-Full Promise/A+ compliant polyfill.
+### 1. DOM Selection & Manipulation
 
-#### Methods
-| Method | Description |
-|--------|-------------|
-| `Promise.resolve()` | Create resolved promise |
-| `Promise.reject()` | Create rejected promise |
-| `Promise.all()` | Wait for all promises |
-| `Promise.race()` | First settled promise |
-| `then()` | Success handler |
-| `catch()` | Error handler |
+```javascript
+// Selection
+$('#element')              // By ID
+$('.class')                // By class
+$('div.container')         // Combined
+$('[data-id="123"]')       // By attribute
 
-### Hjnd - jQuery 3.6.3
-Complete jQuery library with all features.
+// DOM manipulation
+$('.item').addClass('active');
+$('.item').removeClass('active');
+$('.item').toggleClass('active');
+$('.item').attr('data-id', '123');
+$('.item').html('<span>content</span>');
+$('.item').text('content');
+$('.item').append('<div>new</div>');
+$('.item').prepend('<div>first</div>');
+$('.item').remove();
+```
 
-#### Core Features
-- DOM manipulation
-- Event handling
-- AJAX requests
-- Animation
-- CSS manipulation
-- Deferred/Promise
-- Utilities
+### 2. Event Handling
 
-#### Key Methods
-| Category | Methods |
-|----------|---------|
-| Selection | `$()`, `find()`, `filter()`, `closest()` |
-| DOM | `append()`, `prepend()`, `remove()`, `clone()` |
-| Events | `on()`, `off()`, `trigger()`, `ready()` |
-| AJAX | `$.ajax()`, `$.get()`, `$.post()`, `$.getJSON()` |
-| Effects | `show()`, `hide()`, `fadeIn()`, `animate()` |
-| CSS | `css()`, `addClass()`, `removeClass()`, `toggleClass()` |
+```javascript
+// Click events
+$('.button').on('click', function(e) {
+  e.preventDefault();
+  // Handle click
+});
 
-#### jQuery.noConflict()
-Releases `$` variable for other libraries.
+// Delegated events
+$('.container').on('click', '.item', function() {
+  // Handle delegated click
+});
 
-## Dependencies
-- Browser DOM APIs
-- XMLHttpRequest
-- MutationObserver
-- Trusted Types API (optional)
+// Event shortcuts
+$('.button').click(handler);
+$('.input').focus(handler);
+$('.input').blur(handler);
+$('.form').submit(handler);
 
-## Technical Details
-- DOMPurify: Comprehensive XSS prevention
-- Promise: Microtask-based scheduling
-- jQuery: Sizzle selector engine included
-- All libraries are self-contained
-- Browser feature detection included
+// Remove events
+$('.button').off('click');
+```
 
-## Security Features
-1. HTML sanitization against XSS
-2. DOM clobbering prevention
-3. Trusted Types integration
-4. Safe attribute validation
-5. Template literal protection
+### 3. AJAX Requests
 
-## Use Cases
-1. User-generated content rendering
-2. Markdown preview sanitization
-3. Cross-browser compatibility
-4. Legacy code support
-5. DOM manipulation utilities
-6. Async operation handling
+```javascript
+// GET request
+$.ajax({
+  url: '/api/models',
+  method: 'GET',
+  success: function(data) {
+    console.log(data);
+  },
+  error: function(xhr, status, error) {
+    console.error(error);
+  }
+});
+
+// Shorthand
+$.get('/api/models', function(data) {
+  console.log(data);
+});
+
+// POST request
+$.post('/api/models', { name: 'Model' }, function(response) {
+  console.log(response);
+});
+
+// JSON
+$.getJSON('/api/models', function(data) {
+  console.log(data);
+});
+```
+
+### 4. CSS Manipulation
+
+```javascript
+// Get/set CSS
+$('.element').css('color');
+$('.element').css('color', 'red');
+$('.element').css({
+  color: 'red',
+  fontSize: '14px'
+});
+
+// Dimensions
+$('.element').width();
+$('.element').height();
+$('.element').outerWidth();
+$('.element').outerHeight();
+
+// Position
+$('.element').offset();     // Relative to document
+$('.element').position();   // Relative to parent
+```
+
+### 5. Animations
+
+```javascript
+// Basic animations
+$('.element').show();
+$('.element').hide();
+$('.element').toggle();
+
+// Fade
+$('.element').fadeIn();
+$('.element').fadeOut();
+$('.element').fadeToggle();
+$('.element').fadeTo(0.5);
+
+// Slide
+$('.element').slideDown();
+$('.element').slideUp();
+$('.element').slideToggle();
+
+// Custom animation
+$('.element').animate({
+  opacity: 0.5,
+  left: '+=50'
+}, 500, 'swing', function() {
+  // Complete callback
+});
+```
+
+### 6. Traversal
+
+```javascript
+// Ancestors
+$('.item').parent();
+$('.item').parents();
+$('.item').closest('.container');
+
+// Descendants
+$('.container').find('.item');
+$('.container').children();
+
+// Siblings
+$('.item').siblings();
+$('.item').next();
+$('.item').prev();
+
+// Filtering
+$('.items').filter('.active');
+$('.items').not('.disabled');
+$('.items').first();
+$('.items').last();
+$('.items').eq(2);
+```
+
+### 7. Utilities
+
+```javascript
+// Array/object iteration
+$.each(array, function(index, value) {
+  // ...
+});
+
+$.each(object, function(key, value) {
+  // ...
+});
+
+// Extend objects
+$.extend(target, source);
+$.extend(true, target, source);  // Deep merge
+
+// Type checking
+$.isArray(value);
+$.isFunction(value);
+$.isPlainObject(value);
+
+// Data
+$('.element').data('key', 'value');
+$('.element').data('key');
+```
+
+### 8. Deferred/Promises
+
+```javascript
+// Create deferred
+var deferred = $.Deferred();
+
+// Resolve/reject
+deferred.resolve(value);
+deferred.reject(error);
+
+// Promise
+deferred.promise();
+
+// Chaining
+$.ajax('/api/models')
+  .done(function(data) { })
+  .fail(function(error) { })
+  .always(function() { });
+
+// Multiple promises
+$.when(promise1, promise2).done(function(result1, result2) {
+  // Both completed
+});
+```
+
+## Sketchfab Usage
+
+### Legacy Components
+
+```javascript
+// Still used in some older Backbone views
+var PopupView = Backbone.View.extend({
+  events: {
+    'click .close': 'onClose'
+  },
+  
+  render: function() {
+    this.$el.html(this.template());
+    this.$('.content').addClass('active');
+    return this;
+  }
+});
+```
+
+### DOM Ready
+
+```javascript
+$(document).ready(function() {
+  // Initialize legacy components
+});
+
+// Or shorthand
+$(function() {
+  // Initialize
+});
+```
+
+### Plugin Integration
+
+```javascript
+// Some legacy plugins still use jQuery
+$('.slider').owlCarousel({
+  items: 4,
+  navigation: true
+});
+```
+
+## Migration Note
+
+Sketchfab is transitioning away from jQuery:
+
+```javascript
+// Old jQuery code
+$('.button').on('click', function() {
+  $(this).addClass('active');
+});
+
+// Modern React equivalent
+function Button() {
+  const [active, setActive] = useState(false);
+  return (
+    <button 
+      className={active ? 'active' : ''} 
+      onClick={() => setActive(true)}
+    >
+      Click me
+    </button>
+  );
+}
+```
+
+## Version
+
+The bundled version appears to be jQuery 3.x based on the module pattern and API signatures.
 
 ## Notes
-- DOMPurify is critical for security
-- jQuery provides compatibility layer
-- Promise polyfill for older browsers
-- All components are battle-tested libraries
-- Essential for viewer's browser support
+
+- Filename is misleading - contains jQuery, not 3D environments
+- Bundled for legacy compatibility
+- New code should use React/vanilla JS
+- Full jQuery API available globally as `$` and `jQuery`
+- Includes AJAX, animation, event handling, DOM manipulation
