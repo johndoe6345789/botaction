@@ -1,0 +1,332 @@
+{
+  "commands": {
+    "fetch": {
+      "help": "Fetch model from Sketchfab",
+      "func": "cmd_fetch",
+      "arguments": [
+        {"name": "url", "help": "Sketchfab model URL"},
+        {"name": "--download", "action": "store_true", "help": "Download model files"},
+        {"name": "--output-dir", "default": "downloads", "help": "Output directory for downloads (default: downloads)"},
+        {"name": "--save-meta", "action": "store_true", "help": "Save metadata to JSON file"}
+      ]
+    },
+    "decrypt": {
+      "help": "Decrypt .binz file",
+      "func": "cmd_decrypt",
+      "arguments": [
+        {"name": "binz_file", "help": "Path to .binz file"},
+        {"name": "--params-file", "help": "Path to params JSON file (alternative to --key)"},
+        {"name": "--key", "help": "Base64-encoded encryption key"},
+        {"name": "--output", "required": true, "help": "Output path for decrypted file"},
+        {"name": "--inspect", "action": "store_true", "help": "Inspect decrypted data after decryption"}
+      ]
+    },
+    "inspect": {
+      "help": "Inspect .binz file",
+      "func": "cmd_inspect",
+      "arguments": [
+        {"name": "binz_file", "help": "Path to .binz file"}
+      ]
+    },
+    "export": {
+      "help": "Export to 3MF format",
+      "func": "cmd_export",
+      "arguments": [
+        {"name": "binz_file", "help": "Path to decrypted .binz file"},
+        {"name": "--output", "required": true, "help": "Output .3mf file path"}
+      ]
+    },
+    "demo": {
+      "help": "Launch demonstration scripts",
+      "func": "cmd_demo",
+      "arguments": [
+        {"name": "demo_name", "choices": ["decryption", "viewer", "inspect"], "help": "Name of the demo to launch"}
+      ]
+    },
+    "gui": {
+      "help": "Launch graphical user interface",
+      "func": "cmd_gui",
+      "arguments": []
+    },
+    "viewer": {
+      "help": "Launch 3D model viewer",
+      "func": "cmd_viewer",
+      "arguments": [
+        {"name": "binz_file", "nargs": "?", "help": "Path to .binz file to load (optional)"}
+      ]
+    },
+    "info": {
+      "help": "Show information",
+      "func": "cmd_info",
+      "arguments": []
+    },
+    "scrape": {
+      "help": "Scrape webpage with requests and BeautifulSoup",
+      "func": "cmd_scrape",
+      "arguments": [
+        {"name": "url", "help": "URL to scrape"},
+        {"name": "--title", "action": "store_true", "help": "Extract and display page title"},
+        {"name": "--links", "action": "store_true", "help": "Extract and display links"},
+        {"name": "--text", "action": "store_true", "help": "Extract and display text content"},
+        {"name": "--max-links", "type": "int", "default": 10, "help": "Maximum number of links to display (default: 10)"},
+        {"name": "--max-lines", "type": "int", "default": 20, "help": "Maximum number of text lines to display (default: 20)"},
+        {"name": "--save-html", "help": "Save parsed HTML to file"}
+      ]
+    },
+    "session": {
+      "help": "Demonstrate session management with cookiejar",
+      "func": "cmd_session",
+      "arguments": [
+        {"name": "url", "help": "URL to start session with"},
+        {"name": "--follow-link", "action": "store_true", "help": "Follow the first link found on the page"},
+        {"name": "--save-cookies", "help": "Save cookies to file (Mozilla format)"}
+      ]
+    },
+    "download-js": {
+      "help": "Download all JavaScript files from a website",
+      "func": "cmd_download_js",
+      "arguments": [
+        {"name": "url", "help": "Website URL to download JS files from"},
+        {"name": "--output-dir", "default": "js_downloads", "help": "Output directory for downloaded files (default: js_downloads)"},
+        {"name": "--recursive", "action": "store_true", "help": "Recursively follow links on the same domain"},
+        {"name": "--max-pages", "type": "int", "help": "Maximum number of pages to process (default: unlimited)"},
+        {"name": "--external-domains", "action": "store_true", "help": "Download JS files from external domains"},
+        {"name": "--parse-json", "action": "store_true", "help": "Parse JSON responses for JS files and recursively follow API endpoints"},
+        {"name": "--verbose", "action": "store_true", "help": "Show verbose output"}
+      ]
+    },
+    "embed": {
+      "help": "Generate embed URL or iframe code for a Sketchfab model",
+      "func": "cmd_embed",
+      "defaults": {"watermark": true},
+      "arguments": [
+        {"name": "model_id_or_url", "help": "Model ID or Sketchfab URL"},
+        {"name": "--iframe", "action": "store_true", "help": "Generate iframe HTML code"},
+        {"name": "--width", "type": "int", "default": 640, "help": "iFrame width (default: 640)"},
+        {"name": "--height", "type": "int", "default": 480, "help": "iFrame height (default: 480)"},
+        {"name": "--autostart", "action": "store_true", "help": "Auto-load model on page load"},
+        {"name": "--autospin", "type": "float", "help": "Auto-rotate speed (0 to disable)"},
+        {"name": "--no-ui", "action": "store_true", "help": "Hide all UI controls"},
+        {"name": "--no-watermark", "dest": "watermark", "action": "store_false", "help": "Hide watermark (requires plan)"},
+        {"name": "--transparent", "action": "store_true", "help": "Transparent background"},
+        {"name": "--no-scrollwheel", "action": "store_true", "help": "Disable scroll wheel zoom"},
+        {"name": "--animation-autoplay", "action": "store_true", "help": "Auto-play animations"},
+        {"name": "--annotation", "type": "int", "help": "Open specific annotation by index"},
+        {"name": "--preload", "action": "store_true", "help": "Preload textures"},
+        {"name": "--copy", "action": "store_true", "help": "Copy URL to clipboard"}
+      ]
+    },
+    "config": {
+      "help": "Display or generate viewer configuration",
+      "func": "cmd_config",
+      "arguments": [
+        {"name": "--list-presets", "action": "store_true", "help": "Show quality and environment presets"},
+        {"name": "--list-embed-options", "action": "store_true", "help": "Show all embed URL parameters"},
+        {"name": "--list-materials", "action": "store_true", "help": "Show material display options"},
+        {"name": "--generate", "action": "store_true", "help": "Generate viewer configuration JSON"},
+        {"name": "--quality", "choices": ["low", "medium", "high", "ultra"], "help": "Quality preset for generated config"},
+        {"name": "--environment", "choices": ["studio", "urban", "dawn", "night", "custom"], "help": "Environment preset"},
+        {"name": "--fov", "type": "int", "help": "Camera field of view"},
+        {"name": "--exposure", "type": "float", "help": "Lighting exposure"},
+        {"name": "--auto-rotate", "action": "store_true", "help": "Enable auto-rotation"},
+        {"name": "--no-shadows", "action": "store_true", "help": "Disable shadows"},
+        {"name": "--no-postprocessing", "action": "store_true", "help": "Disable post-processing"},
+        {"name": "--ssao", "action": "store_true", "help": "Enable SSAO"},
+        {"name": "--bloom", "action": "store_true", "help": "Enable bloom effect"},
+        {"name": "--output", "short": "-o", "help": "Save generated config to file"}
+      ]
+    },
+    "api": {
+      "help": "Display API endpoint information and utilities",
+      "func": "cmd_api",
+      "arguments": [
+        {"name": "--list-endpoints", "action": "store_true", "help": "Show all API endpoints"},
+        {"name": "--build-url", "help": "Build a specific API URL (endpoint name)"},
+        {"name": "--model-id", "help": "Model ID for URL building"},
+        {"name": "--username", "help": "Username for URL building"},
+        {"name": "--params", "nargs": "*", "help": "Query parameters (key=value format)"},
+        {"name": "--token", "help": "API token for authentication"},
+        {"name": "--curl", "action": "store_true", "help": "Output as curl command"},
+        {"name": "--formats", "action": "store_true", "help": "Show download formats"},
+        {"name": "--visibility", "action": "store_true", "help": "Show visibility types"}
+      ]
+    },
+    "ai-info": {
+      "help": "Display information about Sketchfab AI tools and providers",
+      "func": "cmd_ai_info",
+      "arguments": []
+    },
+    "parse-url": {
+      "help": "Parse and analyze Sketchfab URLs",
+      "func": "cmd_parse_url",
+      "arguments": [
+        {"name": "url", "help": "URL to parse"}
+      ]
+    },
+    "stats": {
+      "help": "Fetch and display model statistics",
+      "func": "cmd_stats",
+      "arguments": [
+        {"name": "model_id_or_url", "help": "Model ID or Sketchfab URL"},
+        {"name": "--token", "help": "API token for authenticated requests"},
+        {"name": "--json", "action": "store_true", "help": "Output raw JSON response"}
+      ]
+    },
+    "search": {
+      "help": "Search for models on Sketchfab",
+      "func": "cmd_search",
+      "arguments": [
+        {"name": "query", "help": "Search query"},
+        {"name": "--type", "choices": ["models", "collections", "users"], "default": "models", "help": "Type of results (default: models)"},
+        {"name": "--sort", "choices": ["relevance", "likeCount", "viewCount", "createdAt", "publishedAt"], "help": "Sort results by"},
+        {"name": "--downloadable", "action": "store_true", "help": "Only show downloadable models"},
+        {"name": "--animated", "action": "store_true", "help": "Only show animated models"},
+        {"name": "--staffpicked", "action": "store_true", "help": "Only show staff picks"},
+        {"name": "--category", "help": "Filter by category slug"},
+        {"name": "--count", "type": "int", "default": 10, "help": "Number of results (default: 10, max: 24)"},
+        {"name": "--json", "action": "store_true", "help": "Output raw JSON response"}
+      ]
+    },
+    "user": {
+      "help": "Look up a Sketchfab user",
+      "func": "cmd_user",
+      "arguments": [
+        {"name": "username", "help": "Username to look up (with or without @)"},
+        {"name": "--models", "action": "store_true", "help": "Show user's recent models"},
+        {"name": "--json", "action": "store_true", "help": "Output raw JSON response"}
+      ]
+    },
+    "thumbnail": {
+      "help": "Generate thumbnail URLs for a model",
+      "func": "cmd_thumbnail",
+      "arguments": [
+        {"name": "model_id_or_url", "help": "Model ID or Sketchfab URL"},
+        {"name": "--fetch", "action": "store_true", "help": "Fetch actual thumbnails from API"}
+      ]
+    },
+    "tiers": {
+      "help": "Display subscription tier information",
+      "func": "cmd_tiers",
+      "arguments": []
+    },
+    "validate": {
+      "help": "Validate input values against Sketchfab patterns",
+      "func": "cmd_validate",
+      "arguments": [
+        {"name": "type", "choices": ["username", "email", "model_id", "url"], "help": "Type of value to validate"},
+        {"name": "value", "help": "Value to validate"}
+      ]
+    },
+    "categories": {
+      "help": "Display Sketchfab model categories",
+      "func": "cmd_categories",
+      "arguments": []
+    },
+    "design": {
+      "help": "Display Sketchfab design system information",
+      "func": "cmd_design",
+      "arguments": [
+        {"name": "--colors", "action": "store_true", "help": "Show color palettes"},
+        {"name": "--typography", "action": "store_true", "help": "Show typography scale"},
+        {"name": "--gradients", "action": "store_true", "help": "Show gradient presets"},
+        {"name": "--shadows", "action": "store_true", "help": "Show shadow presets"},
+        {"name": "--notifications", "action": "store_true", "help": "Show notification type colors"},
+        {"name": "--generate-css", "action": "store_true", "help": "Generate CSS variables"},
+        {"name": "--theme", "choices": ["light", "dark"], "help": "Theme for CSS generation"}
+      ]
+    },
+    "string": {
+      "help": "String manipulation utilities (slugify, case conversion)",
+      "func": "cmd_string",
+      "arguments": [
+        {"name": "text", "help": "Text to transform"},
+        {"name": "--slugify", "action": "store_true", "help": "Convert to URL-friendly slug"},
+        {"name": "--camel", "action": "store_true", "help": "Convert to camelCase"},
+        {"name": "--kebab", "action": "store_true", "help": "Convert to kebab-case"},
+        {"name": "--snake", "action": "store_true", "help": "Convert to snake_case"},
+        {"name": "--title", "action": "store_true", "help": "Convert to Title Case"},
+        {"name": "--truncate", "type": "int", "help": "Truncate to N characters"}
+      ]
+    },
+    "filesize": {
+      "help": "Format file size in human-readable format",
+      "func": "cmd_filesize",
+      "arguments": [
+        {"name": "bytes", "type": "int", "help": "Size in bytes"}
+      ]
+    },
+    "layout": {
+      "help": "Display responsive layout and breakpoint information",
+      "func": "cmd_layout",
+      "arguments": [
+        {"name": "--breakpoints", "action": "store_true", "help": "Show responsive breakpoints"},
+        {"name": "--dimensions", "action": "store_true", "help": "Show layout dimensions"},
+        {"name": "--spacing", "action": "store_true", "help": "Show spacing scale"},
+        {"name": "--generate-scss", "action": "store_true", "help": "Generate SCSS variables"}
+      ]
+    },
+    "share": {
+      "help": "Generate social sharing URLs for a model",
+      "func": "cmd_share",
+      "arguments": [
+        {"name": "model_id_or_url", "help": "Model ID or Sketchfab URL"},
+        {"name": "--text", "help": "Custom share text"},
+        {"name": "--platform", "choices": ["twitter", "facebook", "pinterest", "linkedin", "email"], "help": "Show URL for specific platform only"}
+      ]
+    },
+    "markdown": {
+      "help": "Display markdown syntax reference",
+      "func": "cmd_markdown",
+      "arguments": []
+    },
+    "brands": {
+      "help": "Display brand and social media colors",
+      "func": "cmd_brands",
+      "arguments": []
+    },
+    "dates": {
+      "help": "Display date format patterns",
+      "func": "cmd_dates",
+      "arguments": []
+    },
+    "licenses": {
+      "help": "Display Creative Commons license information",
+      "func": "cmd_licenses",
+      "arguments": [
+        {"name": "--license", "short": "-l", "choices_from": "LICENSE_TYPES", "help": "Show details for specific license"}
+      ]
+    },
+    "webgl": {
+      "help": "Display WebGL error types and troubleshooting",
+      "func": "cmd_webgl",
+      "arguments": []
+    },
+    "animation": {
+      "help": "Display spring animation presets",
+      "func": "cmd_animation",
+      "arguments": [
+        {"name": "--generate-js", "action": "store_true", "help": "Generate JavaScript spring implementation"}
+      ]
+    },
+    "privacy": {
+      "help": "Display cookie consent categories (GDPR/OneTrust)",
+      "func": "cmd_privacy",
+      "arguments": []
+    },
+    "model-fields": {
+      "help": "Display model property field definitions",
+      "func": "cmd_model_fields",
+      "arguments": []
+    },
+    "grid": {
+      "help": "Display responsive grid configuration",
+      "func": "cmd_grid",
+      "arguments": []
+    },
+    "placements": {
+      "help": "Display UI popup/tooltip placement options",
+      "func": "cmd_placements",
+      "arguments": []
+    }
+  }
+}

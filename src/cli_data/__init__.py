@@ -294,3 +294,12 @@ def load_all_data():
         'privacy': get_consent_categories(),
         'animation': get_animation_config(),
     }
+
+def get_arguments_config():
+    """Load CLI arguments configuration."""
+    return load_json('arguments.json')
+
+
+def get_commands():
+    """Load command definitions."""
+    return load_json('arguments.json')['commands']
