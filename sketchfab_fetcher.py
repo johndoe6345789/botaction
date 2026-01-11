@@ -91,6 +91,52 @@ class SketchfabFetcher:
 
         return urls
 
+    def fetch_embed_config(self, model_id: str) -> Optional[Dict[str, Any]]:
+        """Fetch the embed configuration which contains file URLs."""
+        # Try the internal API endpoint
+        config_url = f"{self.BASE_URL}/i/models/{model_id}"
+        try:
+            response = self.session.get(config_url)
+            if response.status_code == 200:
+                return response.json()
+        except:
+            pass
+
+        # Try embed page
+        embed_url = f"{self.BASE_URL}/models/{model_id}/embed"
+        try:
+            response = self.session.get(embed_url)
+            if response.status_code == 200:
+                # Look for configuration in embed page
+                html = response.text
+
+                # Find osgjs/files configuration
+                config_match = re.search(r'var\s+config\s*=\s*(\{.*?\});', html, re.DOTALL)
+                if config_match:
+                    return json.loads(config_match.group(1))
+
+                # Look for prefetched data
+                prefetch_match = re.search(r'prefetchedData\s*=\s*(\{.*?\})\s*;', html, re.DOTALL)
+                if prefetch_match:
+                    return json.loads(prefetch_match.group(1))
+        except:
+            pass
+
+        return None
+
+    def fetch_file_config(self, model_id: str) -> Optional[Dict[str, Any]]:
+        """Fetch the file configuration for the 3D model."""
+        # This endpoint returns the osgjs file locations
+        file_url = f"{self.BASE_URL}/i/models/{model_id}/file"
+        try:
+            response = self.session.get(file_url)
+            if response.status_code == 200:
+                return response.json()
+        except:
+            pass
+
+        return None
+
     def fetch_model(self, url: str) -> Dict[str, Any]:
         """
         Fetch all available data for a model.
@@ -106,6 +152,8 @@ class SketchfabFetcher:
             'model_id': None,
             'api_data': None,
             'page_data': None,
+            'embed_config': None,
+            'file_config': None,
             'file_urls': {},
             'error': None,
         }
@@ -127,6 +175,24 @@ class SketchfabFetcher:
             print(f"Author: {api_data.get('user', {}).get('username', 'Unknown')}")
         except requests.RequestException as e:
             print(f"API fetch failed: {e}")
+
+        # Fetch embed config
+        try:
+            embed_config = self.fetch_embed_config(model_id)
+            result['embed_config'] = embed_config
+            if embed_config:
+                print(f"Got embed config with {len(embed_config)} keys")
+        except Exception as e:
+            print(f"Embed config fetch failed: {e}")
+
+        # Fetch file config
+        try:
+            file_config = self.fetch_file_config(model_id)
+            result['file_config'] = file_config
+            if file_config:
+                print(f"Got file config")
+        except Exception as e:
+            print(f"File config fetch failed: {e}")
 
         # Fetch page HTML
         try:
