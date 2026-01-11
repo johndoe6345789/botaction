@@ -4,7 +4,7 @@ Quick test to examine the .binz file structure
 """
 
 from pathlib import Path
-from binz_reader import BinzReader
+from src.binz_reader import BinzReader
 import json
 
 # Load the binz file

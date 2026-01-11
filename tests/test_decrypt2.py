@@ -4,8 +4,8 @@ Test decryption without decompression
 """
 
 from pathlib import Path
-from model_decryptor import SketchfabDecryptor
-from binz_reader import BinzReader
+from src.model_decryptor import SketchfabDecryptor
+from src.binz_reader import BinzReader
 import json
 
 binz_path = Path("downloads/dea4f17e94974e1fa720cbadc531ed63_7dffeb160ae740c082d33243f011454f.binz")

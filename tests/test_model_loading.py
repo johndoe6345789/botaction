@@ -5,9 +5,13 @@ Simple test to verify model loading works
 
 import sys
 from pathlib import Path
+
+# Add parent directory to path to import src modules
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from PyQt6.QtWidgets import QApplication
-from model_viewer import ModelViewerWidget
-from binz_reader import BinzReader
+from src.model_viewer import ModelViewerWidget
+from src.binz_reader import BinzReader
 
 print("Testing model loading...")
 

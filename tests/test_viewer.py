@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from PyQt6.QtWidgets import QApplication
-from model_viewer import ModelViewerPanel
+from src.model_viewer import ModelViewerPanel
 
 
 def main():

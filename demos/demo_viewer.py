@@ -9,7 +9,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
 from PyQt6.QtCore import Qt
 
-from model_viewer import ModelViewerPanel
+from src.model_viewer import ModelViewerPanel
 
 
 class DemoWindow(QMainWindow):
