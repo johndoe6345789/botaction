@@ -1966,7 +1966,7 @@ def cmd_string(args):
         # Convert to snake_case
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', text)
         result = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
-        result = re.sub(r'[-\s]+', '_', result)
+        result = re.sub(r'[-_\s]+', '_', result)
         print(f"snake_case: {result}")
         return 0
     
