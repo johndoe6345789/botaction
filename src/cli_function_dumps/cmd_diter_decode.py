@@ -57,13 +57,10 @@ def cmd_diter_decode(args):
             decoded_size = output_path.stat().st_size if output_path.exists() else 0
         elif decoder == "c":
             from src.diter_decoder_c import decode_diter_file
-            if not wasm_path or not wasm_path.exists():
-                raise RuntimeError("WASM binary required for C decoder.")
             decoded_size = decode_diter_file(
                 binz_path,
                 params_path,
                 output_path,
-                wasm_path=wasm_path,
                 key_hex=args.key_hex,
                 key_source=key_source,
             )

@@ -51,7 +51,7 @@ uint32_t w2c_env_sbrk(struct w2c_env* env, uint32_t increment) {
 }
 
 static void usage(const char* prog) {
-  fprintf(stderr, "Usage: %s --binz FILE --params FILE --out FILE [--wasm FILE] [--key-hex HEX] [--key-source FILE]\n", prog);
+  fprintf(stderr, "Usage: %s --binz FILE --params FILE --out FILE [--key-hex HEX] [--key-source FILE]\n", prog);
 }
 
 static uint8_t* read_file(const char* path, size_t* out_len) {
@@ -283,144 +283,6 @@ static char* extract_key_hex(const char* text) {
   return NULL;
 }
 
-static uint32_t read_leb_u32(const uint8_t* data, size_t size, size_t* offset, int* ok) {
-  uint32_t result = 0;
-  uint32_t shift = 0;
-  while (*offset < size && shift < 32) {
-    uint8_t byte = data[(*offset)++];
-    result |= ((uint32_t)(byte & 0x7f)) << shift;
-    if ((byte & 0x80) == 0) {
-      *ok = 1;
-      return result;
-    }
-    shift += 7;
-  }
-  *ok = 0;
-  return 0;
-}
-
-static int32_t read_leb_s32(const uint8_t* data, size_t size, size_t* offset, int* ok) {
-  int32_t result = 0;
-  uint32_t shift = 0;
-  uint8_t byte = 0;
-  while (*offset < size && shift < 32) {
-    byte = data[(*offset)++];
-    result |= ((int32_t)(byte & 0x7f)) << shift;
-    shift += 7;
-    if ((byte & 0x80) == 0) {
-      break;
-    }
-  }
-  if (*offset >= size && (byte & 0x80)) {
-    *ok = 0;
-    return 0;
-  }
-  if (shift < 32 && (byte & 0x40)) {
-    result |= -((int32_t)1 << shift);
-  }
-  *ok = 1;
-  return result;
-}
-
-static int read_string(const uint8_t* data, size_t size, size_t* offset, char** out_str) {
-  int ok = 0;
-  uint32_t len = read_leb_u32(data, size, offset, &ok);
-  if (!ok || *offset + len > size) return 0;
-  char* s = (char*)malloc(len + 1);
-  if (!s) return 0;
-  memcpy(s, data + *offset, len);
-  s[len] = '\0';
-  *offset += len;
-  *out_str = s;
-  return 1;
-}
-
-static void parse_wasm(const uint8_t* data, size_t size, uint32_t* heap_base, uint32_t* mem_min) {
-  if (size < 8) return;
-  if (memcmp(data, "\0asm", 4) != 0) return;
-  size_t off = 8;
-  while (off < size) {
-    uint8_t id = data[off++];
-    int ok = 0;
-    uint32_t section_size = read_leb_u32(data, size, &off, &ok);
-    if (!ok || off + section_size > size) return;
-    size_t section_end = off + section_size;
-    if (id == 2) {
-      uint32_t count = read_leb_u32(data, size, &off, &ok);
-      if (!ok) break;
-      for (uint32_t i = 0; i < count && off < section_end; i++) {
-        char* mod = NULL;
-        char* name = NULL;
-        if (!read_string(data, size, &off, &mod)) break;
-        if (!read_string(data, size, &off, &name)) {
-          free(mod);
-          break;
-        }
-        free(mod);
-        free(name);
-        if (off >= section_end) break;
-        uint8_t kind = data[off++];
-        if (kind == 0x02) {
-          uint8_t flags = data[off++];
-          uint32_t min = read_leb_u32(data, size, &off, &ok);
-          if (!ok) break;
-          *mem_min = min;
-          if (flags & 0x01) {
-            read_leb_u32(data, size, &off, &ok);
-          }
-        } else {
-          if (kind == 0x00) {
-            read_leb_u32(data, size, &off, &ok);
-          } else if (kind == 0x01) {
-            if (off < size) {
-              off++;
-            }
-            if (off < size) {
-              uint8_t flags = data[off++];
-              read_leb_u32(data, size, &off, &ok);
-              if (flags & 0x01) {
-                read_leb_u32(data, size, &off, &ok);
-              }
-            }
-          } else if (kind == 0x03) {
-            if (off + 1 < size) {
-              off += 2;
-            } else {
-              off = section_end;
-            }
-          }
-        }
-      }
-    } else if (id == 6) {
-      uint32_t count = read_leb_u32(data, size, &off, &ok);
-      if (!ok) break;
-      for (uint32_t i = 0; i < count && off < section_end; i++) {
-        if (off + 2 > section_end) break;
-        uint8_t valtype = data[off++];
-        uint8_t mut = data[off++];
-        (void)valtype;
-        (void)mut;
-        uint8_t opcode = data[off++];
-        if (opcode == 0x41) {
-          int ok_s = 0;
-          int32_t value = read_leb_s32(data, size, &off, &ok_s);
-          if (ok_s && value > 0) {
-            *heap_base = (uint32_t)value;
-          }
-        }
-        while (off < section_end && data[off] != 0x0b) {
-          off++;
-        }
-        if (off < section_end && data[off] == 0x0b) {
-          off++;
-        }
-        if (i == 0) break;
-      }
-    }
-    off = section_end;
-  }
-}
-
 static void write_key(struct w2c_env* env, w2c_diter__wasm__blob* instance, const char* key_hex) {
   char cleaned[41];
   size_t pos = 0;
@@ -448,7 +310,6 @@ int main(int argc, char** argv) {
   const char* binz_path = NULL;
   const char* params_path = NULL;
   const char* out_path = NULL;
-  const char* wasm_path = NULL;
   const char* key_hex = NULL;
   const char* key_source = NULL;
 
@@ -459,8 +320,6 @@ int main(int argc, char** argv) {
       params_path = argv[++i];
     } else if (strcmp(argv[i], "--out") == 0 && i + 1 < argc) {
       out_path = argv[++i];
-    } else if (strcmp(argv[i], "--wasm") == 0 && i + 1 < argc) {
-      wasm_path = argv[++i];
     } else if (strcmp(argv[i], "--key-hex") == 0 && i + 1 < argc) {
       key_hex = argv[++i];
     } else if (strcmp(argv[i], "--key-source") == 0 && i + 1 < argc) {
@@ -548,14 +407,6 @@ int main(int argc, char** argv) {
 
   uint32_t heap_base = DEFAULT_HEAP_BASE;
   uint32_t mem_min = wasm2c_diter__wasm__blob_min_env_memory;
-  if (wasm_path) {
-    size_t wasm_len = 0;
-    uint8_t* wasm_bytes = read_file(wasm_path, &wasm_len);
-    if (wasm_bytes) {
-      parse_wasm(wasm_bytes, wasm_len, &heap_base, &mem_min);
-      free(wasm_bytes);
-    }
-  }
 
   uint32_t aligned = ((heap_base + 65535u) >> 16) << 16;
   uint32_t total_bytes = 262144u + aligned;

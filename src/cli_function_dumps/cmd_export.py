@@ -36,10 +36,6 @@ def _decode_diter(binz_path: Path, params_path: Path, output_path: Path, decoder
         except Exception as exc:
             print(f"Error: C DITER decoder unavailable ({exc})")
             return False
-        wasm_path = root / "downloads" / "diter_wasm_blob.wasm"
-        if not wasm_path.exists():
-            print(f"Error: DITER WASM binary not found at {wasm_path}")
-            return False
         key_source = root / "downloads" / "diter_standalone_deob.js"
         if not key_source.exists():
             fallback = root / "downloads" / "diter_standalone.js"
@@ -49,7 +45,6 @@ def _decode_diter(binz_path: Path, params_path: Path, output_path: Path, decoder
                 binz_path,
                 params_path,
                 output_path,
-                wasm_path=wasm_path,
                 key_source=key_source,
             )
         except Exception as exc:
