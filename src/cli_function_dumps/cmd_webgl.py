@@ -1,5 +1,6 @@
 # Auto-generated extract of cli.py
 # See cli.py for shared context and imports
+from src.cli_context import *
 
 def cmd_webgl(args):
     """Display WebGL error types and troubleshooting."""

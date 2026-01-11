@@ -15,8 +15,14 @@ def main():
 
     functions = [
         node for node in tree.body
-        if isinstance(node, ast.FunctionDef)
+        if isinstance(node, ast.FunctionDef) and node.name.startswith("cmd_")
     ]
+
+    header = (
+        "# Auto-generated extract of cli.py\n"
+        "# See cli.py for shared context and imports\n"
+        "from src.cli_context import *\n\n"
+    )
 
     for node in functions:
         snippet = ast.get_source_segment(source, node) or ""
@@ -25,10 +31,7 @@ def main():
 
         file_path = dest_dir / f"{node.name}.py"
         file_path.write_text(
-            "# Auto-generated extract of cli.py\n"
-            "# See cli.py for shared context and imports\n\n"
-            + snippet
-            + "\n"
+            header + snippet.strip() + "\n"
         )
 
     print(f"Wrote {len(functions)} function(s) to {dest_dir}")
