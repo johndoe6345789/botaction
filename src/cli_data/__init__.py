@@ -8,8 +8,8 @@ import json
 from pathlib import Path
 from functools import lru_cache
 
-# Path to the cli_data directory
-DATA_DIR = Path(__file__).parent / 'cli_data'
+# Path to the cli_data directory (same as this file's directory)
+DATA_DIR = Path(__file__).parent
 
 
 @lru_cache(maxsize=32)
