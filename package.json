@@ -4,6 +4,7 @@
   "type": "commonjs",
   "dependencies": {
     "acorn": "^8.11.3",
-    "astring": "^1.8.6"
+    "astring": "^1.8.6",
+    "wabt": "^1.0.34"
   }
 }
