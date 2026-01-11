@@ -11,28 +11,38 @@ Python tools for working with Sketchfab 3D models and their file formats.
 - ✅ Full decryption implementation
 - ✅ Working demo with Annihilator 2000 model  
 - ✅ Raw geometry data extraction
-- 📚 Complete documentation in [SOLUTION_SUMMARY.md](SOLUTION_SUMMARY.md)
+- 📚 Complete documentation in [docs/SOLUTION_SUMMARY.md](docs/SOLUTION_SUMMARY.md)
+
+## Project Structure
+
+```
+.
+├── src/              # Main source code
+│   ├── binz_reader.py         # Parse .binz binary files
+│   ├── model_decryptor.py     # Decrypt Sketchfab models
+│   ├── model_viewer.py        # 3D viewer (PyQt6 + OpenGL)
+│   ├── sketchfab_fetcher.py   # Fetch from Sketchfab API
+│   ├── sketchfab_gui.py       # GUI application
+│   └── sketchfab_utils.py     # Utility functions
+├── tests/            # Test scripts
+├── demos/            # Demo scripts
+├── scripts/          # Utility scripts
+├── docs/             # Documentation
+├── data/             # Data files
+└── downloads/        # Downloaded models
+```
 
 ## Quick Start
 
 ```bash
-# Decrypt a model
-python demo_decryption.py
-```
-
-## Files
-
-| File | Description |
-|------|-------------|
-| `sketchfab_gui.py` | PyQt6 GUI application for fetching and analyzing models |
-| `sketchfab_fetcher.py` | Fetch model metadata, file URLs, and download assets from Sketchfab |
-| `binz_reader.py` | Parse and analyze `.binz` binary geometry files |
-| `sketchfab_utils.py` | Ported utilities from Sketchfab's JS codebase (color conversion, etc.) |
-
-## Installation
-
-```bash
+# Install dependencies
 pip install requests numpy pycryptodome PyQt6
+
+# Launch GUI application
+python -m src.sketchfab_gui
+
+# Or run demos
+python demos/demo_decryption.py
 ```
 
 ## GUI Application
@@ -40,7 +50,7 @@ pip install requests numpy pycryptodome PyQt6
 Launch the graphical interface:
 
 ```bash
-python sketchfab_gui.py
+python -m src.sketchfab_gui
 ```
 
 Features:
@@ -56,7 +66,7 @@ Features:
 ### Fetch a Model
 
 ```python
-from sketchfab_fetcher import SketchfabFetcher
+from src.sketchfab_fetcher import SketchfabFetcher
 
 fetcher = SketchfabFetcher()
 
@@ -74,7 +84,7 @@ downloaded = fetcher.download_model_files(result['model_id'], output_dir='downlo
 ### Command Line
 
 ```bash
-python sketchfab_fetcher.py
+python -m src.sketchfab_fetcher
 ```
 
 This will fetch the example model and save:
@@ -86,7 +96,7 @@ This will fetch the example model and save:
 ### Analyze a .binz File
 
 ```python
-from binz_reader import BinzReader, inspect_binz
+from src.binz_reader import BinzReader, inspect_binz
 
 # Inspect file structure
 info = inspect_binz('model.binz')
@@ -102,7 +112,7 @@ geometry = reader.parse_geometry(data, layout)
 ### Color Space Conversion
 
 ```python
-from sketchfab_utils import linear_to_srgb, srgb_to_linear
+from src.sketchfab_utils import linear_to_srgb, srgb_to_linear
 
 # Convert linear color to sRGB
 srgb_value = linear_to_srgb(0.5)
