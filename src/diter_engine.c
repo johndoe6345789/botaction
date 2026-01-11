@@ -6,7 +6,6 @@
 #include <string.h>
 
 #include "diter_wasm_blob_wasm2c.h"
-#include "wasm-rt.h"
 
 #define DEFAULT_HEAP_BASE 83360u
 #define DEFAULT_MAX_PAGES 8192u

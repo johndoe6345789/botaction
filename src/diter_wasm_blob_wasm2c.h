@@ -2,7 +2,7 @@
 #ifndef DITER_WASM_BLOB_WASM2C_H_GENERATED_
 #define DITER_WASM_BLOB_WASM2C_H_GENERATED_
 
-#include "wasm-rt.h"
+#include "diter_rt.h"
 
 #include <stdint.h>
 
