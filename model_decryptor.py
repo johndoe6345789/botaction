@@ -88,6 +88,13 @@ class SketchfabDecryptor:
         # Decode key and IV
         key, iv = self.decode_encryption_params(params_b64)
         
+        # AES requires data to be multiple of 16 bytes
+        # Truncate to aligned size if necessary
+        aligned_size = (len(encrypted_data) // 16) * 16
+        if aligned_size != len(encrypted_data):
+            print(f"Warning: File size {len(encrypted_data)} not aligned to 16 bytes, truncating to {aligned_size}")
+            encrypted_data = encrypted_data[:aligned_size]
+        
         # Decrypt using AES-256-CBC
         cipher = AES.new(key, AES.MODE_CBC, iv)
         decrypted = cipher.decrypt(encrypted_data)
@@ -97,6 +104,7 @@ class SketchfabDecryptor:
             decrypted = unpad(decrypted, AES.block_size)
         except ValueError:
             # Data might not be padded, or padding is invalid
+            # Just return as-is
             pass
         
         return decrypted

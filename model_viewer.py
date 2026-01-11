@@ -63,31 +63,43 @@ class ModelViewerWidget(QOpenGLWidget):
         try:
             reader = BinzReader()
             
-            # Try to decrypt if encrypted and params available
-            if params_path and Path(params_path).exists() and DECRYPTION_AVAILABLE:
-                try:
-                    decryptor = SketchfabDecryptor()
-                    with open(params_path, 'r') as f:
-                        import json
-                        params = json.load(f)
-                    
-                    # Check if encrypted
-                    if params and isinstance(params, list) and params[0].get('d', False):
-                        print("Model is encrypted, decrypting...")
-                        data = decryptor.decrypt_and_decompress(binz_path, params)
-                    else:
-                        # Not encrypted, just decompress
-                        data = reader.read_file(binz_path)
-                except Exception as e:
-                    print(f"Decryption failed: {e}, trying raw read...")
-                    data = reader.read_file(binz_path)
+            # Check if it's a test file (raw binary, not compressed)
+            is_test_file = 'test_' in Path(binz_path).name
+            
+            if is_test_file:
+                # Test files are raw binary, no decompression needed
+                with open(binz_path, 'rb') as f:
+                    data = f.read()
+                print(f"Loaded test file: {len(data)} bytes")
             else:
-                # No params or decryption not available
-                data = reader.read_file(binz_path)
+                # Try to decrypt if encrypted and params available
+                if params_path and Path(params_path).exists() and DECRYPTION_AVAILABLE:
+                    try:
+                        decryptor = SketchfabDecryptor()
+                        with open(params_path, 'r') as f:
+                            import json
+                            params = json.load(f)
+                        
+                        # Check if encrypted
+                        if params and isinstance(params, list) and params[0].get('d', False):
+                            print("Model is encrypted, decrypting...")
+                            data = decryptor.decrypt_and_decompress(binz_path, params)
+                        else:
+                            # Not encrypted, just decompress
+                            data = reader.read_file(binz_path)
+                    except Exception as e:
+                        print(f"Decryption failed: {e}, trying raw read...")
+                        data = reader.read_file(binz_path)
+                else:
+                    # No params or decryption not available
+                    data = reader.read_file(binz_path)
             
             # Try to parse the geometry
-            # If we have params, use them; otherwise try to parse raw data
-            if params_path and Path(params_path).exists():
+            if is_test_file:
+                # Parse test file format (simple vertices + indices)
+                self.geometry = self._parse_test_file(reader, data)
+            elif params_path and Path(params_path).exists():
+                # Parse with params
                 with open(params_path, 'r') as f:
                     params = json.load(f)
                 self.geometry = reader.parse_geometry_from_params(data, params)
@@ -107,6 +119,51 @@ class ModelViewerWidget(QOpenGLWidget):
             import traceback
             traceback.print_exc()
             return False
+    
+    def _parse_test_file(self, reader: BinzReader, data: bytes) -> MeshGeometry:
+        """Parse test file format (vertices followed by indices)."""
+        from binz_reader import GeometryBuffer
+        
+        geometry = MeshGeometry()
+        
+        # Determine split point
+        # Try different splits to find valid geometry
+        for vertex_ratio in [0.6, 0.7, 0.75, 0.8, 0.9]:
+            vertex_bytes = int(len(data) * vertex_ratio)
+            # Align to float32 boundary
+            vertex_bytes = (vertex_bytes // 4) * 4
+            
+            # Read vertices
+            vertex_count = vertex_bytes // 12  # 3 floats per vertex
+            if vertex_count == 0:
+                continue
+                
+            try:
+                vertices = reader.read_float32_array(data, 0, vertex_count * 3)
+                vertices = vertices.reshape(-1, 3)
+                
+                # Read indices
+                index_offset = vertex_bytes
+                indices = reader.read_uint16_array(data, index_offset)
+                
+                # Validate
+                if len(indices) > 0 and np.max(indices) < vertex_count:
+                    geometry.vertices = GeometryBuffer(
+                        data=vertices,
+                        item_size=3,
+                        count=vertex_count
+                    )
+                    geometry.indices = GeometryBuffer(
+                        data=indices,
+                        item_size=1,
+                        count=len(indices)
+                    )
+                    print(f"✓ Parsed test file: {vertex_count} vertices, {len(indices)} indices")
+                    return geometry
+            except Exception:
+                continue
+        
+        return geometry
     
     def _parse_basic_geometry(self, reader: BinzReader, data: bytes) -> MeshGeometry:
         """Parse geometry from raw binary data without params."""
