@@ -42,11 +42,17 @@
       ]
     },
     "export": {
-      "help": "Export to 3MF format",
+      "help": "Export to 3MF or STL format",
       "func": "cmd_export",
       "arguments": [
-        {"name": "binz_file", "help": "Path to decrypted .binz file"},
-        {"name": "--output", "required": true, "help": "Output .3mf file path"}
+        {"name": "binz_file", "nargs": "?", "help": "Path to .binz file (3MF) or file.binz (STL)"},
+        {"name": "--output", "required": true, "help": "Output file path"},
+        {"name": "--format", "default": "3mf", "choices": ["3mf", "stl"], "help": "Export format"},
+        {"name": "--osgjs", "help": "Path to decoded OSGJS JSON (STL)"},
+        {"name": "--geometry", "help": "Path to model_file.binz (STL)"},
+        {"name": "--params", "help": "Path to params.json for DITER decode (STL)"},
+        {"name": "--force-decode", "action": "store_true", "help": "Force re-decode file.binz with DITER"},
+        {"name": "--screenshot", "help": "Output PNG path for STL preview"}
       ]
     },
     "demo": {

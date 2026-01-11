@@ -1,0 +1,1 @@
+{i.d(t,{Z:()=>r});var n=i("aqzA").Z.osg;const r=function(e,t,i){for(var r=new n[i](t),a=0,o=0;a!==t;){var s=0,l=0;do{s|=(127&e[o])<<l,l+=7}while(0!=(128&e[o++]));r[a++]=s}if("U"!==i[0])for(var u=0;u<t;++u){var c=r[u];r[u]=c>>1^-(1&c)}return r}}

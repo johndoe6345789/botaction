@@ -186,6 +186,14 @@ class SketchfabFetcher:
         result['model_id'] = model_id
         print(f"Model ID: {model_id}")
 
+        # Fetch page HTML first to establish cookies for later requests
+        try:
+            html = self.fetch_page(url)
+            result['page_data'] = self.extract_embed_data(html)
+            result['file_urls'] = self.find_file_urls(html)
+        except requests.RequestException as e:
+            result['error'] = f"Page fetch failed: {e}"
+
         # Fetch API data
         try:
             api_data = self.fetch_model_api(model_id)
@@ -212,14 +220,6 @@ class SketchfabFetcher:
                 print(f"Got file config")
         except Exception as e:
             print(f"File config fetch failed: {e}")
-
-        # Fetch page HTML
-        try:
-            html = self.fetch_page(url)
-            result['page_data'] = self.extract_embed_data(html)
-            result['file_urls'] = self.find_file_urls(html)
-        except requests.RequestException as e:
-            result['error'] = f"Page fetch failed: {e}"
 
         return result
 
@@ -268,6 +268,23 @@ class SketchfabFetcher:
                                 json.dump(params, f, indent=2)
                             downloaded['params'] = str(params_file)
                             print(f"  Params: {params_file}")
+
+                        # Attempt to download geometry files from the same directory
+                        base_url = binz_url.rsplit('/', 1)[0]
+                        for suffix in ("model_file.binz", "model_file_wireframe.binz"):
+                            file_url = f"{base_url}/{suffix}"
+                            try:
+                                file_resp = self.session.get(file_url)
+                                if file_resp.status_code == 200:
+                                    out_name = f"{model_id}_{suffix}"
+                                    out_path = output_path / out_name
+                                    with open(out_path, 'wb') as f:
+                                        f.write(file_resp.content)
+                                    key = "model_file" if "wireframe" not in suffix else "wireframe"
+                                    downloaded[key] = str(out_path)
+                                    print(f"  Saved: {out_path} ({len(file_resp.content)} bytes)")
+                            except Exception as e:
+                                print(f"  Failed to download {file_url}: {e}")
                 except Exception as e:
                     print(f"  Failed: {e}")
 

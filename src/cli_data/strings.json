@@ -16,79 +16,193 @@
       "core": {
         "title": "Core Commands:",
         "commands": [
-          {"name": "fetch", "description": "Fetch model info and download files from Sketchfab"},
-          {"name": "decrypt", "description": "Decrypt an encrypted .binz file"},
-          {"name": "inspect", "description": "Inspect a .binz file structure"},
-          {"name": "export", "description": "Export decrypted model to 3MF format"},
-          {"name": "viewer", "description": "Launch 3D model viewer"}
+          {
+            "name": "fetch",
+            "description": "Fetch model info and download files from Sketchfab"
+          },
+          {
+            "name": "decrypt",
+            "description": "Decrypt an encrypted .binz file"
+          },
+          {
+            "name": "inspect",
+            "description": "Inspect a .binz file structure"
+          },
+          {
+            "name": "export",
+            "description": "Export decrypted model to 3MF format"
+          },
+          {
+            "name": "viewer",
+            "description": "Launch 3D model viewer"
+          }
         ]
       },
       "search": {
         "title": "Search & Discovery Commands:",
         "commands": [
-          {"name": "search", "description": "Search for models on Sketchfab"},
-          {"name": "user", "description": "Look up a Sketchfab user"},
-          {"name": "stats", "description": "Fetch and display model statistics from API"},
-          {"name": "categories", "description": "Display model categories"},
-          {"name": "share", "description": "Generate social sharing URLs for a model"}
+          {
+            "name": "search",
+            "description": "Search for models on Sketchfab"
+          },
+          {
+            "name": "user",
+            "description": "Look up a Sketchfab user"
+          },
+          {
+            "name": "stats",
+            "description": "Fetch and display model statistics from API"
+          },
+          {
+            "name": "categories",
+            "description": "Display model categories"
+          },
+          {
+            "name": "share",
+            "description": "Generate social sharing URLs for a model"
+          }
         ]
       },
       "url_embed": {
         "title": "URL & Embed Commands:",
         "commands": [
-          {"name": "embed", "description": "Generate embed URL or iframe code for a model"},
-          {"name": "parse-url", "description": "Parse and analyze Sketchfab URLs"},
-          {"name": "thumbnail", "description": "Generate thumbnail URLs for a model"}
+          {
+            "name": "embed",
+            "description": "Generate embed URL or iframe code for a model"
+          },
+          {
+            "name": "parse-url",
+            "description": "Parse and analyze Sketchfab URLs"
+          },
+          {
+            "name": "thumbnail",
+            "description": "Generate thumbnail URLs for a model"
+          }
         ]
       },
       "config_design": {
         "title": "Configuration & Design Commands:",
         "commands": [
-          {"name": "config", "description": "Display or generate viewer configuration"},
-          {"name": "api", "description": "Display API endpoint information and utilities"},
-          {"name": "ai-info", "description": "Show information about Sketchfab AI tools"},
-          {"name": "tiers", "description": "Display subscription tier information"},
-          {"name": "design", "description": "Show design system (colors, typography, gradients)"},
-          {"name": "layout", "description": "Show responsive breakpoints and spacing"},
-          {"name": "brands", "description": "Show brand/social media colors"},
-          {"name": "validate", "description": "Validate input values (username, email, model_id, url)"}
+          {
+            "name": "config",
+            "description": "Display or generate viewer configuration"
+          },
+          {
+            "name": "api",
+            "description": "Display API endpoint information and utilities"
+          },
+          {
+            "name": "ai-info",
+            "description": "Show information about Sketchfab AI tools"
+          },
+          {
+            "name": "tiers",
+            "description": "Display subscription tier information"
+          },
+          {
+            "name": "design",
+            "description": "Show design system (colors, typography, gradients)"
+          },
+          {
+            "name": "layout",
+            "description": "Show responsive breakpoints and spacing"
+          },
+          {
+            "name": "brands",
+            "description": "Show brand/social media colors"
+          },
+          {
+            "name": "validate",
+            "description": "Validate input values (username, email, model_id, url)"
+          }
         ]
       },
       "utility": {
         "title": "Utility Commands:",
         "commands": [
-          {"name": "string", "description": "String manipulation (slugify, camelCase, kebab-case)"},
-          {"name": "filesize", "description": "Format file sizes in human-readable format"},
-          {"name": "markdown", "description": "Display markdown syntax reference"},
-          {"name": "dates", "description": "Display date format patterns"}
+          {
+            "name": "string",
+            "description": "String manipulation (slugify, camelCase, kebab-case)"
+          },
+          {
+            "name": "filesize",
+            "description": "Format file sizes in human-readable format"
+          },
+          {
+            "name": "markdown",
+            "description": "Display markdown syntax reference"
+          },
+          {
+            "name": "dates",
+            "description": "Display date format patterns"
+          }
         ]
       },
       "reference": {
         "title": "Reference Commands:",
         "commands": [
-          {"name": "licenses", "description": "Display Creative Commons license information"},
-          {"name": "webgl", "description": "Show WebGL error types and troubleshooting"},
-          {"name": "animation", "description": "Show spring animation presets and physics"},
-          {"name": "privacy", "description": "Display cookie consent categories (GDPR/OneTrust)"},
-          {"name": "model-fields", "description": "Show model property field definitions"},
-          {"name": "grid", "description": "Display responsive grid column configurations"},
-          {"name": "placements", "description": "Show UI popup placement options"}
+          {
+            "name": "licenses",
+            "description": "Display Creative Commons license information"
+          },
+          {
+            "name": "webgl",
+            "description": "Show WebGL error types and troubleshooting"
+          },
+          {
+            "name": "animation",
+            "description": "Show spring animation presets and physics"
+          },
+          {
+            "name": "privacy",
+            "description": "Display cookie consent categories (GDPR/OneTrust)"
+          },
+          {
+            "name": "model-fields",
+            "description": "Show model property field definitions"
+          },
+          {
+            "name": "grid",
+            "description": "Display responsive grid column configurations"
+          },
+          {
+            "name": "placements",
+            "description": "Show UI popup placement options"
+          }
         ]
       },
       "scraping": {
         "title": "Web Scraping Commands:",
         "commands": [
-          {"name": "scrape", "description": "Scrape webpage content using requests/BeautifulSoup"},
-          {"name": "session", "description": "Demonstrate session management with cookiejar"},
-          {"name": "download-js", "description": "Download all JavaScript files from a website"}
+          {
+            "name": "scrape",
+            "description": "Scrape webpage content using requests/BeautifulSoup"
+          },
+          {
+            "name": "session",
+            "description": "Demonstrate session management with cookiejar"
+          },
+          {
+            "name": "download-js",
+            "description": "Download all JavaScript files from a website"
+          }
         ]
       },
       "other": {
         "title": "Other Commands:",
         "commands": [
-          {"name": "demo", "description": "Launch demonstration scripts"},
-          {"name": "gui", "description": "Launch graphical user interface"},
-          {"name": "info", "description": "Show this help information"}
+          {
+            "name": "demo",
+            "description": "Launch demonstration scripts"
+          },
+          {
+            "name": "gui",
+            "description": "Launch graphical user interface"
+          },
+          {
+            "name": "info",
+            "description": "Show this help information"
+          }
         ]
       }
     },
@@ -134,7 +248,18 @@
       "exporting": "Exporting {name} to 3MF...",
       "exported": "Exported to: {path}",
       "vertices": "Vertices: {count:,}",
-      "triangles": "Triangles: {count:,}"
+      "triangles": "Triangles: {count:,}",
+      "error_import_stl": "Error: Could not import STL exporter",
+      "exporting_stl": "Exporting {name} to STL...",
+      "stl_exported": "STL saved to: {path}",
+      "screenshot_saved": "Screenshot saved to: {path}",
+      "decoding_geometry": "Decoding geometry {name} with DITER...",
+      "geometry_decoded": "Decoded geometry saved to: {path}",
+      "geometry_decode_failed": "Warning: geometry decode failed, using raw file",
+      "error_geometry_not_found": "Error: geometry file not found: {path}",
+      "error_osgjs_missing": "Error: OSGJS source not provided",
+      "error_params_missing": "Error: params file required for DITER decode",
+      "error_osgjs_not_found": "Error: OSGJS file not found: {path}"
     },
     "demo": {
       "error_unknown": "Error: Unknown demo '{name}'. Available: {available}",
@@ -367,36 +492,132 @@
   "defaults": {
     "share_text": "Check out this 3D model on Sketchfab!"
   },
-  "file_units": ["B", "KB", "MB", "GB", "TB", "PB"],
+  "file_units": [
+    "B",
+    "KB",
+    "MB",
+    "GB",
+    "TB",
+    "PB"
+  ],
   "iframe_template": "<iframe title=\"Sketchfab Model\" width=\"{width}\" height=\"{height}\" src=\"{url}\" frameborder=\"0\" allow=\"autoplay; fullscreen; xr-spatial-tracking\" allowfullscreen mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>",
   "markdown_examples": [
-    {"syntax": "**bold text**", "result": "bold text"},
-    {"syntax": "*italic text*", "result": "italic text"},
-    {"syntax": "~~strikethrough~~", "result": "strikethrough"},
-    {"syntax": "`inline code`", "result": "inline code"},
-    {"syntax": "[link](url)", "result": "clickable link"},
-    {"syntax": "![alt](image.jpg)", "result": "embedded image"},
-    {"syntax": "> quote", "result": "blockquote"},
-    {"syntax": "- list item", "result": "bullet point"},
-    {"syntax": "1. numbered", "result": "numbered list"},
-    {"syntax": "- [ ] todo", "result": "checkbox (unchecked)"},
-    {"syntax": "- [x] done", "result": "checkbox (checked)"}
+    {
+      "syntax": "**bold text**",
+      "result": "bold text"
+    },
+    {
+      "syntax": "*italic text*",
+      "result": "italic text"
+    },
+    {
+      "syntax": "~~strikethrough~~",
+      "result": "strikethrough"
+    },
+    {
+      "syntax": "`inline code`",
+      "result": "inline code"
+    },
+    {
+      "syntax": "[link](url)",
+      "result": "clickable link"
+    },
+    {
+      "syntax": "![alt](image.jpg)",
+      "result": "embedded image"
+    },
+    {
+      "syntax": "> quote",
+      "result": "blockquote"
+    },
+    {
+      "syntax": "- list item",
+      "result": "bullet point"
+    },
+    {
+      "syntax": "1. numbered",
+      "result": "numbered list"
+    },
+    {
+      "syntax": "- [ ] todo",
+      "result": "checkbox (unchecked)"
+    },
+    {
+      "syntax": "- [x] done",
+      "result": "checkbox (checked)"
+    }
   ],
   "dayjs_tokens": [
-    {"token": "YYYY", "description": "4-digit year", "example": "2024"},
-    {"token": "YY", "description": "2-digit year", "example": "24"},
-    {"token": "MMMM", "description": "Full month name", "example": "January"},
-    {"token": "MMM", "description": "Abbreviated month", "example": "Jan"},
-    {"token": "MM", "description": "2-digit month", "example": "01"},
-    {"token": "DD", "description": "2-digit day", "example": "05"},
-    {"token": "D", "description": "Day of month", "example": "5"},
-    {"token": "dddd", "description": "Full weekday", "example": "Monday"},
-    {"token": "ddd", "description": "Abbreviated weekday", "example": "Mon"},
-    {"token": "HH", "description": "24-hour", "example": "14"},
-    {"token": "hh", "description": "12-hour", "example": "02"},
-    {"token": "mm", "description": "Minutes", "example": "30"},
-    {"token": "ss", "description": "Seconds", "example": "45"},
-    {"token": "A", "description": "AM/PM", "example": "PM"}
+    {
+      "token": "YYYY",
+      "description": "4-digit year",
+      "example": "2024"
+    },
+    {
+      "token": "YY",
+      "description": "2-digit year",
+      "example": "24"
+    },
+    {
+      "token": "MMMM",
+      "description": "Full month name",
+      "example": "January"
+    },
+    {
+      "token": "MMM",
+      "description": "Abbreviated month",
+      "example": "Jan"
+    },
+    {
+      "token": "MM",
+      "description": "2-digit month",
+      "example": "01"
+    },
+    {
+      "token": "DD",
+      "description": "2-digit day",
+      "example": "05"
+    },
+    {
+      "token": "D",
+      "description": "Day of month",
+      "example": "5"
+    },
+    {
+      "token": "dddd",
+      "description": "Full weekday",
+      "example": "Monday"
+    },
+    {
+      "token": "ddd",
+      "description": "Abbreviated weekday",
+      "example": "Mon"
+    },
+    {
+      "token": "HH",
+      "description": "24-hour",
+      "example": "14"
+    },
+    {
+      "token": "hh",
+      "description": "12-hour",
+      "example": "02"
+    },
+    {
+      "token": "mm",
+      "description": "Minutes",
+      "example": "30"
+    },
+    {
+      "token": "ss",
+      "description": "Seconds",
+      "example": "45"
+    },
+    {
+      "token": "A",
+      "description": "AM/PM",
+      "example": "PM"
+    }
   ],
   "strftime_map": {
     "YYYY": "%Y",
@@ -416,22 +637,58 @@
     "a": "%p"
   },
   "permission_types": [
-    {"name": "commercial", "description": "Use for commercial purposes"},
-    {"name": "modify", "description": "Create derivative works"},
-    {"name": "distribute", "description": "Share and redistribute"},
-    {"name": "attribution", "description": "Credit the original author"},
-    {"name": "share-alike", "description": "Use same license for derivatives"},
-    {"name": "non-commercial", "description": "No commercial use allowed"}
+    {
+      "name": "commercial",
+      "description": "Use for commercial purposes"
+    },
+    {
+      "name": "modify",
+      "description": "Create derivative works"
+    },
+    {
+      "name": "distribute",
+      "description": "Share and redistribute"
+    },
+    {
+      "name": "attribution",
+      "description": "Credit the original author"
+    },
+    {
+      "name": "share-alike",
+      "description": "Use same license for derivatives"
+    },
+    {
+      "name": "non-commercial",
+      "description": "No commercial use allowed"
+    }
   ],
   "spring_formulas": [
-    {"formula": "F = -k * x", "description": "Spring force"},
-    {"formula": "F = -c * v", "description": "Damping force"},
-    {"formula": "a = F / m", "description": "Acceleration"}
+    {
+      "formula": "F = -k * x",
+      "description": "Spring force"
+    },
+    {
+      "formula": "F = -c * v",
+      "description": "Damping force"
+    },
+    {
+      "formula": "a = F / m",
+      "description": "Acceleration"
+    }
   ],
   "spring_variables": [
-    {"var": "k", "description": "stiffness (higher = bouncier)"},
-    {"var": "c", "description": "damping (higher = less oscillation)"},
-    {"var": "m", "description": "mass (default: 1)"}
+    {
+      "var": "k",
+      "description": "stiffness (higher = bouncier)"
+    },
+    {
+      "var": "c",
+      "description": "damping (higher = less oscillation)"
+    },
+    {
+      "var": "m",
+      "description": "mass (default: 1)"
+    }
   ],
   "code_snippets": {
     "webgl_detection": "const canvas = document.createElement('canvas');\nconst gl = canvas.getContext('webgl2') ||\n           canvas.getContext('webgl') ||\n           canvas.getContext('experimental-webgl');\nif (!gl) {\n  // WebGL not supported\n}",
@@ -458,10 +715,22 @@
     "api_search": "{api_base}/search"
   },
   "model_id_patterns": [
-    {"pattern": "sketchfab\\.com/(?:3d-)?models/[^/]+-([a-f0-9]{32})", "description": "/models/name-id"},
-    {"pattern": "sketchfab\\.com/(?:3d-)?models/([a-f0-9]{32})", "description": "/models/id"},
-    {"pattern": "sketchfab\\.com/models/([a-f0-9]{32})", "description": "Direct model ID"},
-    {"pattern": "/([a-f0-9]{32})(?:/embed)?(?:\\?|$)", "description": "ID in path"}
+    {
+      "pattern": "sketchfab\\.com/(?:3d-)?models/[^/]+-([a-f0-9]{32})",
+      "description": "/models/name-id"
+    },
+    {
+      "pattern": "sketchfab\\.com/(?:3d-)?models/([a-f0-9]{32})",
+      "description": "/models/id"
+    },
+    {
+      "pattern": "sketchfab\\.com/models/([a-f0-9]{32})",
+      "description": "Direct model ID"
+    },
+    {
+      "pattern": "/([a-f0-9]{32})(?:/embed)?(?:\\?|$)",
+      "description": "ID in path"
+    }
   ],
   "model_id_regex": "^[a-f0-9]{32}$",
   "geometry_labels": {
@@ -944,7 +1213,12 @@
     "default_file": "default.jpeg",
     "square_size": "200x200.jpeg"
   },
-  "direction_names": ["top", "right", "bottom", "left"],
+  "direction_names": [
+    "top",
+    "right",
+    "bottom",
+    "left"
+  ],
   "center_label": "center",
   "theme_suffix": " THEME:",
   "views_label": "{views} views",
