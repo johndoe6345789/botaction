@@ -369,6 +369,109 @@ SHADOW_PRESETS = {
     'xl': '0 20px 25px rgba(0, 0, 0, 0.15)',
 }
 
+# Brand/Social Colors (from viewer_materials.js.md)
+BRAND_COLORS = {
+    'sketchfab': '#1d7df6',
+    'epic': '#2a2a2a',
+    'fab': '#1a73e8',
+    'facebook': '#3b5998',
+    'twitter': '#1da1f2',
+    'google': '#db4437',
+    'apple': '#000000',
+    'instagram': '#c13584',
+    'youtube': '#ff0000',
+    'pinterest': '#bd081c',
+}
+
+# Responsive Breakpoints (from viewer_materials.js.md)
+BREAKPOINTS = {
+    'xs': {'min': 0, 'max': 599, 'desc': 'Extra small (phones)'},
+    'sm': {'min': 600, 'max': 899, 'desc': 'Small (tablets portrait)'},
+    'md': {'min': 900, 'max': 1199, 'desc': 'Medium (tablets landscape)'},
+    'lg': {'min': 1200, 'max': 1535, 'desc': 'Large (desktops)'},
+    'xl': {'min': 1536, 'max': None, 'desc': 'Extra large (wide screens)'},
+}
+
+# Layout Dimensions (from viewer_materials.js.md)
+LAYOUT_DIMENSIONS = {
+    'header': {'height': 64, 'heightMobile': 56},
+    'sidebar': {'width': 240, 'collapsedWidth': 64},
+    'container': {'maxWidth': 1440, 'padding': 24},
+}
+
+# Spacing Scale (from viewer_materials.js.md)
+SPACING_SCALE = {
+    0: '0',
+    1: '4px',
+    2: '8px',
+    3: '12px',
+    4: '16px',
+    5: '20px',
+    6: '24px',
+    8: '32px',
+    10: '40px',
+    12: '48px',
+    16: '64px',
+}
+
+# Date Formats (from viewer_ar.js.md - Day.js patterns)
+DATE_FORMATS = {
+    'short': 'YYYY-MM-DD',
+    'medium': 'MMM D, YYYY',
+    'long': 'MMMM D, YYYY',
+    'full': 'dddd, MMMM D, YYYY',
+    'time': 'h:mm A',
+    'datetime': 'MMM D, YYYY h:mm A',
+    'iso': 'YYYY-MM-DDTHH:mm:ssZ',
+    'relative': 'fromNow',  # e.g., "2 hours ago"
+}
+
+# Markdown Toolbar Buttons (from viewer_network.js.md)
+MARKDOWN_TOOLBAR = {
+    'text_formatting': [
+        {'id': 'bold', 'icon': 'bold', 'label': 'Bold', 'shortcut': 'Ctrl+B', 'syntax': '**'},
+        {'id': 'italic', 'icon': 'italic', 'label': 'Italic', 'shortcut': 'Ctrl+I', 'syntax': '*'},
+        {'id': 'strikethrough', 'icon': 'strikethrough', 'label': 'Strikethrough', 'syntax': '~~'},
+    ],
+    'headers': [
+        {'id': 'h1', 'icon': 'heading-1', 'label': 'Heading 1', 'syntax': '# '},
+        {'id': 'h2', 'icon': 'heading-2', 'label': 'Heading 2', 'syntax': '## '},
+        {'id': 'h3', 'icon': 'heading-3', 'label': 'Heading 3', 'syntax': '### '},
+    ],
+    'lists': [
+        {'id': 'ul', 'icon': 'list-ul', 'label': 'Bullet List', 'syntax': '- '},
+        {'id': 'ol', 'icon': 'list-ol', 'label': 'Numbered List', 'syntax': '1. '},
+        {'id': 'checklist', 'icon': 'check-square', 'label': 'Checklist', 'syntax': '- [ ] '},
+    ],
+    'code': [
+        {'id': 'code', 'icon': 'code', 'label': 'Inline Code', 'syntax': '`'},
+        {'id': 'codeblock', 'icon': 'code-block', 'label': 'Code Block', 'syntax': '```\n'},
+    ],
+    'other': [
+        {'id': 'quote', 'icon': 'quote', 'label': 'Quote', 'syntax': '> '},
+        {'id': 'hr', 'icon': 'minus', 'label': 'Horizontal Rule', 'syntax': '\n---\n'},
+        {'id': 'link', 'icon': 'link', 'label': 'Insert Link', 'shortcut': 'Ctrl+K', 'syntax': '[](url)'},
+        {'id': 'image', 'icon': 'image', 'label': 'Insert Image', 'syntax': '![](url)'},
+    ],
+}
+
+# Report Reasons (from popup_template.js.md)
+REPORT_REASONS = [
+    {'value': 'copyright', 'label': 'Copyright infringement'},
+    {'value': 'inappropriate', 'label': 'Inappropriate content'},
+    {'value': 'spam', 'label': 'Spam or misleading'},
+    {'value': 'other', 'label': 'Other'},
+]
+
+# Social Share Platforms (from popup_template.js.md)
+SHARE_PLATFORMS = [
+    {'id': 'twitter', 'name': 'Twitter', 'url_template': 'https://twitter.com/intent/tweet?url={url}&text={text}'},
+    {'id': 'facebook', 'name': 'Facebook', 'url_template': 'https://www.facebook.com/sharer/sharer.php?u={url}'},
+    {'id': 'pinterest', 'name': 'Pinterest', 'url_template': 'https://pinterest.com/pin/create/button/?url={url}&description={text}'},
+    {'id': 'linkedin', 'name': 'LinkedIn', 'url_template': 'https://www.linkedin.com/shareArticle?mini=true&url={url}&title={text}'},
+    {'id': 'email', 'name': 'Email', 'url_template': 'mailto:?subject={text}&body={url}'},
+]
+
 from src.sketchfab_fetcher import SketchfabFetcher
 from src.model_decryptor import SketchfabDecryptor, decrypt_model
 from src.binz_reader import BinzReader
@@ -687,11 +790,12 @@ def cmd_info(args):
     print("  export      - Export decrypted model to 3MF format")
     print("  viewer      - Launch 3D model viewer")
     print()
-    print("Search & Discovery Commands (from Sketchfab JS analysis):")
+    print("Search & Discovery Commands:")
     print("  search      - Search for models on Sketchfab")
     print("  user        - Look up a Sketchfab user")
     print("  stats       - Fetch and display model statistics from API")
     print("  categories  - Display model categories")
+    print("  share       - Generate social sharing URLs for a model")
     print()
     print("URL & Embed Commands:")
     print("  embed       - Generate embed URL or iframe code for a model")
@@ -704,7 +808,15 @@ def cmd_info(args):
     print("  ai-info     - Show information about Sketchfab AI tools")
     print("  tiers       - Display subscription tier information")
     print("  design      - Show design system (colors, typography, gradients)")
+    print("  layout      - Show responsive breakpoints and spacing")
+    print("  brands      - Show brand/social media colors")
     print("  validate    - Validate input values (username, email, model_id, url)")
+    print()
+    print("Utility Commands:")
+    print("  string      - String manipulation (slugify, camelCase, kebab-case)")
+    print("  filesize    - Format file sizes in human-readable format")
+    print("  markdown    - Display markdown syntax reference")
+    print("  dates       - Display date format patterns")
     print()
     print("Web Scraping Commands:")
     print("  scrape      - Scrape webpage content using requests/BeautifulSoup")
@@ -723,6 +835,8 @@ def cmd_info(args):
     print(f"  Environment Presets: {', '.join(ENVIRONMENT_PRESETS.keys())}")
     print(f"  AI Providers: {', '.join(AI_PROVIDERS.keys())}")
     print(f"  Download Formats: {', '.join(DOWNLOAD_FORMATS)}")
+    print(f"  Brand Colors: {len(BRAND_COLORS)} brands")
+    print(f"  Breakpoints: {len(BREAKPOINTS)} ({', '.join(BREAKPOINTS.keys())})")
     print()
     print("Use 'python cli.py <command> --help' for command-specific help.")
 
@@ -1822,6 +1936,348 @@ def cmd_design(args):
     return 0
 
 
+def cmd_string(args):
+    """String manipulation utilities inspired by Sketchfab's JS utilities."""
+    text = args.text
+    
+    if args.slugify:
+        # Convert to URL-friendly slug
+        slug = re.sub(r'[^\w\s-]', '', text.lower())
+        slug = re.sub(r'[-\s]+', '-', slug).strip('-')
+        print(f"Slug: {slug}")
+        return 0
+    
+    if args.camel:
+        # Convert to camelCase
+        words = re.split(r'[-_\s]+', text)
+        result = words[0].lower() + ''.join(w.capitalize() for w in words[1:])
+        print(f"camelCase: {result}")
+        return 0
+    
+    if args.kebab:
+        # Convert to kebab-case
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1-\2', text)
+        result = re.sub('([a-z0-9])([A-Z])', r'\1-\2', s1).lower()
+        result = re.sub(r'[-_\s]+', '-', result)
+        print(f"kebab-case: {result}")
+        return 0
+    
+    if args.snake:
+        # Convert to snake_case
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', text)
+        result = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+        result = re.sub(r'[-\s]+', '_', result)
+        print(f"snake_case: {result}")
+        return 0
+    
+    if args.title:
+        # Convert to Title Case
+        result = text.replace('-', ' ').replace('_', ' ').title()
+        print(f"Title Case: {result}")
+        return 0
+    
+    if args.truncate:
+        max_len = args.truncate
+        if len(text) <= max_len:
+            print(text)
+        else:
+            print(f"{text[:max_len-3]}...")
+        return 0
+    
+    # Default: show all conversions
+    print(f"Original: {text}")
+    print("-" * 40)
+    
+    # Slug
+    slug = re.sub(r'[^\w\s-]', '', text.lower())
+    slug = re.sub(r'[-\s]+', '-', slug).strip('-')
+    print(f"Slug:       {slug}")
+    
+    # camelCase
+    words = re.split(r'[-_\s]+', text)
+    camel = words[0].lower() + ''.join(w.capitalize() for w in words[1:])
+    print(f"camelCase:  {camel}")
+    
+    # kebab-case
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1-\2', text)
+    kebab = re.sub('([a-z0-9])([A-Z])', r'\1-\2', s1).lower()
+    kebab = re.sub(r'[-_\s]+', '-', kebab)
+    print(f"kebab-case: {kebab}")
+    
+    # snake_case
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', text)
+    snake = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+    snake = re.sub(r'[-_\s]+', '_', snake)
+    print(f"snake_case: {snake}")
+    
+    # Title Case
+    title = text.replace('-', ' ').replace('_', ' ').title()
+    print(f"Title Case: {title}")
+    
+    return 0
+
+
+def cmd_filesize(args):
+    """Format file sizes in human-readable format."""
+    size_bytes = args.bytes
+    
+    if size_bytes < 0:
+        print("Error: Size must be a positive number")
+        return 1
+    
+    # Human-readable format
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if abs(size_bytes) < 1024.0:
+            print(f"{size_bytes:.2f} {unit}")
+            break
+        size_bytes /= 1024.0
+    else:
+        print(f"{size_bytes:.2f} PB")
+    
+    return 0
+
+
+def cmd_layout(args):
+    """Display responsive layout information."""
+    
+    if args.breakpoints:
+        print("Responsive Breakpoints")
+        print("=" * 60)
+        
+        for name, info in BREAKPOINTS.items():
+            max_val = info['max'] if info['max'] else '∞'
+            print(f"\n{name.upper()} - {info['desc']}")
+            print(f"  Min: {info['min']}px")
+            print(f"  Max: {max_val}px" if info['max'] else f"  Max: No limit")
+            
+            # Generate media query
+            if info['min'] == 0 and info['max']:
+                print(f"  Media Query: @media (max-width: {info['max']}px)")
+            elif info['max']:
+                print(f"  Media Query: @media (min-width: {info['min']}px) and (max-width: {info['max']}px)")
+            else:
+                print(f"  Media Query: @media (min-width: {info['min']}px)")
+        return 0
+    
+    if args.dimensions:
+        print("Layout Dimensions")
+        print("=" * 60)
+        
+        for component, dims in LAYOUT_DIMENSIONS.items():
+            print(f"\n{component.upper()}:")
+            for key, value in dims.items():
+                print(f"  {key}: {value}px")
+        return 0
+    
+    if args.spacing:
+        print("Spacing Scale")
+        print("=" * 60)
+        
+        for level, value in SPACING_SCALE.items():
+            print(f"  {level:3}: {value}")
+        
+        print("\n\nCSS Custom Properties:")
+        for level, value in SPACING_SCALE.items():
+            print(f"  --spacing-{level}: {value};")
+        return 0
+    
+    if args.generate_scss:
+        print("// Sketchfab SCSS Variables")
+        print()
+        print("// Breakpoints")
+        print("$breakpoints: (")
+        for name, info in BREAKPOINTS.items():
+            print(f"  '{name}': {info['min']}px,")
+        print(");")
+        print()
+        print("// Spacing")
+        print("$spacing: (")
+        for level, value in SPACING_SCALE.items():
+            print(f"  {level}: {value},")
+        print(");")
+        print()
+        print("// Layout")
+        for component, dims in LAYOUT_DIMENSIONS.items():
+            for key, value in dims.items():
+                var_name = f"${component}-{key}".replace('_', '-').lower()
+                # Convert camelCase to kebab-case
+                var_name = re.sub(r'([a-z])([A-Z])', r'\1-\2', var_name).lower()
+                print(f"{var_name}: {value}px;")
+        return 0
+    
+    # Default: show summary
+    print("Layout & Responsive Design")
+    print("=" * 60)
+    print("\nOptions:")
+    print("  --breakpoints    Show responsive breakpoints")
+    print("  --dimensions     Show layout dimensions")
+    print("  --spacing        Show spacing scale")
+    print("  --generate-scss  Generate SCSS variables")
+    print()
+    print("Quick Stats:")
+    print(f"  Breakpoints: {len(BREAKPOINTS)} ({', '.join(BREAKPOINTS.keys())})")
+    print(f"  Spacing levels: {len(SPACING_SCALE)}")
+    print(f"  Layout components: {len(LAYOUT_DIMENSIONS)}")
+    
+    return 0
+
+
+def cmd_share(args):
+    """Generate social sharing URLs for a model."""
+    model_id = extract_model_id(args.model_id_or_url)
+    
+    if not model_id:
+        print(f"Error: Could not extract model ID from: {args.model_id_or_url}")
+        return 1
+    
+    model_url = f"{SKETCHFAB_BASE_URL}/3d-models/{model_id}"
+    text = args.text or "Check out this 3D model on Sketchfab!"
+    
+    print(f"Social Sharing URLs for Model: {model_id}")
+    print("=" * 60)
+    print(f"\nModel URL: {model_url}")
+    print()
+    
+    for platform in SHARE_PLATFORMS:
+        share_url = platform['url_template'].format(
+            url=model_url,
+            text=text.replace(' ', '%20')
+        )
+        print(f"{platform['name']:12} {share_url}")
+    
+    if args.platform:
+        platform = next((p for p in SHARE_PLATFORMS if p['id'] == args.platform), None)
+        if platform:
+            share_url = platform['url_template'].format(
+                url=model_url,
+                text=text.replace(' ', '%20')
+            )
+            print(f"\nDirect link for {platform['name']}:")
+            print(share_url)
+    
+    return 0
+
+
+def cmd_markdown(args):
+    """Display markdown syntax reference from Sketchfab's editor."""
+    
+    print("Markdown Syntax Reference")
+    print("=" * 60)
+    print("(Based on Sketchfab's markdown editor toolbar)")
+    print()
+    
+    for category, buttons in MARKDOWN_TOOLBAR.items():
+        display_name = category.replace('_', ' ').title()
+        print(f"\n{display_name}:")
+        print("-" * 40)
+        
+        for btn in buttons:
+            shortcut = f" ({btn['shortcut']})" if btn.get('shortcut') else ""
+            syntax = btn['syntax'].replace('\n', '\\n')
+            print(f"  {btn['label']:20}{shortcut}")
+            print(f"    Syntax: {syntax}")
+    
+    print("\n\nExamples:")
+    print("-" * 40)
+    print("  **bold text**        → bold text")
+    print("  *italic text*        → italic text")
+    print("  ~~strikethrough~~    → strikethrough")
+    print("  `inline code`        → inline code")
+    print("  [link](url)          → clickable link")
+    print("  ![alt](image.jpg)    → embedded image")
+    print("  > quote              → blockquote")
+    print("  - list item          → bullet point")
+    print("  1. numbered          → numbered list")
+    print("  - [ ] todo           → checkbox (unchecked)")
+    print("  - [x] done           → checkbox (checked)")
+    
+    return 0
+
+
+def cmd_brands(args):
+    """Display brand/social media colors."""
+    
+    print("Brand & Social Media Colors")
+    print("=" * 60)
+    
+    for brand, color in BRAND_COLORS.items():
+        # Create a simple visual indicator
+        print(f"  {brand:15} {color}  {'█' * 3}")
+    
+    print("\n\nUsage in CSS:")
+    print("-" * 40)
+    for brand, color in BRAND_COLORS.items():
+        print(f"  --color-{brand}: {color};")
+    
+    return 0
+
+
+def cmd_dates(args):
+    """Display date format patterns used by Sketchfab."""
+    
+    print("Date Format Patterns")
+    print("=" * 60)
+    print("(Based on Day.js patterns used by Sketchfab)")
+    print()
+    
+    from datetime import datetime
+    now = datetime.now()
+    
+    print("Format Patterns:")
+    print("-" * 40)
+    
+    for name, pattern in DATE_FORMATS.items():
+        if pattern == 'fromNow':
+            example = "e.g., '2 hours ago'"
+        else:
+            # Try to show an example using strftime equivalent
+            try:
+                strftime_map = {
+                    'YYYY': '%Y',
+                    'YY': '%y',
+                    'MMMM': '%B',
+                    'MMM': '%b',
+                    'MM': '%m',
+                    'DD': '%d',
+                    'D': '%d',
+                    'dddd': '%A',
+                    'ddd': '%a',
+                    'HH': '%H',
+                    'hh': '%I',
+                    'mm': '%M',
+                    'ss': '%S',
+                    'A': '%p',
+                    'a': '%p',
+                }
+                strftime_pattern = pattern
+                for dayjs, strft in strftime_map.items():
+                    strftime_pattern = strftime_pattern.replace(dayjs, strft)
+                example = now.strftime(strftime_pattern)
+            except:
+                example = pattern
+        
+        print(f"  {name:12} {pattern:30} {example}")
+    
+    print("\n\nDay.js Token Reference:")
+    print("-" * 40)
+    print("  YYYY = 4-digit year (2024)")
+    print("  YY   = 2-digit year (24)")
+    print("  MMMM = Full month name (January)")
+    print("  MMM  = Abbreviated month (Jan)")
+    print("  MM   = 2-digit month (01)")
+    print("  DD   = 2-digit day (05)")
+    print("  D    = Day of month (5)")
+    print("  dddd = Full weekday (Monday)")
+    print("  ddd  = Abbreviated weekday (Mon)")
+    print("  HH   = 24-hour (14)")
+    print("  hh   = 12-hour (02)")
+    print("  mm   = Minutes (30)")
+    print("  ss   = Seconds (45)")
+    print("  A    = AM/PM")
+    
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Sketchfab Model Tools CLI",
@@ -2125,6 +2581,72 @@ def main():
     design_parser.add_argument('--theme', choices=['light', 'dark'],
         help='Theme for CSS generation')
     design_parser.set_defaults(func=cmd_design)
+
+    # String command - String manipulation utilities
+    string_parser = subparsers.add_parser('string',
+        help='String manipulation utilities (slugify, case conversion)')
+    string_parser.add_argument('text',
+        help='Text to transform')
+    string_parser.add_argument('--slugify', action='store_true',
+        help='Convert to URL-friendly slug')
+    string_parser.add_argument('--camel', action='store_true',
+        help='Convert to camelCase')
+    string_parser.add_argument('--kebab', action='store_true',
+        help='Convert to kebab-case')
+    string_parser.add_argument('--snake', action='store_true',
+        help='Convert to snake_case')
+    string_parser.add_argument('--title', action='store_true',
+        help='Convert to Title Case')
+    string_parser.add_argument('--truncate', type=int,
+        help='Truncate to N characters')
+    string_parser.set_defaults(func=cmd_string)
+
+    # Filesize command - Format file sizes
+    filesize_parser = subparsers.add_parser('filesize',
+        help='Format file size in human-readable format')
+    filesize_parser.add_argument('bytes', type=int,
+        help='Size in bytes')
+    filesize_parser.set_defaults(func=cmd_filesize)
+
+    # Layout command - Responsive layout info
+    layout_parser = subparsers.add_parser('layout',
+        help='Display responsive layout and breakpoint information')
+    layout_parser.add_argument('--breakpoints', action='store_true',
+        help='Show responsive breakpoints')
+    layout_parser.add_argument('--dimensions', action='store_true',
+        help='Show layout dimensions')
+    layout_parser.add_argument('--spacing', action='store_true',
+        help='Show spacing scale')
+    layout_parser.add_argument('--generate-scss', action='store_true',
+        help='Generate SCSS variables')
+    layout_parser.set_defaults(func=cmd_layout)
+
+    # Share command - Social sharing URLs
+    share_parser = subparsers.add_parser('share',
+        help='Generate social sharing URLs for a model')
+    share_parser.add_argument('model_id_or_url',
+        help='Model ID or Sketchfab URL')
+    share_parser.add_argument('--text',
+        help='Custom share text')
+    share_parser.add_argument('--platform',
+        choices=['twitter', 'facebook', 'pinterest', 'linkedin', 'email'],
+        help='Show URL for specific platform only')
+    share_parser.set_defaults(func=cmd_share)
+
+    # Markdown command - Markdown syntax reference
+    markdown_parser = subparsers.add_parser('markdown',
+        help='Display markdown syntax reference')
+    markdown_parser.set_defaults(func=cmd_markdown)
+
+    # Brands command - Brand/social colors
+    brands_parser = subparsers.add_parser('brands',
+        help='Display brand and social media colors')
+    brands_parser.set_defaults(func=cmd_brands)
+
+    # Dates command - Date format patterns
+    dates_parser = subparsers.add_parser('dates',
+        help='Display date format patterns')
+    dates_parser.set_defaults(func=cmd_dates)
 
     # Parse args
     args = parser.parse_args()
