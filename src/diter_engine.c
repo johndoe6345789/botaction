@@ -80,7 +80,7 @@ static void write_key_hex(struct DiterEngine* engine, const char* key_hex) {
   while (pos < 40) cleaned[pos++] = '0';
   cleaned[40] = '\0';
 
-  uint32_t ptr = diter_core_Umlja1JvbGxlZDRV(&engine->instance, 0, 40);
+  uint32_t ptr = diter_core_alloc_key(&engine->instance, 0, 40);
   if ((uint64_t)ptr + 40 > engine->env.memory.size) {
     fprintf(stderr, "Key pointer out of bounds\n");
     exit(1);
@@ -111,7 +111,7 @@ void diter_engine_destroy(DiterEngine* engine) {
 
 void diter_engine_init(DiterEngine* engine) {
   if (!engine) return;
-  diter_core_mV2ZXIgZ29ubmEgbGV0IHlvdSBkb3duCk5l(&engine->instance);
+  diter_core_init(&engine->instance);
 }
 
 void diter_engine_set_key_hex(DiterEngine* engine, const char* key_hex) {
@@ -121,8 +121,7 @@ void diter_engine_set_key_hex(DiterEngine* engine, const char* key_hex) {
 
 int diter_engine_write_dict(DiterEngine* engine, const uint8_t* data, size_t len) {
   if (!engine || !data || !len) return 0;
-  uint32_t ptr = diter_core_dmVyIGdvbm5hIHJ1biBhcm91bmQgYW5kI(
-      &engine->instance, (uint32_t)len);
+  uint32_t ptr = diter_core_load_dict(&engine->instance, (uint32_t)len);
   if ((uint64_t)ptr + len > engine->env.memory.size) {
     return 0;
   }
@@ -132,8 +131,7 @@ int diter_engine_write_dict(DiterEngine* engine, const uint8_t* data, size_t len
 
 int diter_engine_write_chunk(DiterEngine* engine, const uint8_t* data, size_t len) {
   if (!engine || !data || !len) return 0;
-  uint32_t ptr = diter_core_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl(
-      &engine->instance, (uint32_t)len);
+  uint32_t ptr = diter_core_load_chunk(&engine->instance, (uint32_t)len);
   if ((uint64_t)ptr + len > engine->env.memory.size) {
     return 0;
   }
@@ -143,13 +141,13 @@ int diter_engine_write_chunk(DiterEngine* engine, const uint8_t* data, size_t le
 
 int diter_engine_pump(DiterEngine* engine) {
   if (!engine) return 0;
-  return (int)diter_core_GRlc2VydCB5b3UKTmV2ZXIgZ29ubmEgbW(&engine->instance);
+  return (int)diter_core_pump(&engine->instance);
 }
 
 const uint8_t* diter_engine_output(DiterEngine* engine, uint32_t* out_len) {
   if (!engine || !out_len) return NULL;
-  uint32_t ptr = diter_core_TmV2ZXIgZ29ubmEgZ2l2ZSB5b3UgdXAKT(&engine->instance);
-  uint32_t len = diter_core_bGwgYSBsaWUgYW5kIGh1cnQgeW91Cg(&engine->instance);
+  uint32_t ptr = diter_core_out_ptr(&engine->instance);
+  uint32_t len = diter_core_out_len(&engine->instance);
   if (len == 0) {
     *out_len = 0;
     return NULL;
@@ -164,5 +162,5 @@ const uint8_t* diter_engine_output(DiterEngine* engine, uint32_t* out_len) {
 
 void diter_engine_output_advance(DiterEngine* engine) {
   if (!engine) return;
-  diter_core_FrZSB5b3UgY3J5Ck5ldmVyIGdvbm5hIHN(&engine->instance);
+  diter_core_out_advance(&engine->instance);
 }

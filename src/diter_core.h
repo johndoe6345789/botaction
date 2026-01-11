@@ -30,9 +30,9 @@ extern wasm_rt_memory_t* diter_env_memory(struct diter_env*);
 typedef struct diter_core {
   struct diter_env* env_instance;
   /* import: 'env' 'memory' */
-  wasm_rt_memory_t *diter_env_memory;
-  u32 w2c_g0;
-  wasm_rt_funcref_table_t w2c_T0;
+  wasm_rt_memory_t *env_memory;
+  u32 stack_ptr;
+  wasm_rt_funcref_table_t func_table;
 } diter_core;
 
 void diter_core_instantiate(diter_core*, struct diter_env*);
@@ -76,6 +76,39 @@ u32 diter_core_bGwgYSBsaWUgYW5kIGh1cnQgeW91Cg(diter_core*);
 
 /* export: 'TmV2ZXIgZ29ubmEgZ2l2ZSB5b3UgdXAKT' */
 u32 diter_core_TmV2ZXIgZ29ubmEgZ2l2ZSB5b3UgdXAKT(diter_core*);
+
+/* Friendly aliases for the exported decode pipeline. */
+static inline void diter_core_init(diter_core* core) {
+  diter_core_mV2ZXIgZ29ubmEgbGV0IHlvdSBkb3duCk5l(core);
+}
+
+static inline u32 diter_core_alloc_key(diter_core* core, u32 offset, u32 length) {
+  return diter_core_Umlja1JvbGxlZDRV(core, offset, length);
+}
+
+static inline u32 diter_core_load_dict(diter_core* core, u32 length) {
+  return diter_core_dmVyIGdvbm5hIHJ1biBhcm91bmQgYW5kI(core, length);
+}
+
+static inline u32 diter_core_load_chunk(diter_core* core, u32 length) {
+  return diter_core_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl(core, length);
+}
+
+static inline u32 diter_core_pump(diter_core* core) {
+  return diter_core_GRlc2VydCB5b3UKTmV2ZXIgZ29ubmEgbW(core);
+}
+
+static inline u32 diter_core_out_ptr(diter_core* core) {
+  return diter_core_TmV2ZXIgZ29ubmEgZ2l2ZSB5b3UgdXAKT(core);
+}
+
+static inline u32 diter_core_out_len(diter_core* core) {
+  return diter_core_bGwgYSBsaWUgYW5kIGh1cnQgeW91Cg(core);
+}
+
+static inline void diter_core_out_advance(diter_core* core) {
+  diter_core_FrZSB5b3UgY3J5Ck5ldmVyIGdvbm5hIHN(core);
+}
 
 #ifdef __cplusplus
 }
