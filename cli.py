@@ -42,13 +42,12 @@ from cli_data import (
     get_commands, get_demos, get_info_strings, get_labels, get_symbols,
     get_config_options, get_api_options, get_design_options, get_layout_options,
     # String getters
-    get_constants, get_messages, get_headers, get_subheaders,
-    get_error_messages, get_result_indicators, get_yes_no,
-    get_file_units, get_http_config, get_code_snippets,
+    get_constants, get_messages, get_error_messages, get_result_indicators,
+    get_yes_no, get_file_units, get_http_config, get_code_snippets,
     get_markdown_examples, get_dayjs_tokens, get_permission_types,
     get_spring_formulas, get_spring_variables, get_defaults,
     get_separator_lengths, get_gui_file, get_iframe_template,
-    get_url_templates, get_strftime_map
+    get_url_templates, get_strftime_map, get_strings_config
 )
 
 # =============================================================================
@@ -190,6 +189,33 @@ def _init_constants():
 
 # Initialize constants on module load
 _init_constants()
+
+# Shared string resources
+_STRINGS = get_strings_config()
+LABELS = get_labels()
+HEADERS = _STRINGS['headers']
+SUBHEADERS = _STRINGS['subheaders']
+MAIN_LABELS = _STRINGS['main_labels']
+INFO_CONFIG = _STRINGS['info_config']
+LAYOUT_SUMMARY = _STRINGS['layout_summary']
+STRING_CONVERSIONS = _STRINGS['string_conversions']
+DATE_LABELS = _STRINGS['date_labels']
+LICENSE_LABELS = _STRINGS['license_labels']
+WEBGL_LABELS = _STRINGS['webgl_labels']
+ANIMATION_LABELS = _STRINGS['animation_labels']
+PRIVACY_LABELS = _STRINGS['privacy_labels']
+MODEL_FIELDS_LABELS = _STRINGS['model_fields_labels']
+GRID_LABELS = _STRINGS['grid_labels']
+PLACEMENTS_LABELS = _STRINGS['placements_labels']
+CODE_SNIPPETS = _STRINGS['code_snippets']
+DEFAULTS = get_defaults()
+ERROR_MESSAGES = get_error_messages()
+DAYJS_TOKENS = get_dayjs_tokens()
+STRFTIME_MAP = get_strftime_map()
+PERMISSION_TYPES = get_permission_types()
+SPRING_FORMULAS = get_spring_formulas()
+SPRING_VARIABLES = get_spring_variables()
+MARKDOWN_EXAMPLES = get_markdown_examples()
 
 from src.sketchfab_fetcher import SketchfabFetcher
 from src.model_decryptor import SketchfabDecryptor, decrypt_model
@@ -520,17 +546,54 @@ def cmd_info(args):
             print(f"  {cmd['name']:14}- {cmd['description']}")
         print()
 
-    print("Configuration Constants (from JS analysis):")
-    print(f"  API Base URL: {SKETCHFAB_API_BASE}")
-    print(f"  Embed Options: {len(EMBED_OPTIONS)} parameters available")
-    print(f"  Quality Presets: {', '.join(QUALITY_PRESETS.keys())}")
-    print(f"  Environment Presets: {', '.join(ENVIRONMENT_PRESETS.keys())}")
-    print(f"  AI Providers: {', '.join(AI_PROVIDERS.keys())}")
-    print(f"  Download Formats: {', '.join(DOWNLOAD_FORMATS)}")
-    print(f"  Brand Colors: {len(BRAND_COLORS)} brands")
-    print(f"  Breakpoints: {len(BREAKPOINTS)} ({', '.join(BREAKPOINTS.keys())})")
-    print(f"  License Types: {len(LICENSE_TYPES)} Creative Commons licenses")
-    print(f"  Spring Presets: {len(SPRING_PRESETS)} animation configs")
+    print(INFO_CONFIG['config_constants_header'])
+    print(f"  {INFO_CONFIG['api_base_url']} {SKETCHFAB_API_BASE}")
+    print(
+        INFO_CONFIG['embed_options_count'].format(
+            count=len(EMBED_OPTIONS)
+        )
+    )
+    print(
+        INFO_CONFIG['quality_presets_list'].format(
+            list=', '.join(QUALITY_PRESETS.keys())
+        )
+    )
+    print(
+        INFO_CONFIG['environment_presets_list'].format(
+            list=', '.join(ENVIRONMENT_PRESETS.keys())
+        )
+    )
+    print(
+        INFO_CONFIG['ai_providers_list'].format(
+            list=', '.join(AI_PROVIDERS.keys())
+        )
+    )
+    print(
+        INFO_CONFIG['download_formats_list'].format(
+            list=', '.join(DOWNLOAD_FORMATS)
+        )
+    )
+    print(
+        INFO_CONFIG['brand_colors_count'].format(
+            count=len(BRAND_COLORS)
+        )
+    )
+    print(
+        INFO_CONFIG['breakpoints_info'].format(
+            count=len(BREAKPOINTS),
+            list=', '.join(BREAKPOINTS.keys())
+        )
+    )
+    print(
+        INFO_CONFIG['license_types_count'].format(
+            count=len(LICENSE_TYPES)
+        )
+    )
+    print(
+        INFO_CONFIG['spring_presets_count'].format(
+            count=len(SPRING_PRESETS)
+        )
+    )
     print()
     print(info['footer'])
 
@@ -883,7 +946,11 @@ def cmd_embed(args):
     model_id = extract_model_id(args.model_id_or_url)
     
     if not model_id:
-        print(f"Error: Could not extract model ID from: {args.model_id_or_url}")
+        print(
+            ERROR_MESSAGES['model_id_extract_failed'].format(
+                input=args.model_id_or_url
+            )
+        )
         return 1
     
     # Build embed parameters
@@ -1643,14 +1710,14 @@ def cmd_string(args):
         # Convert to URL-friendly slug
         slug = re.sub(r'[^\w\s-]', '', text.lower())
         slug = re.sub(r'[-\s]+', '-', slug).strip('-')
-        print(f"Slug: {slug}")
+        print(f"{STRING_CONVERSIONS['slug']} {slug}")
         return 0
     
     if args.camel:
         # Convert to camelCase
         words = re.split(r'[-_\s]+', text)
         result = words[0].lower() + ''.join(w.capitalize() for w in words[1:])
-        print(f"camelCase: {result}")
+        print(f"{STRING_CONVERSIONS['camelcase']} {result}")
         return 0
     
     if args.kebab:
@@ -1658,7 +1725,7 @@ def cmd_string(args):
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1-\2', text)
         result = re.sub('([a-z0-9])([A-Z])', r'\1-\2', s1).lower()
         result = re.sub(r'[-_\s]+', '-', result)
-        print(f"kebab-case: {result}")
+        print(f"{STRING_CONVERSIONS['kebabcase']} {result}")
         return 0
     
     if args.snake:
@@ -1666,13 +1733,13 @@ def cmd_string(args):
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', text)
         result = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
         result = re.sub(r'[-_\s]+', '_', result)
-        print(f"snake_case: {result}")
+        print(f"{STRING_CONVERSIONS['snakecase']} {result}")
         return 0
     
     if args.title:
         # Convert to Title Case
         result = text.replace('-', ' ').replace('_', ' ').title()
-        print(f"Title Case: {result}")
+        print(f"{STRING_CONVERSIONS['titlecase']} {result}")
         return 0
     
     if args.truncate:
@@ -1684,34 +1751,34 @@ def cmd_string(args):
         return 0
     
     # Default: show all conversions
-    print(f"Original: {text}")
+    print(f"{STRING_CONVERSIONS['original']} {text}")
     print("-" * 40)
     
     # Slug
     slug = re.sub(r'[^\w\s-]', '', text.lower())
     slug = re.sub(r'[-\s]+', '-', slug).strip('-')
-    print(f"Slug:       {slug}")
+    print(f"{STRING_CONVERSIONS['slug']:14} {slug}")
     
     # camelCase
     words = re.split(r'[-_\s]+', text)
     camel = words[0].lower() + ''.join(w.capitalize() for w in words[1:])
-    print(f"camelCase:  {camel}")
+    print(f"{STRING_CONVERSIONS['camelcase']:14} {camel}")
     
     # kebab-case
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1-\2', text)
     kebab = re.sub('([a-z0-9])([A-Z])', r'\1-\2', s1).lower()
     kebab = re.sub(r'[-_\s]+', '-', kebab)
-    print(f"kebab-case: {kebab}")
+    print(f"{STRING_CONVERSIONS['kebabcase']:14} {kebab}")
     
     # snake_case
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', text)
     snake = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
     snake = re.sub(r'[-_\s]+', '_', snake)
-    print(f"snake_case: {snake}")
+    print(f"{STRING_CONVERSIONS['snakecase']:14} {snake}")
     
     # Title Case
     title = text.replace('-', ' ').replace('_', ' ').title()
-    print(f"Title Case: {title}")
+    print(f"{STRING_CONVERSIONS['titlecase']:14} {title}")
     
     return 0
 
@@ -1721,7 +1788,7 @@ def cmd_filesize(args):
     size_bytes = args.bytes
     
     if size_bytes < 0:
-        print("Error: Size must be a positive number")
+        print(ERROR_MESSAGES['size_must_be_positive'])
         return 1
     
     # Human-readable format
@@ -1740,14 +1807,18 @@ def cmd_layout(args):
     """Display responsive layout information."""
     
     if args.breakpoints:
-        print("Responsive Breakpoints")
+        print(HEADERS['responsive_breakpoints'])
         print("=" * 60)
         
         for name, info in BREAKPOINTS.items():
-            max_val = info['max'] if info['max'] else '∞'
+            max_val = info['max'] if info['max'] else MAIN_LABELS['infinity']
             print(f"\n{name.upper()} - {info['desc']}")
             print(f"  Min: {info['min']}px")
-            print(f"  Max: {max_val}px" if info['max'] else f"  Max: No limit")
+            print(
+                f"  Max: {max_val}px"
+                if info['max']
+                else f"  Max: {MAIN_LABELS['no_limit']}"
+            )
             
             # Generate media query
             if info['min'] == 0 and info['max']:
@@ -1759,7 +1830,7 @@ def cmd_layout(args):
         return 0
     
     if args.dimensions:
-        print("Layout Dimensions")
+        print(HEADERS['layout_dimensions'])
         print("=" * 60)
         
         for component, dims in LAYOUT_DIMENSIONS.items():
@@ -1769,13 +1840,13 @@ def cmd_layout(args):
         return 0
     
     if args.spacing:
-        print("Spacing Scale")
+        print(HEADERS['spacing_scale'])
         print("=" * 60)
         
         for level, value in SPACING_SCALE.items():
             print(f"  {level:3}: {value}")
         
-        print("\n\nCSS Custom Properties:")
+        print(f"\n\n{HEADERS['css_custom_props']}")
         for level, value in SPACING_SCALE.items():
             print(f"  --spacing-{level}: {value};")
         return 0
@@ -1805,18 +1876,21 @@ def cmd_layout(args):
         return 0
     
     # Default: show summary
-    print("Layout & Responsive Design")
+    print(HEADERS['layout_responsive'])
     print("=" * 60)
-    print("\nOptions:")
+    print(f"\n{LAYOUT_SUMMARY['options_header']}")
     print("  --breakpoints    Show responsive breakpoints")
     print("  --dimensions     Show layout dimensions")
     print("  --spacing        Show spacing scale")
     print("  --generate-scss  Generate SCSS variables")
     print()
-    print("Quick Stats:")
-    print(f"  Breakpoints: {len(BREAKPOINTS)} ({', '.join(BREAKPOINTS.keys())})")
-    print(f"  Spacing levels: {len(SPACING_SCALE)}")
-    print(f"  Layout components: {len(LAYOUT_DIMENSIONS)}")
+    print(LAYOUT_SUMMARY['quick_stats'])
+    print(
+        f"  {LAYOUT_SUMMARY['breakpoints']} {len(BREAKPOINTS)} "
+        f"({', '.join(BREAKPOINTS.keys())})"
+    )
+    print(f"  {LAYOUT_SUMMARY['spacing_levels']} {len(SPACING_SCALE)}")
+    print(f"  {LAYOUT_SUMMARY['layout_components']} {len(LAYOUT_DIMENSIONS)}")
     
     return 0
 
@@ -1830,11 +1904,11 @@ def cmd_share(args):
         return 1
     
     model_url = f"{SKETCHFAB_BASE_URL}/3d-models/{model_id}"
-    text = args.text or "Check out this 3D model on Sketchfab!"
-    
-    print(f"Social Sharing URLs for Model: {model_id}")
+    text = args.text or DEFAULTS['share_text']
+
+    print(f"{HEADERS['social_sharing']} {model_id}")
     print("=" * 60)
-    print(f"\nModel URL: {model_url}")
+    print(f"\n{LABELS['model_url']} {model_url}")
     print()
     
     for platform in SHARE_PLATFORMS:
@@ -1851,7 +1925,7 @@ def cmd_share(args):
                 url=model_url,
                 text=text.replace(' ', '%20')
             )
-            print(f"\nDirect link for {platform['name']}:")
+            print(f"\n{LABELS['direct_link_for'].format(platform=platform['name'])}")
             print(share_url)
     
     return 0
@@ -1860,9 +1934,9 @@ def cmd_share(args):
 def cmd_markdown(args):
     """Display markdown syntax reference from Sketchfab's editor."""
     
-    print("Markdown Syntax Reference")
+    print(HEADERS['markdown_reference'])
     print("=" * 60)
-    print("(Based on Sketchfab's markdown editor toolbar)")
+    print(SUBHEADERS['based_on_editor'])
     print()
     
     for category, buttons in MARKDOWN_TOOLBAR.items():
@@ -1876,19 +1950,10 @@ def cmd_markdown(args):
             print(f"  {btn['label']:20}{shortcut}")
             print(f"    Syntax: {syntax}")
     
-    print("\n\nExamples:")
+    print(f"\n\n{HEADERS['examples']}")
     print("-" * 40)
-    print("  **bold text**        → bold text")
-    print("  *italic text*        → italic text")
-    print("  ~~strikethrough~~    → strikethrough")
-    print("  `inline code`        → inline code")
-    print("  [link](url)          → clickable link")
-    print("  ![alt](image.jpg)    → embedded image")
-    print("  > quote              → blockquote")
-    print("  - list item          → bullet point")
-    print("  1. numbered          → numbered list")
-    print("  - [ ] todo           → checkbox (unchecked)")
-    print("  - [x] done           → checkbox (checked)")
+    for example in MARKDOWN_EXAMPLES:
+        print(f"  {example['syntax']:20} → {example['result']}")
     
     return 0
 
@@ -1896,14 +1961,14 @@ def cmd_markdown(args):
 def cmd_brands(args):
     """Display brand/social media colors."""
     
-    print("Brand & Social Media Colors")
+    print(HEADERS['brand_colors'])
     print("=" * 60)
     
     for brand, color in BRAND_COLORS.items():
         # Create a simple visual indicator
         print(f"  {brand:15} {color}  {'█' * 3}")
     
-    print("\n\nUsage in CSS:")
+    print(f"\n\n{HEADERS['usage_in_css']}")
     print("-" * 40)
     for brand, color in BRAND_COLORS.items():
         print(f"  --color-{brand}: {color};")
@@ -1914,67 +1979,37 @@ def cmd_brands(args):
 def cmd_dates(args):
     """Display date format patterns used by Sketchfab."""
     
-    print("Date Format Patterns")
+    print(HEADERS['date_format_patterns'])
     print("=" * 60)
-    print("(Based on Day.js patterns used by Sketchfab)")
+    print(SUBHEADERS['based_on_dayjs'])
     print()
     
     from datetime import datetime
     now = datetime.now()
-    
-    print("Format Patterns:")
+    dates_msgs = get_messages()['dates']
+
+    print(DATE_LABELS['format_patterns'])
     print("-" * 40)
-    
+
     for name, pattern in DATE_FORMATS.items():
         if pattern == 'fromNow':
-            example = "e.g., '2 hours ago'"
+            example = dates_msgs['from_now_example']
         else:
-            # Try to show an example using strftime equivalent
             try:
-                strftime_map = {
-                    'YYYY': '%Y',
-                    'YY': '%y',
-                    'MMMM': '%B',
-                    'MMM': '%b',
-                    'MM': '%m',
-                    'DD': '%d',
-                    'D': '%d',
-                    'dddd': '%A',
-                    'ddd': '%a',
-                    'HH': '%H',
-                    'hh': '%I',
-                    'mm': '%M',
-                    'ss': '%S',
-                    'A': '%p',
-                    'a': '%p',
-                }
                 strftime_pattern = pattern
-                for dayjs, strft in strftime_map.items():
-                    strftime_pattern = strftime_pattern.replace(dayjs, strft)
+                for dayjs_token, strftime_eq in STRFTIME_MAP.items():
+                    strftime_pattern = strftime_pattern.replace(dayjs_token, strftime_eq)
                 example = now.strftime(strftime_pattern)
-
-            except:
+            except Exception:
                 example = pattern
-        
+
         print(f"  {name:12} {pattern:30} {example}")
-    
-    print("\n\nDay.js Token Reference:")
+
+    print(f"\n\n{DATE_LABELS['dayjs_tokens']}")
     print("-" * 40)
-    print("  YYYY = 4-digit year (2024)")
-    print("  YY   = 2-digit year (24)")
-    print("  MMMM = Full month name (January)")
-    print("  MMM  = Abbreviated month (Jan)")
-    print("  MM   = 2-digit month (01)")
-    print("  DD   = 2-digit day (05)")
-    print("  D    = Day of month (5)")
-    print("  dddd = Full weekday (Monday)")
-    print("  ddd  = Abbreviated weekday (Mon)")
-    print("  HH   = 24-hour (14)")
-    print("  hh   = 12-hour (02)")
-    print("  mm   = Minutes (30)")
-    print("  ss   = Seconds (45)")
-    print("  A    = AM/PM")
-    
+    for token in DAYJS_TOKENS:
+        print(f"  {token['token']:4} = {token['description']} ({token['example']})")
+
     return 0
 
 
@@ -1984,40 +2019,42 @@ def cmd_licenses(args):
     if args.license:
         # Show specific license
         if args.license not in LICENSE_TYPES:
-            print(f"Unknown license: {args.license}")
-            print(f"Available: {', '.join(LICENSE_TYPES.keys())}")
+            print(ERROR_MESSAGES['unknown_license'].format(license=args.license))
+            print(
+                ERROR_MESSAGES['available_licenses'].format(
+                    list=', '.join(LICENSE_TYPES.keys())
+                )
+            )
             return 1
         
         lic = LICENSE_TYPES[args.license]
-        print(f"License: {lic['name']}")
+        print(f"{LICENSE_LABELS['name']} {lic['name']}")
         print("=" * 60)
         if lic['url']:
-            print(f"URL: {lic['url']}")
-        print(f"\nAllows: {', '.join(lic['allows']) if lic['allows'] else 'None'}")
-        print(f"Requires: {', '.join(lic['requires']) if lic['requires'] else 'None'}")
+            print(f"{LICENSE_LABELS['url']} {lic['url']}")
+        allows = ', '.join(lic['allows']) if lic['allows'] else MAIN_LABELS['none']
+        requires = ', '.join(lic['requires']) if lic['requires'] else MAIN_LABELS['none']
+        print(f"\n{LICENSE_LABELS['allows']} {allows}")
+        print(f"{LICENSE_LABELS['requires']} {requires}")
         return 0
     
-    print("Creative Commons Licenses")
+    print(HEADERS['cc_licenses'])
     print("=" * 60)
-    print("(Used for model licensing on Sketchfab)")
+    print(SUBHEADERS['used_for_licensing'])
     print()
     
     for code, lic in LICENSE_TYPES.items():
         print(f"\n{code}")
-        print(f"  Name: {lic['name']}")
+        print(f"  {LICENSE_LABELS['name']} {lic['name']}")
         allows = ', '.join(lic['allows']) if lic['allows'] else 'None'
         requires = ', '.join(lic['requires']) if lic['requires'] else 'None'
-        print(f"  Allows: {allows}")
-        print(f"  Requires: {requires}")
+        print(f"  {LICENSE_LABELS['allows']} {allows}")
+        print(f"  {LICENSE_LABELS['requires']} {requires}")
     
-    print("\n\nPermission Types:")
+    print(f"\n\n{LICENSE_LABELS['permission_types_header']}")
     print("-" * 40)
-    print("  commercial    - Use for commercial purposes")
-    print("  modify        - Create derivative works")
-    print("  distribute    - Share and redistribute")
-    print("  attribution   - Credit the original author")
-    print("  share-alike   - Use same license for derivatives")
-    print("  non-commercial - No commercial use allowed")
+    for perm in PERMISSION_TYPES:
+        print(f"  {perm['name']:15} - {perm['description']}")
     
     return 0
 
@@ -2025,30 +2062,22 @@ def cmd_licenses(args):
 def cmd_webgl(args):
     """Display WebGL error types and troubleshooting."""
     
-    print("WebGL Error Types & Troubleshooting")
+    print(HEADERS['webgl_errors'])
     print("=" * 60)
     print()
     
     for error_type, info in WEBGL_ERRORS.items():
         print(f"\n{error_type.upper()}")
         print("-" * 40)
-        print(f"Title: {info['title']}")
-        print(f"Message: {info['message']}")
-        print("Suggestions:")
+        print(f"{WEBGL_LABELS['title']} {info['title']}")
+        print(f"{WEBGL_LABELS['message']} {info['message']}")
+        print(WEBGL_LABELS['suggestions'])
         for suggestion in info['suggestions']:
             print(f"  • {suggestion}")
     
-    print("\n\nWebGL Detection Code:")
+    print(f"\n\n{WEBGL_LABELS['detection_header']}")
     print("-" * 40)
-    print("""
-  const canvas = document.createElement('canvas');
-  const gl = canvas.getContext('webgl2') ||
-             canvas.getContext('webgl') ||
-             canvas.getContext('experimental-webgl');
-  if (!gl) {
-    // WebGL not supported
-  }
-""")
+    print(CODE_SNIPPETS['webgl_detection'])
     
     return 0
 
@@ -2056,42 +2085,29 @@ def cmd_webgl(args):
 def cmd_animation(args):
     """Display spring animation presets."""
     
-    print("Spring Animation Presets")
+    print(HEADERS['spring_animation'])
     print("=" * 60)
-    print("(Physics-based animation configurations)")
+    print(SUBHEADERS['physics_based'])
     print()
     
     for name, preset in SPRING_PRESETS.items():
         print(f"\n{name.upper()}")
-        print(f"  Stiffness: {preset['stiffness']}")
-        print(f"  Damping: {preset['damping']}")
-        print(f"  Description: {preset['desc']}")
+        print(f"  {ANIMATION_LABELS['stiffness']} {preset['stiffness']}")
+        print(f"  {ANIMATION_LABELS['damping']} {preset['damping']}")
+        print(f"  {ANIMATION_LABELS['description']} {preset['desc']}")
     
-    print("\n\nSpring Physics Formula:")
+    print(f"\n\n{ANIMATION_LABELS['formula_header']}")
     print("-" * 40)
-    print("  F = -k * x  (Spring force)")
-    print("  F = -c * v  (Damping force)")
-    print("  a = F / m   (Acceleration)")
+    for formula in SPRING_FORMULAS:
+        print(f"  {formula['formula']}  ({formula['description']})")
     print()
-    print("  k = stiffness (higher = bouncier)")
-    print("  c = damping (higher = less oscillation)")
-    print("  m = mass (default: 1)")
+    for variable in SPRING_VARIABLES:
+        print(f"  {variable['var']} = {variable['description']}")
     
     if args.generate_js:
-        print("\n\nJavaScript Implementation:")
+        print(f"\n\n{ANIMATION_LABELS['js_impl_header']}")
         print("-" * 40)
-        print("""
-function springStep(position, velocity, target, config, dt) {
-  const { stiffness, damping, mass = 1 } = config;
-  const springForce = -stiffness * (position - target);
-  const dampingForce = -damping * velocity;
-  const acceleration = (springForce + dampingForce) / mass;
-  return {
-    position: position + velocity * dt,
-    velocity: velocity + acceleration * dt
-  };
-}
-""")
+        print(CODE_SNIPPETS['spring_js'])
     
     return 0
 
@@ -2099,9 +2115,9 @@ function springStep(position, velocity, target, config, dt) {
 def cmd_privacy(args):
     """Display cookie consent categories."""
     
-    print("Cookie Consent Categories")
+    print(HEADERS['cookie_consent'])
     print("=" * 60)
-    print("(OneTrust/GDPR consent management)")
+    print(SUBHEADERS['onetrust_gdpr'])
     print()
     
     for code, cat in CONSENT_CATEGORIES.items():
@@ -2109,20 +2125,9 @@ def cmd_privacy(args):
         print(f"\n{code} - {cat['name']} [{required}]")
         print(f"  {cat['description']}")
     
-    print("\n\nUsage Pattern:")
+    print(f"\n\n{PRIVACY_LABELS['usage_header']}")
     print("-" * 40)
-    print("""
-  // Check consent before loading tracking
-  if (OneTrust.IsActiveGroup('C0002')) {
-    // Load analytics (Performance)
-    loadGoogleAnalytics();
-  }
-  
-  if (OneTrust.IsActiveGroup('C0004')) {
-    // Load advertising (Targeting)
-    loadFacebookPixel();
-  }
-""")
+    print(CODE_SNIPPETS['consent_usage'])
     
     return 0
 
@@ -2130,9 +2135,9 @@ def cmd_privacy(args):
 def cmd_model_fields(args):
     """Display model property field definitions."""
     
-    print("Model Property Fields")
+    print(HEADERS['model_props'])
     print("=" * 60)
-    print("(Field definitions for model metadata)")
+    print(SUBHEADERS['field_definitions'])
     print()
     
     for field_name, field_def in MODEL_PROPERTIES.items():
@@ -2142,7 +2147,7 @@ def cmd_model_fields(args):
             if key != 'type':
                 print(f"  {key}: {value}")
     
-    print("\n\nUser Profile Field Groups:")
+    print(f"\n\n{MODEL_FIELDS_LABELS['groups_header']}")
     print("-" * 40)
     for group, fields in USER_PROFILE_FIELDS.items():
         print(f"\n{group.upper()}:")
@@ -2155,41 +2160,19 @@ def cmd_model_fields(args):
 def cmd_grid(args):
     """Display responsive grid configuration."""
     
-    print("Responsive Grid Configuration")
+    print(HEADERS['responsive_grid'])
     print("=" * 60)
     print()
     
     for size, config in GRID_COLUMNS.items():
-        print(f"{size.upper():10} {config['columns']} columns @ {config['breakpoint']}px+")
+        print(
+            f"{size.upper():10} "
+            f"{GRID_LABELS['columns_at'].format(cols=config['columns'], breakpoint=config['breakpoint'])}"
+        )
     
-    print("\n\nCSS Grid Implementation:")
+    print(f"\n\n{GRID_LABELS['css_impl_header']}")
     print("-" * 40)
-    print("""
-.grid {
-  display: grid;
-  gap: 16px;
-}
-
-/* Mobile: 2 columns */
-@media (max-width: 767px) {
-  .grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-/* Tablet: 3 columns */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .grid { grid-template-columns: repeat(3, 1fr); }
-}
-
-/* Desktop: 4 columns */
-@media (min-width: 1024px) and (max-width: 1439px) {
-  .grid { grid-template-columns: repeat(4, 1fr); }
-}
-
-/* Wide: 5 columns */
-@media (min-width: 1440px) {
-  .grid { grid-template-columns: repeat(5, 1fr); }
-}
-""")
+    print(CODE_SNIPPETS['css_grid'])
     
     return 0
 
@@ -2197,9 +2180,9 @@ def cmd_grid(args):
 def cmd_placements(args):
     """Display UI popup/tooltip placement options."""
     
-    print("Popup/Tooltip Placements")
+    print(HEADERS['popup_placements'])
     print("=" * 60)
-    print("(Floating UI positioning options)")
+    print(SUBHEADERS['floating_ui'])
     print()
     
     # Group by direction
@@ -2212,27 +2195,21 @@ def cmd_placements(args):
         print(f"\n{direction.upper()}:")
         for p in placements:
             suffix = p.replace(direction, '').lstrip('-') or 'center'
-            print(f"  {p:15} (aligned {suffix})")
+            print(
+                f"  {p:15} "
+                f"{PLACEMENTS_LABELS['aligned'].format(suffix=suffix)}"
+            )
     
-    print("\n\nUsage Example (Floating UI):")
+    print(f"\n\n{PLACEMENTS_LABELS['usage_header']}")
     print("-" * 40)
-    print("""
-const { x, y } = useFloating({
-  placement: 'bottom-start',
-  middleware: [
-    offset(8),
-    flip(),
-    shift({ padding: 8 })
-  ]
-});
-""")
+    print(CODE_SNIPPETS['floating_ui'])
     
     return 0
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Sketchfab Model Tools CLI",
+        description=_STRINGS['cli_description'],
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
 
@@ -2263,10 +2240,10 @@ def main():
     try:
         return args.func(args)
     except KeyboardInterrupt:
-        print("\nInterrupted by user")
+        print(f"\n{_STRINGS['interrupt_message']}")
         return 1
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        print(_STRINGS['unexpected_error'].format(error=e))
         return 1
 
 
