@@ -12,7 +12,7 @@ def cmd_dates(args):
     
     from datetime import datetime
     now = datetime.now()
-    dates_msgs = get_messages()['dates']
+    dates_msgs = DATES_MESSAGES
 
     print(DATE_LABELS['format_patterns'])
     print("-" * 40)

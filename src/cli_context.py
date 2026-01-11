@@ -200,6 +200,7 @@ PERMISSION_TYPES = get_permission_types()
 SPRING_FORMULAS = get_spring_formulas()
 SPRING_VARIABLES = get_spring_variables()
 MARKDOWN_EXAMPLES = get_markdown_examples()
+DATES_MESSAGES = _STRINGS.get('messages_dates', {})
 CLI_DESCRIPTION = _STRINGS['cli_description']
 INTERRUPT_MESSAGE = _STRINGS['interrupt_message']
 UNEXPECTED_ERROR = _STRINGS['unexpected_error']
