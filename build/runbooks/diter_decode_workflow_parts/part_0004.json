@@ -1,0 +1,39 @@
+{
+  "nodes": [
+    {
+      "id": "extract-key",
+      "name": "Extract Key",
+      "type": "diter.action",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        160
+      ],
+      "parameters": {
+        "action": "extract_key_hex",
+        "text": "@key_source_text",
+        "outputs": {
+          "key_hex": "extracted_key_hex"
+        }
+      }
+    },
+    {
+      "id": "select-key",
+      "name": "Select Key",
+      "type": "diter.action",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        160
+      ],
+      "parameters": {
+        "action": "select_key",
+        "key_hex": "@key_hex",
+        "fallback_key_hex": "@extracted_key_hex",
+        "outputs": {
+          "key_hex": "key_hex_final"
+        }
+      }
+    }
+  ]
+}

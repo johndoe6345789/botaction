@@ -1,0 +1,26 @@
+{
+  "nodes": [
+    {
+      "id": "engine-decode",
+      "name": "Engine Decode",
+      "type": "diter.action",
+      "typeVersion": 1,
+      "position": [
+        2440,
+        200
+      ],
+      "parameters": {
+        "action": "engine_decode",
+        "binz_bytes": "@binz_bytes",
+        "dict_bytes": "@dict_bytes",
+        "needs_key": "@needs_key",
+        "key_hex": "@key_hex_final",
+        "output_path": "@out_path",
+        "chunk_size": "@chunk_size",
+        "outputs": {
+          "output_size": "output_size"
+        }
+      }
+    }
+  ]
+}

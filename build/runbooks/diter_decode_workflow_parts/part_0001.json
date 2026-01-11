@@ -1,0 +1,132 @@
+{
+  "nodes": [
+    {
+      "id": "trigger-manual",
+      "name": "Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "read-params",
+      "name": "Read Params",
+      "type": "diter.action",
+      "typeVersion": 1,
+      "position": [
+        480,
+        200
+      ],
+      "parameters": {
+        "action": "read_text",
+        "path": "@params_path",
+        "outputs": {
+          "text": "params_text"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "Read Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "Read Params": {
+      "main": {
+        "0": [
+          {
+            "node": "Parse Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "Parse Params": {
+      "main": {
+        "0": [
+          {
+            "node": "Decode Dict",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "Decode Dict": {
+      "main": {
+        "0": [
+          {
+            "node": "Read Binz",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "Read Binz": {
+      "main": {
+        "0": [
+          {
+            "node": "Read Key Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "Read Key Source": {
+      "main": {
+        "0": [
+          {
+            "node": "Extract Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "Extract Key": {
+      "main": {
+        "0": [
+          {
+            "node": "Select Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "Select Key": {
+      "main": {
+        "0": [
+          {
+            "node": "Engine Decode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "meta": {
+    "inputs": {
+      "params_path": "downloads/dea4f17e94974e1fa720cbadc531ed63_7dffeb160ae740c082d33243f011454f_params.json",
+      "binz_path": "downloads/dea4f17e94974e1fa720cbadc531ed63_7dffeb160ae740c082d33243f011454f.binz",
+      "out_path": "build/diter_decode_output.bin",
+      "key_hex": "",
+      "key_source_path": "downloads/diter_standalone.js",
+      "chunk_size": 10240
+    }
+  }
+}

@@ -371,7 +371,40 @@ def main() -> None:
     args = parser.parse_args()
 
     workflow_path = Path(args.workflow)
-    doc = json.loads(workflow_path.read_text(encoding="utf-8"))
+
+    def merge_workflow(base: dict[str, Any], part: dict[str, Any]) -> dict[str, Any]:
+        if "nodes" in part:
+            base.setdefault("nodes", [])
+            base["nodes"].extend(part.get("nodes", []))
+        if "connections" in part:
+            base.setdefault("connections", {})
+            for src, by_type in part.get("connections", {}).items():
+                if src not in base["connections"]:
+                    base["connections"][src] = by_type
+                else:
+                    for typ, outputs in by_type.items():
+                        base["connections"][src].setdefault(typ, {})
+                        base["connections"][src][typ].update(outputs)
+        if "meta" in part:
+            base.setdefault("meta", {})
+            base["meta"].update(part.get("meta", {}))
+        return base
+
+    def load_workflow(path: Path) -> dict[str, Any]:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        parts = doc.get("parts")
+        if not parts:
+            return doc
+        merged: dict[str, Any] = {k: v for k, v in doc.items() if k != "parts"}
+        for part in parts:
+            part_path = Path(part)
+            if not part_path.is_absolute():
+                part_path = path.parent / part_path
+            part_doc = json.loads(part_path.read_text(encoding="utf-8"))
+            merged = merge_workflow(merged, part_doc)
+        return merged
+
+    doc = load_workflow(workflow_path)
 
     context = {}
     meta_inputs = doc.get("meta", {}).get("inputs", {})

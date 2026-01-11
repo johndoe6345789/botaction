@@ -1,0 +1,39 @@
+{
+  "nodes": [
+    {
+      "id": "parse-params",
+      "name": "Parse Params",
+      "type": "diter.action",
+      "typeVersion": 1,
+      "position": [
+        760,
+        200
+      ],
+      "parameters": {
+        "action": "parse_params",
+        "text": "@params_text",
+        "outputs": {
+          "dict_b64": "dict_b64",
+          "needs_key": "needs_key"
+        }
+      }
+    },
+    {
+      "id": "decode-dict",
+      "name": "Decode Dict",
+      "type": "diter.action",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        200
+      ],
+      "parameters": {
+        "action": "decode_dict",
+        "dict_b64": "@dict_b64",
+        "outputs": {
+          "dict_bytes": "dict_bytes"
+        }
+      }
+    }
+  ]
+}

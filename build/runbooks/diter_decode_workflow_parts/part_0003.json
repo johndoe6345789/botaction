@@ -1,0 +1,39 @@
+{
+  "nodes": [
+    {
+      "id": "read-binz",
+      "name": "Read Binz",
+      "type": "diter.action",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        200
+      ],
+      "parameters": {
+        "action": "read_bytes",
+        "path": "@binz_path",
+        "outputs": {
+          "bytes": "binz_bytes"
+        }
+      }
+    },
+    {
+      "id": "read-key-source",
+      "name": "Read Key Source",
+      "type": "diter.action",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        160
+      ],
+      "parameters": {
+        "action": "read_text",
+        "path": "@key_source_path",
+        "optional": true,
+        "outputs": {
+          "text": "key_source_text"
+        }
+      }
+    }
+  ]
+}
