@@ -212,10 +212,10 @@ def extract_model_id(url_or_id):
         return url_or_id
 
     patterns = [
-        r'sketchfab\\.com/(?:3d-)?models/[^/]+-([a-f0-9]{32})',
-        r'sketchfab\\.com/(?:3d-)?models/([a-f0-9]{32})',
-        r'sketchfab\\.com/models/([a-f0-9]{32})',
-        r'/([a-f0-9]{32})(?:/embed)?(?:\\?|$)',
+        r'sketchfab\.com/(?:3d-)?models/[^/]+-([a-f0-9]{32})',
+        r'sketchfab\.com/(?:3d-)?models/([a-f0-9]{32})',
+        r'sketchfab\.com/models/([a-f0-9]{32})',
+        r'/([a-f0-9]{32})(?:/embed)?(?:\?|$)',
     ]
 
     for pattern in patterns:
