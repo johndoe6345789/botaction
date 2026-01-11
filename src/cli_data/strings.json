@@ -315,6 +315,19 @@
       "json_parse_error": "Could not parse JSON from {url}",
       "completed": "Completed! Downloaded {count} JavaScript files to {dir}",
       "processed_pages": "Processed {count} pages"
+    },
+    "wasm_tools": {
+      "extracting": "Extracting DITER module from chunks...",
+      "deobfuscating": "Deobfuscating standalone module...",
+      "decoding_wasm": "Decoding WASM base64...",
+      "converting_wat": "Converting WASM to WAT...",
+      "decompiling": "Decompiling WASM...",
+      "missing_script": "Error: script not found: {path}",
+      "missing_input": "Error: input file not found: {path}",
+      "missing_tool": "Error: tool not found: {name}",
+      "command_failed": "Error: {step} failed: {error}",
+      "wrote": "Wrote: {path}",
+      "wrote_deps": "Wrote dependency graph: {path}"
     }
   },
   "labels": {

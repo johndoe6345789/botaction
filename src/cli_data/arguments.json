@@ -114,6 +114,25 @@
         {"name": "--verbose", "action": "store_true", "help": "Show verbose output"}
       ]
     },
+    "wasm-tools": {
+      "help": "Run WASM reverse tooling (extract/deobfuscate/convert/decompile)",
+      "func": "cmd_wasm_tools",
+      "arguments": [
+        {"name": "--action", "default": "all", "choices": ["all", "extract", "deobfuscate", "decode-wasm", "wat", "decompile"], "help": "Which step to run"},
+        {"name": "--chunks", "help": "Comma-separated list of JS chunk paths for extraction"},
+        {"name": "--module", "default": "kbo/", "help": "Webpack module id to extract"},
+        {"name": "--standalone", "default": "downloads/diter_standalone.js", "help": "Standalone JS path"},
+        {"name": "--deps", "default": "downloads/diter_dependencies.json", "help": "Dependency graph output path"},
+        {"name": "--deob", "default": "downloads/diter_standalone_deob.js", "help": "Deobfuscated JS output path"},
+        {"name": "--wasm-b64", "default": "downloads/diter_wasm_blob.js", "help": "WASM base64 JS path"},
+        {"name": "--wasm", "default": "downloads/diter_wasm_blob.wasm", "help": "WASM binary path"},
+        {"name": "--wat", "default": "downloads/diter_wasm_blob.wat", "help": "WAT output path"},
+        {"name": "--decompile", "default": "downloads/diter_wasm_blob.c", "help": "Decompiled C output path"},
+        {"name": "--rename-len", "type": "int", "default": 2, "help": "Rename identifiers of length <= N during deobfuscation"},
+        {"name": "--no-names", "action": "store_true", "help": "Do not generate names in WAT output"},
+        {"name": "--fold-exprs", "action": "store_true", "help": "Fold WAT expressions"}
+      ]
+    },
     "embed": {
       "help": "Generate embed URL or iframe code for a Sketchfab model",
       "func": "cmd_embed",
