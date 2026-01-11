@@ -6,6 +6,10 @@
 
 typedef struct DiterEngine DiterEngine;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 DiterEngine* diter_engine_create(void);
 void diter_engine_destroy(DiterEngine* engine);
 
@@ -18,5 +22,9 @@ int diter_engine_write_chunk(DiterEngine* engine, const uint8_t* data, size_t le
 int diter_engine_pump(DiterEngine* engine);
 const uint8_t* diter_engine_output(DiterEngine* engine, uint32_t* out_len);
 void diter_engine_output_advance(DiterEngine* engine);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
