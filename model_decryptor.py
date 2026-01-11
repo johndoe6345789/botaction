@@ -117,26 +117,41 @@ class SketchfabDecryptor:
         """
         Decrypt and then decompress a .binz file.
         
+        Note: Decrypted .binz files may NOT be compressed!
+        They can be raw binary geometry data.
+        
         Args:
             encrypted_path: Path to encrypted file
             params: Encryption parameters
             
         Returns:
-            Decompressed binary geometry data
+            Binary geometry data (decompressed if it was compressed)
         """
         import zlib
         
         # First decrypt
         decrypted = self.decrypt_file(encrypted_path, params)
         
-        # Then decompress
-        try:
-            return zlib.decompress(decrypted)
-        except zlib.error:
+        # Check if it looks like zlib-compressed data
+        # zlib header bytes: 78 01 (no compression), 78 9C (default), 78 DA (max compression)
+        if len(decrypted) >= 2 and decrypted[0] == 0x78 and decrypted[1] in (0x01, 0x9C, 0xDA):
+            # Looks like zlib, try to decompress
             try:
-                return zlib.decompress(decrypted, -zlib.MAX_WBITS)
+                return zlib.decompress(decrypted)
             except zlib.error:
-                return zlib.decompress(decrypted, zlib.MAX_WBITS | 16)
+                try:
+                    return zlib.decompress(decrypted, -zlib.MAX_WBITS)
+                except zlib.error:
+                    try:
+                        return zlib.decompress(decrypted, zlib.MAX_WBITS | 16)
+                    except zlib.error:
+                        # Not compressed, return as-is
+                        print("Warning: Data has zlib-like header but decompression failed, returning as-is")
+                        return decrypted
+        else:
+            # Not zlib-compressed, return raw binary data
+            print("Note: Data is not zlib-compressed, returning raw binary")
+            return decrypted
 
 
 def decrypt_model(
