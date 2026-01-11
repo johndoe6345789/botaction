@@ -10,6 +10,19 @@
         {"name": "--save-meta", "action": "store_true", "help": "Save metadata to JSON file"}
       ]
     },
+    "archive": {
+      "help": "Download model archive via internal API",
+      "func": "cmd_archive",
+      "arguments": [
+        {"name": "model_id_or_url", "help": "Model ID or Sketchfab URL"},
+        {"name": "--archive-type", "default": "gltf", "help": "Archive type (gltf, glb, source, usdz)"},
+        {"name": "--output-dir", "default": "downloads", "help": "Output directory for downloads (default: downloads)"},
+        {"name": "--output", "help": "Output file path (optional)"},
+        {"name": "--cookie-jar", "help": "Path to Netscape/Mozilla cookies.txt"},
+        {"name": "--url-only", "action": "store_true", "help": "Print archive URL without downloading"},
+        {"name": "--json", "action": "store_true", "help": "Print raw JSON response"}
+      ]
+    },
     "decrypt": {
       "help": "Decrypt .binz file",
       "func": "cmd_decrypt",
