@@ -514,7 +514,7 @@ def cmd_download_js(args):
                                 if not path or path.endswith('/') or '.' not in path.split('/')[-1]:
                                     url_queue.append(link_url)
 
-                # Process JSON files that might contain JS references
+                # Process JSON files that might contain JS references and API endpoints
                 elif 'application/json' in content_type and args.parse_json:
                     try:
                         json_data = response.json()
@@ -525,12 +525,12 @@ def cmd_download_js(args):
                             if isinstance(obj, dict):
                                 for key, value in obj.items():
                                     current_path = f"{path}.{key}" if path else key
-                                    if isinstance(value, str) and (value.endswith('.js') or '.js' in value):
-                                        # Check if it looks like a URL
+                                    if isinstance(value, str):
+                                        # Check if it looks like a URL (JS files or API endpoints)
                                         if value.startswith(('http://', 'https://', '//')):
                                             urls.append(value)
-                                        elif value.startswith('/'):
-                                            # Relative URL
+                                        elif value.startswith('/') and ('.js' in value or '/api/' in value or value.endswith('.json')):
+                                            # Relative URL that looks like JS or API
                                             urls.append(urljoin(args.url, value))
                                     else:
                                         urls.extend(find_urls(value, current_path))
@@ -539,7 +539,20 @@ def cmd_download_js(args):
                                     urls.extend(find_urls(item, f"{path}[{i}]"))
                             return urls
 
-                        js_urls = find_urls(json_data)
+                        found_urls = find_urls(json_data)
+
+                        # Separate JS files from potential API endpoints
+                        js_urls = []
+                        api_urls = []
+
+                        for found_url in found_urls:
+                            if '.js' in found_url:
+                                js_urls.append(found_url)
+                            elif found_url.endswith('.json') or '/api/' in found_url or found_url.count('/') > 3:
+                                # Likely an API endpoint or JSON file
+                                api_urls.append(found_url)
+
+                        # Download JS files
                         for js_url in js_urls:
                             if js_url in downloaded_files:
                                 continue
@@ -570,6 +583,18 @@ def cmd_download_js(args):
                             except requests.RequestException as e:
                                 if args.verbose:
                                     print(f"  Failed to download JSON JS {js_url}: {e}")
+
+                        # Add API endpoints to processing queue for recursive discovery
+                        for api_url in api_urls:
+                            if api_url not in processed_urls:
+                                parsed_api = urlparse(api_url)
+                                parsed_base = urlparse(args.url)
+
+                                # Only follow APIs on the same domain (unless external domains allowed)
+                                if args.external_domains or parsed_api.netloc == parsed_base.netloc:
+                                    url_queue.append(api_url)
+                                    if args.verbose:
+                                        print(f"  Found API endpoint in JSON: {api_url}")
 
                     except json.JSONDecodeError:
                         if args.verbose:
@@ -683,7 +708,7 @@ def main():
     download_js_parser.add_argument('--external-domains', action='store_true',
                                    help='Download JS files from external domains')
     download_js_parser.add_argument('--parse-json', action='store_true',
-                                   help='Parse JSON responses for additional JS file references')
+                                   help='Parse JSON responses for JS files and recursively follow API endpoints')
     download_js_parser.add_argument('--verbose', action='store_true',
                                    help='Show verbose output')
     download_js_parser.set_defaults(func=cmd_download_js)
