@@ -17,17 +17,23 @@ Python tools for working with Sketchfab 3D models and their file formats.
 
 ```
 .
-├── src/              # Main source code
-│   ├── binz_reader.py         # Parse .binz binary files
-│   ├── model_decryptor.py     # Decrypt Sketchfab models
-│   ├── model_viewer.py        # 3D viewer (PyQt6 + OpenGL)
-│   ├── sketchfab_fetcher.py   # Fetch from Sketchfab API
-│   ├── sketchfab_gui.py       # GUI application
-│   └── sketchfab_utils.py     # Utility functions
+├── src/              # Main source code package
+│   ├── __init__.py           # Package initialization
+│   ├── __main__.py           # Module entry point
+│   ├── binz_reader.py        # Parse .binz binary files
+│   ├── model_decryptor.py    # Decrypt Sketchfab models
+│   ├── model_viewer.py       # 3D viewer (PyQt6 + OpenGL)
+│   ├── sketchfab_fetcher.py  # Fetch from Sketchfab API
+│   ├── sketchfab_gui.py      # GUI application
+│   ├── sketchfab_utils.py    # Utility functions
+│   ├── cli.py                # Command-line interface
+│   └── export_3mf.py         # Export to 3MF format
 ├── tests/            # Test scripts
 ├── demos/            # Demo scripts
-├── scripts/          # Utility scripts
 ├── docs/             # Documentation
+├── data/             # Data files
+└── downloads/        # Downloaded models
+```
 ├── data/             # Data files
 └── downloads/        # Downloaded models
 ```
@@ -37,6 +43,21 @@ Python tools for working with Sketchfab 3D models and their file formats.
 ```bash
 # Install dependencies
 pip install requests numpy pycryptodome PyQt6
+
+# Use the command-line interface
+python -m src --help
+
+# Fetch a model
+python -m src fetch "https://sketchfab.com/3d-models/model-name-abc123" --download
+
+# Decrypt a downloaded model
+python -m src decrypt downloads/model.binz --params-file downloads/model_params.json --output model_decrypted.bin
+
+# Inspect a model file
+python -m src inspect downloads/model.binz
+
+# Export to 3MF format
+python -m src export model_decrypted.bin --output model.3mf
 
 # Launch GUI application
 python -m src.sketchfab_gui
