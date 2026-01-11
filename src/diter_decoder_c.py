@@ -7,11 +7,12 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 
 def _resolve_cc() -> str | None:
-    for name in ("cc", "gcc", "clang"):
+    for name in ("c++", "g++", "clang++"):
         found = shutil.which(name)
         if found:
             return found
@@ -36,30 +37,25 @@ def build_decoder(build_dir: Path | None = None) -> Path:
 
     cc = _resolve_cc()
     if not cc:
-        raise RuntimeError("C compiler not found (need cc/gcc/clang).")
+        raise RuntimeError("C++ compiler not found (need c++/g++/clang++).")
 
     exe_name = "diter_decode_c.exe" if os.name == "nt" else "diter_decode_c"
     exe = build_dir / exe_name
     src_dir = root / "src"
-    core_c = src_dir / "diter_core.c"
-    core_h = src_dir / "diter_core.h"
-    rt_impl = src_dir / "diter_rt.c"
-    wrapper = src_dir / "diter_decode_c.c"
-    engine = src_dir / "diter_engine.c"
-    if _needs_rebuild(exe, [core_c, core_h, rt_impl, wrapper, engine]):
+    wrapper = src_dir / "diter_decode_c.cc"
+    if _needs_rebuild(exe, [wrapper]):
         cmd = [
             cc,
             "-O2",
-            "-std=c11",
+            "-std=c++17",
             "-I",
             str(src_dir),
             "-o",
             str(exe),
             str(wrapper),
-            str(engine),
-            str(core_c),
-            str(rt_impl),
         ]
+        if sys.platform.startswith("linux"):
+            cmd.append("-ldl")
         subprocess.run(cmd, check=True)
     return exe
 
