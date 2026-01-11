@@ -188,6 +188,42 @@ Scene description files (JSON) that define:
 | `GET /v3/models/{id}` | Public API model metadata |
 | `GET /models/{id}/embed` | Embed page with viewer config |
 
+## Challenges with Encrypted Models
+
+### Problem Overview
+Encrypted Sketchfab models, such as the "Annihilator 2000," present unique challenges:
+- **Encryption**: Models are protected with AES-256-CBC encryption.
+- **Missing Layout Info**: The `.osgjs` file, which typically provides buffer layout information, is inaccessible (returns an "Access Denied" error).
+- **Binary Parsing**: Decrypted `.binz` files lack clear structure, making it difficult to extract geometry data without layout metadata.
+
+### Progress
+1. **Decryption Success**:
+   - Implemented AES-256-CBC decryption using PyCryptodome.
+   - Decrypted binary data matches expected file size but lacks recognizable patterns.
+
+2. **Binary Analysis**:
+   - Compared decrypted data with test models (e.g., `test_cube.binz`).
+   - Identified scattered `float32` values but no clear vertex/index structure.
+
+3. **JS Viewer Investigation**:
+   - Downloaded and analyzed minified JavaScript files from Sketchfab's viewer.
+   - Found references to geometry parsing but blocked by obfuscation.
+
+### Next Steps
+- **Reverse-Engineering**:
+  - Analyze decrypted binary data for patterns (e.g., headers, offsets, repeated blocks).
+  - Attempt to infer buffer layout heuristically.
+- **Alternative Approaches**:
+  - Investigate Sketchfab's web viewer for runtime buffer layout extraction.
+  - Explore other models with accessible `.osgjs` files for layout examples.
+
+### Lessons Learned
+- `.osgjs` files are critical for parsing `.binz` geometry.
+- Minified JavaScript files hinder direct extraction of parsing logic.
+- Binary analysis requires careful comparison with known formats (e.g., test models).
+
+For detailed technical notes, see [docs/SOLUTION_SUMMARY.md](docs/SOLUTION_SUMMARY.md).
+
 ## Limitations
 
 - Model geometry files are encrypted
