@@ -6,6 +6,7 @@ Python tools for working with Sketchfab 3D models and their file formats.
 
 | File | Description |
 |------|-------------|
+| `sketchfab_gui.py` | PyQt6 GUI application for fetching and analyzing models |
 | `sketchfab_fetcher.py` | Fetch model metadata, file URLs, and download assets from Sketchfab |
 | `binz_reader.py` | Parse and analyze `.binz` binary geometry files |
 | `sketchfab_utils.py` | Ported utilities from Sketchfab's JS codebase (color conversion, etc.) |
@@ -13,8 +14,24 @@ Python tools for working with Sketchfab 3D models and their file formats.
 ## Installation
 
 ```bash
-pip install requests numpy pycryptodome
+pip install requests numpy pycryptodome PyQt6
 ```
+
+## GUI Application
+
+Launch the graphical interface:
+
+```bash
+python sketchfab_gui.py
+```
+
+Features:
+- Enter any Sketchfab model URL to fetch metadata
+- View model info: name, author, views, likes, face/vertex count
+- See encryption details and key material
+- Browse file URLs and sizes
+- Download model files and thumbnails
+- Dark theme UI
 
 ## Usage
 
