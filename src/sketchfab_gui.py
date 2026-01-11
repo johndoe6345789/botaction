@@ -20,10 +20,10 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize
 from PyQt6.QtGui import QPixmap, QFont, QIcon, QPalette, QColor, QAction, QClipboard
 
-from sketchfab_fetcher import SketchfabFetcher
+from .sketchfab_fetcher import SketchfabFetcher
 
 try:
-    from model_viewer import ModelViewerPanel
+    from .model_viewer import ModelViewerPanel
     MODEL_VIEWER_AVAILABLE = True
 except ImportError as e:
     print(f"Model viewer not available: {e}")
