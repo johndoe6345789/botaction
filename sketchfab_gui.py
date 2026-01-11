@@ -22,6 +22,13 @@ from PyQt6.QtGui import QPixmap, QFont, QIcon, QPalette, QColor, QAction, QClipb
 
 from sketchfab_fetcher import SketchfabFetcher
 
+try:
+    from model_viewer import ModelViewerPanel
+    MODEL_VIEWER_AVAILABLE = True
+except ImportError as e:
+    print(f"Model viewer not available: {e}")
+    MODEL_VIEWER_AVAILABLE = False
+
 
 class FetchWorker(QThread):
     """Background worker for fetching model data."""
@@ -581,6 +588,11 @@ class MainWindow(QMainWindow):
 
         # Right panel - tabs
         self.tabs = QTabWidget()
+
+        # 3D Viewer tab (add first)
+        if MODEL_VIEWER_AVAILABLE:
+            self.viewer_panel = ModelViewerPanel()
+            self.tabs.addTab(self.viewer_panel, "3D Viewer")
 
         # Encryption tab
         self.encryption_panel = EncryptionInfoPanel()

@@ -398,6 +398,82 @@ class BinzReader:
         """Clear the file cache."""
         self._cache.clear()
 
+    def parse_geometry_from_params(
+        self,
+        data: bytes,
+        params: List[Dict[str, Any]]
+    ) -> MeshGeometry:
+        """
+        Parse geometry from .binz data using params array from Sketchfab.
+
+        Args:
+            data: Decompressed binary data
+            params: Parameters array from embed config
+
+        Returns:
+            MeshGeometry with parsed buffers
+        """
+        geometry = MeshGeometry()
+
+        # The params array typically contains buffer definitions
+        # Each param describes a buffer with type, offset, and format info
+        for param in params:
+            if not isinstance(param, dict):
+                continue
+
+            # Look for buffer type indicators
+            buffer_type = param.get('type', '')
+            semantic = param.get('semantic', '')
+            
+            # Map common semantics to geometry attributes
+            if 'POSITION' in semantic or 'Vertex' in semantic:
+                geometry.vertices = self._parse_param_buffer(data, param, 3)
+            elif 'NORMAL' in semantic or 'Normal' in semantic:
+                geometry.normals = self._parse_param_buffer(data, param, 3)
+            elif 'TEXCOORD' in semantic or 'TexCoord' in semantic:
+                geometry.uvs = self._parse_param_buffer(data, param, 2)
+            elif 'indices' in semantic.lower() or buffer_type == 'ELEMENT_ARRAY_BUFFER':
+                # Indices are typically 1D
+                geometry.indices = self._parse_param_buffer(data, param, 1)
+
+        return geometry
+
+    def _parse_param_buffer(
+        self,
+        data: bytes,
+        param: Dict[str, Any],
+        item_size: int
+    ) -> Optional[GeometryBuffer]:
+        """Parse a single buffer from param definition."""
+        try:
+            byte_offset = param.get('byteOffset', 0)
+            byte_length = param.get('byteLength', 0)
+            component_type = param.get('componentType', 5126)  # Default to FLOAT
+
+            # GL type constants
+            GL_FLOAT = 5126
+            GL_UNSIGNED_SHORT = 5123
+            GL_UNSIGNED_INT = 5125
+
+            dtype_map = {
+                GL_FLOAT: 'float32',
+                GL_UNSIGNED_SHORT: 'uint16',
+                GL_UNSIGNED_INT: 'uint32',
+            }
+
+            dtype = dtype_map.get(component_type, 'float32')
+
+            return self.parse_buffer(
+                data,
+                dtype=dtype,
+                byte_offset=byte_offset,
+                byte_length=byte_length,
+                item_size=item_size
+            )
+        except Exception as e:
+            print(f"Error parsing param buffer: {e}")
+            return None
+
 
 def auto_detect_geometry(data: bytes) -> Optional[MeshGeometry]:
     """
