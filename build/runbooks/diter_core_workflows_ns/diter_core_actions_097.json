@@ -1,0 +1,113 @@
+{
+  "name": "Diter Core Actions 097",
+  "active": false,
+  "nodes": [
+    {
+      "id": "diter_core_actions_097:wf097-trigger",
+      "name": "diter_core_actions_097:Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "diter_core_actions_097:wf097-fn-000",
+      "name": "diter_core_actions_097:diter_core_f87",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "function": "diter_core_f87",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f88",
+          "diter_core_f89"
+        ]
+      }
+    },
+    {
+      "id": "diter_core_actions_097:wf097-fn-001",
+      "name": "diter_core_actions_097:diter_core_f187",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ],
+      "parameters": {
+        "function": "diter_core_f187",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f142",
+          "diter_core_f143",
+          "diter_core_f146",
+          "diter_core_f147",
+          "diter_core_f152",
+          "diter_core_f153",
+          "diter_core_f154",
+          "diter_core_f155"
+        ]
+      }
+    }
+  ],
+  "connections": {
+    "diter_core_actions_097:Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_actions_097:diter_core_f87",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_actions_097:diter_core_f87": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_actions_097:diter_core_f187",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "diter"
+    },
+    {
+      "name": "actions"
+    }
+  ],
+  "meta": {
+    "source": "src/diter_core.c",
+    "chunkIndex": 97,
+    "functionCount": 2
+  },
+  "settings": {
+    "timezone": "UTC",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveDataManualExecution": "all"
+  },
+  "triggers": [
+    {
+      "nodeId": "wf097-trigger",
+      "kind": "manual",
+      "enabled": true
+    }
+  ]
+}

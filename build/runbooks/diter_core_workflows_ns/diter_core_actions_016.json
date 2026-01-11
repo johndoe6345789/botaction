@@ -1,0 +1,103 @@
+{
+  "name": "Diter Core Actions 016",
+  "active": false,
+  "nodes": [
+    {
+      "id": "diter_core_actions_016:wf016-trigger",
+      "name": "diter_core_actions_016:Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "diter_core_actions_016:wf016-fn-000",
+      "name": "diter_core_actions_016:diter_core_dmVyIGdvbm5hIHJ1biBhcm91bmQgYW5kI_0",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "function": "diter_core_dmVyIGdvbm5hIHJ1biBhcm91bmQgYW5kI_0",
+        "role": "internal",
+        "exportName": null,
+        "calls": []
+      }
+    },
+    {
+      "id": "diter_core_actions_016:wf016-fn-001",
+      "name": "diter_core_actions_016:diter_core_f106",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ],
+      "parameters": {
+        "function": "diter_core_f106",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f13"
+        ]
+      }
+    }
+  ],
+  "connections": {
+    "diter_core_actions_016:Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_actions_016:diter_core_dmVyIGdvbm5hIHJ1biBhcm91bmQgYW5kI_0",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_actions_016:diter_core_dmVyIGdvbm5hIHJ1biBhcm91bmQgYW5kI_0": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_actions_016:diter_core_f106",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "diter"
+    },
+    {
+      "name": "actions"
+    }
+  ],
+  "meta": {
+    "source": "src/diter_core.c",
+    "chunkIndex": 16,
+    "functionCount": 2
+  },
+  "settings": {
+    "timezone": "UTC",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveDataManualExecution": "all"
+  },
+  "triggers": [
+    {
+      "nodeId": "wf016-trigger",
+      "kind": "manual",
+      "enabled": true
+    }
+  ]
+}

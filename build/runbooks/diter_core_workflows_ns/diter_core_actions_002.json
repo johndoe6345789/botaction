@@ -1,0 +1,143 @@
+{
+  "name": "Diter Core Actions 002",
+  "active": false,
+  "nodes": [
+    {
+      "id": "diter_core_actions_002:wf002-trigger",
+      "name": "diter_core_actions_002:Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "diter_core_actions_002:wf002-fn-000",
+      "name": "diter_core_actions_002:diter_core_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "function": "diter_core_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl",
+        "role": "export",
+        "exportName": "heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl",
+        "calls": [
+          "diter_core_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl_0"
+        ]
+      }
+    },
+    {
+      "id": "diter_core_actions_002:wf002-fn-001",
+      "name": "diter_core_actions_002:diter_core_f92",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ],
+      "parameters": {
+        "function": "diter_core_f92",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f101",
+          "diter_core_f102",
+          "diter_core_f103",
+          "diter_core_f104",
+          "diter_core_f105",
+          "diter_core_f22",
+          "diter_core_f31",
+          "diter_core_f33"
+        ]
+      }
+    },
+    {
+      "id": "diter_core_actions_002:wf002-fn-002",
+      "name": "diter_core_actions_002:diter_core_f192",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        440
+      ],
+      "parameters": {
+        "function": "diter_core_f192",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f142",
+          "diter_core_f152",
+          "diter_core_f191"
+        ]
+      }
+    }
+  ],
+  "connections": {
+    "diter_core_actions_002:Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_actions_002:diter_core_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_actions_002:diter_core_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_actions_002:diter_core_f92",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_actions_002:diter_core_f92": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_actions_002:diter_core_f192",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "diter"
+    },
+    {
+      "name": "actions"
+    }
+  ],
+  "meta": {
+    "source": "src/diter_core.c",
+    "chunkIndex": 2,
+    "functionCount": 3
+  },
+  "settings": {
+    "timezone": "UTC",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveDataManualExecution": "all"
+  },
+  "triggers": [
+    {
+      "nodeId": "wf002-trigger",
+      "kind": "manual",
+      "enabled": true
+    }
+  ]
+}

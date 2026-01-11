@@ -1,0 +1,101 @@
+{
+  "name": "Diter Core Actions 032",
+  "active": false,
+  "nodes": [
+    {
+      "id": "diter_core_actions_032:wf032-trigger",
+      "name": "diter_core_actions_032:Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "diter_core_actions_032:wf032-fn-000",
+      "name": "diter_core_actions_032:diter_core_f22",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "function": "diter_core_f22",
+        "role": "internal",
+        "exportName": null,
+        "calls": []
+      }
+    },
+    {
+      "id": "diter_core_actions_032:wf032-fn-001",
+      "name": "diter_core_actions_032:diter_core_f122",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ],
+      "parameters": {
+        "function": "diter_core_f122",
+        "role": "internal",
+        "exportName": null,
+        "calls": []
+      }
+    }
+  ],
+  "connections": {
+    "diter_core_actions_032:Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_actions_032:diter_core_f22",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_actions_032:diter_core_f22": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_actions_032:diter_core_f122",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "diter"
+    },
+    {
+      "name": "actions"
+    }
+  ],
+  "meta": {
+    "source": "src/diter_core.c",
+    "chunkIndex": 32,
+    "functionCount": 2
+  },
+  "settings": {
+    "timezone": "UTC",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveDataManualExecution": "all"
+  },
+  "triggers": [
+    {
+      "nodeId": "wf032-trigger",
+      "kind": "manual",
+      "enabled": true
+    }
+  ]
+}
