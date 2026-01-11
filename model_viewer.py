@@ -498,8 +498,13 @@ class ModelViewerPanel(QWidget):
             self.info_label.setText("No downloads directory found")
             return
         
-        # Find .binz files
-        binz_files = list(downloads_dir.glob("*.binz"))
+        # Find .binz files - prefer test files
+        test_files = list(downloads_dir.glob("test_*.binz"))
+        all_binz_files = list(downloads_dir.glob("*.binz"))
+        
+        # Use test files if available, otherwise use any binz file
+        binz_files = test_files if test_files else all_binz_files
+        
         if not binz_files:
             self.info_label.setText("No .binz files found in downloads/")
             return
