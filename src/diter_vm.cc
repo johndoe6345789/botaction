@@ -308,6 +308,74 @@ std::vector<std::string> split_tokens(const std::string &text) {
   return tokens;
 }
 
+std::string strip_trailing(const std::string &token) {
+  size_t end = token.size();
+  while (end > 0) {
+    char c = token[end - 1];
+    if (c == ',' || c == ')' || c == ':') {
+      end--;
+      continue;
+    }
+    break;
+  }
+  return token.substr(0, end);
+}
+
+std::string strip_leading(const std::string &token) {
+  size_t start = 0;
+  while (start < token.size()) {
+    char c = token[start];
+    if (c == '(' || c == ',') {
+      start++;
+      continue;
+    }
+    break;
+  }
+  return token.substr(start);
+}
+
+std::string strip_punct(const std::string &token) {
+  return strip_trailing(strip_leading(token));
+}
+
+std::vector<std::string> parse_call_args(const std::string &text) {
+  auto open = text.find('(');
+  auto close = text.rfind(')');
+  if (open == std::string::npos || close == std::string::npos || close <= open) {
+    return {};
+  }
+  std::string args = text.substr(open + 1, close - open - 1);
+  std::vector<std::string> out;
+  std::string current;
+  int parens = 0;
+  for (char c : args) {
+    if (c == '(') parens++;
+    if (c == ')') parens--;
+    if (c == ',' && parens == 0) {
+      if (!current.empty()) {
+        out.push_back(current);
+        current.clear();
+      }
+      continue;
+    }
+    current.push_back(c);
+  }
+  if (!current.empty()) {
+    out.push_back(current);
+  }
+  return out;
+}
+
+Value parse_last_token(const std::unordered_map<std::string, Value> &regs,
+                       const std::string &arg) {
+  auto tokens = split_tokens(arg);
+  if (tokens.empty()) {
+    return {};
+  }
+  std::string last = strip_punct(tokens.back());
+  return parse_operand(regs, last);
+}
+
 void execute_instruction(VmState &state, Frame &frame, const Instruction &inst) {
   state.op_counts[inst.op]++;
   const auto tokens = split_tokens(inst.text);
@@ -329,7 +397,7 @@ void execute_instruction(VmState &state, Frame &frame, const Instruction &inst) 
         break;
       }
     }
-    std::string type = type_idx < tokens.size() ? tokens[type_idx] : "i8";
+    std::string type = type_idx < tokens.size() ? strip_punct(tokens[type_idx]) : "i8";
     size_t size = type_size_bytes(type);
     size_t align = 8;
     auto align_it = inst.text.find("align");
@@ -346,13 +414,11 @@ void execute_instruction(VmState &state, Frame &frame, const Instruction &inst) 
   if (inst.op == "store") {
     // "store i32 %x, ptr %y"
     if (tokens.size() < 4) return;
-    std::string value_token = tokens[2];
-    if (value_token.back() == ',') value_token.pop_back();
-    std::string ptr_token = tokens[4];
-    if (ptr_token.back() == ',') ptr_token.pop_back();
+    std::string value_token = strip_punct(tokens[2]);
+    std::string ptr_token = strip_punct(tokens.back());
     Value val = parse_operand(frame.regs, value_token);
     Value ptr = parse_operand(frame.regs, ptr_token);
-    size_t size = type_size_bytes(tokens[1]);
+    size_t size = type_size_bytes(strip_punct(tokens[1]));
     store_value(state, ptr.u, val, size);
     return;
   }
@@ -360,10 +426,9 @@ void execute_instruction(VmState &state, Frame &frame, const Instruction &inst) 
   if (inst.op == "load") {
     // "%x = load i32, ptr %y"
     if (tokens.size() < 4) return;
-    std::string ptr_token = tokens[4];
-    if (ptr_token.back() == ',') ptr_token.pop_back();
+    std::string ptr_token = strip_punct(tokens.back());
     Value ptr = parse_operand(frame.regs, ptr_token);
-    size_t size = type_size_bytes(tokens[2]);
+    size_t size = type_size_bytes(strip_punct(tokens[2]));
     Value val = load_value(state, ptr.u, size);
     frame.regs[inst.dest] = val;
     return;
@@ -375,17 +440,17 @@ void execute_instruction(VmState &state, Frame &frame, const Instruction &inst) 
     size_t elem_size = 1;
     for (size_t i = 0; i < tokens.size(); i++) {
       if (tokens[i] == "getelementptr" && i + 1 < tokens.size()) {
-        elem_size = type_size_bytes(tokens[i + 1]);
+        elem_size = type_size_bytes(strip_punct(tokens[i + 1]));
       }
       if (tokens[i] == "ptr" && i + 1 < tokens.size()) {
-        Value ptr = parse_operand(frame.regs, tokens[i + 1]);
+        Value ptr = parse_operand(frame.regs, strip_punct(tokens[i + 1]));
         base = ptr.u;
       }
     }
     uint64_t index = 0;
-    for (size_t i = 0; i < tokens.size(); i++) {
-      if (tokens[i].rfind("i", 0) == 0 && i + 1 < tokens.size()) {
-        Value idx = parse_operand(frame.regs, tokens[i + 1]);
+    for (size_t i = 0; i + 1 < tokens.size(); i++) {
+      if (tokens[i].rfind("i", 0) == 0) {
+        Value idx = parse_operand(frame.regs, strip_punct(tokens[i + 1]));
         index = idx.u;
       }
     }
@@ -618,11 +683,37 @@ void diter_vm_execute(DiterVm* vm) {
         auto end = inst.text.find("(", at);
         callee = inst.text.substr(at + 1, end == std::string::npos ? std::string::npos : end - at - 1);
       }
+
+      auto args = parse_call_args(inst.text);
+      if (callee.find("llvm.memcpy") != std::string::npos && args.size() >= 3) {
+        auto dest = parse_last_token(frame.regs, args[0]);
+        auto src = parse_last_token(frame.regs, args[1]);
+        auto len = parse_last_token(frame.regs, args[2]);
+        ensure_memory(vm->state, dest.u + len.u);
+        ensure_memory(vm->state, src.u + len.u);
+        std::memmove(&vm->state.memory[dest.u], &vm->state.memory[src.u], len.u);
+        if (!inst.dest.empty()) frame.regs[inst.dest] = {0};
+        continue;
+      }
+      if (callee.find("llvm.memset") != std::string::npos && args.size() >= 3) {
+        auto dest = parse_last_token(frame.regs, args[0]);
+        auto val = parse_last_token(frame.regs, args[1]);
+        auto len = parse_last_token(frame.regs, args[2]);
+        ensure_memory(vm->state, dest.u + len.u);
+        std::memset(&vm->state.memory[dest.u], static_cast<int>(val.u & 0xff), len.u);
+        if (!inst.dest.empty()) frame.regs[inst.dest] = {0};
+        continue;
+      }
+
       if (!callee.empty() && vm->state.functions.find(callee) != vm->state.functions.end()) {
         Frame next;
         next.func = callee;
         next.saved_stack_top = vm->state.stack_top;
         next.ret_dest = inst.dest;
+        for (size_t i = 0; i < args.size(); i++) {
+          std::string reg_name = "%" + std::to_string(i);
+          next.regs[reg_name] = parse_last_token(frame.regs, args[i]);
+        }
         stack.push_back(std::move(next));
         continue;
       }

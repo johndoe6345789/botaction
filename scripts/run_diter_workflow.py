@@ -30,7 +30,7 @@ def _needs_rebuild(output: Path, inputs: list[Path]) -> bool:
 
 
 def _resolve_cc() -> str | None:
-    for name in ("c++", "g++", "clang++"):
+    for name in ("cc", "gcc", "clang"):
         found = shutil.which(name)
         if found:
             return found
@@ -44,8 +44,9 @@ def build_engine_lib() -> Path:
 
     src_dir = root / "src"
     sources = [
-        src_dir / "diter_engine.cc",
-        src_dir / "diter_vm.cc",
+        src_dir / "diter_engine_legacy.c",
+        Path(root / "legacy" / "diter_core.c"),
+        src_dir / "diter_rt.c",
     ]
 
     if sys.platform.startswith("linux"):
@@ -61,12 +62,12 @@ def build_engine_lib() -> Path:
 
     cc = _resolve_cc()
     if not cc:
-        raise RuntimeError("C++ compiler not found (need c++/g++/clang++).")
+        raise RuntimeError("C compiler not found (need cc/gcc/clang).")
 
     cmd = [
         cc,
         "-O2",
-        "-std=c++17",
+        "-std=c11",
         "-shared",
         "-fPIC",
         "-I",
@@ -74,8 +75,6 @@ def build_engine_lib() -> Path:
         "-o",
         str(output),
     ] + [str(src) for src in sources]
-    if sys.platform.startswith("linux"):
-        cmd.append("-ldl")
     subprocess.run(cmd, check=True)
     return output
 
