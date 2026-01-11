@@ -6,6 +6,9 @@ Demo: Load and display a 3D model programmatically
 import sys
 from pathlib import Path
 
+# Add parent directory to path to import src modules
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QLabel
 from PyQt6.QtCore import Qt
 

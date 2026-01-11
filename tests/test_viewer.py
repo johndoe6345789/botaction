@@ -6,8 +6,8 @@ Test script for the 3D model viewer
 import sys
 from pathlib import Path
 
-# Add current directory to path
-sys.path.insert(0, str(Path(__file__).parent))
+# Add parent directory to path to import src modules
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from PyQt6.QtWidgets import QApplication
 from src.model_viewer import ModelViewerPanel

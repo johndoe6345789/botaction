@@ -21,10 +21,10 @@ try:
 except ImportError:
     OPENGL_AVAILABLE = False
 
-from binz_reader import BinzReader, MeshGeometry
+from .binz_reader import BinzReader, MeshGeometry
 
 try:
-    from model_decryptor import SketchfabDecryptor, CRYPTO_AVAILABLE as DECRYPTION_AVAILABLE
+    from .model_decryptor import SketchfabDecryptor, CRYPTO_AVAILABLE as DECRYPTION_AVAILABLE
 except ImportError:
     DECRYPTION_AVAILABLE = False
 
@@ -122,7 +122,7 @@ class ModelViewerWidget(QOpenGLWidget):
     
     def _parse_test_file(self, reader: BinzReader, data: bytes) -> MeshGeometry:
         """Parse test file format (vertices followed by indices)."""
-        from binz_reader import GeometryBuffer
+        from .binz_reader import GeometryBuffer
         
         geometry = MeshGeometry()
         
@@ -167,7 +167,7 @@ class ModelViewerWidget(QOpenGLWidget):
     
     def _parse_basic_geometry(self, reader: BinzReader, data: bytes) -> MeshGeometry:
         """Parse geometry from raw binary data without params."""
-        from binz_reader import GeometryBuffer
+        from .binz_reader import GeometryBuffer
         
         geometry = MeshGeometry()
         

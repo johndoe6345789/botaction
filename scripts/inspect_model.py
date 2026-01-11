@@ -3,7 +3,12 @@
 Quick test to examine the .binz file structure
 """
 
+import sys
 from pathlib import Path
+
+# Add parent directory to path to import src modules
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from src.binz_reader import BinzReader
 import json
 
