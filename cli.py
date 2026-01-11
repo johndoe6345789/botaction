@@ -3,7 +3,14 @@
 Sketchfab Model Tools CLI
 
 A command-line interface for working with Sketchfab 3D models.
-Supports fetching, decrypting, inspecting, and exporting models.
+Supports fetching, decrypting, inspecting, exporting models, and various utilities.
+
+Based on analysis of Sketchfab's JavaScript architecture including:
+- Viewer configuration and embed options
+- API endpoints and data structures
+- AI tools integration (text-to-3D, image-to-3D)
+- Material and rendering options
+- URL utilities and query parsing
 """
 
 import argparse
@@ -11,9 +18,153 @@ import sys
 import json
 from pathlib import Path
 import http.cookiejar
+from urllib.parse import urljoin, urlparse, urlencode, parse_qs
+import re
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
+
+# =============================================================================
+# CONSTANTS - Derived from Sketchfab JavaScript analysis
+# =============================================================================
+
+# API Endpoints (from error_messages.js.md / api_client.js.md)
+SKETCHFAB_API_BASE = "https://api.sketchfab.com/v3"
+SKETCHFAB_BASE_URL = "https://sketchfab.com"
+
+API_ENDPOINTS = {
+    'models': '/models',
+    'model_detail': '/models/{model_id}',
+    'model_download': '/models/{model_id}/download',
+    'model_embed': '/models/{model_id}/embed',
+    'user': '/users/{username}',
+    'user_models': '/users/{username}/models',
+    'search': '/search',
+    'categories': '/categories',
+    'collections': '/collections',
+    'me': '/me',
+    'likes': '/me/likes',
+    'purchases': '/me/purchases',
+}
+
+# Viewer Embed Options (from material_options.js.md)
+EMBED_OPTIONS = {
+    'autostart': {'type': bool, 'default': False, 'desc': 'Auto-load model on page load'},
+    'autospin': {'type': float, 'default': 0, 'desc': 'Auto-rotate speed (0 to disable)'},
+    'camera': {'type': bool, 'default': True, 'desc': 'Enable camera controls'},
+    'preload': {'type': bool, 'default': True, 'desc': 'Preload textures'},
+    'transparent': {'type': bool, 'default': False, 'desc': 'Transparent background'},
+    'ui_controls': {'type': bool, 'default': True, 'desc': 'Show UI controls'},
+    'ui_infos': {'type': bool, 'default': True, 'desc': 'Show info panel'},
+    'ui_inspector': {'type': bool, 'default': True, 'desc': 'Show inspector'},
+    'ui_watermark': {'type': bool, 'default': True, 'desc': 'Show watermark'},
+    'ui_help': {'type': bool, 'default': True, 'desc': 'Show help button'},
+    'ui_settings': {'type': bool, 'default': True, 'desc': 'Show settings button'},
+    'ui_fullscreen': {'type': bool, 'default': True, 'desc': 'Show fullscreen button'},
+    'ui_annotations': {'type': bool, 'default': True, 'desc': 'Show annotations'},
+    'annotations_visible': {'type': bool, 'default': True, 'desc': 'Annotations visible on load'},
+    'animation_autoplay': {'type': bool, 'default': False, 'desc': 'Auto-play animations'},
+    'scrollwheel': {'type': bool, 'default': True, 'desc': 'Enable scroll wheel zoom'},
+    'double_click': {'type': bool, 'default': True, 'desc': 'Enable double-click to focus'},
+    'orbit_constraint_pan': {'type': bool, 'default': False, 'desc': 'Constrain panning'},
+    'orbit_constraint_zoom_in': {'type': float, 'default': None, 'desc': 'Min zoom distance'},
+    'orbit_constraint_zoom_out': {'type': float, 'default': None, 'desc': 'Max zoom distance'},
+}
+
+# Material Display Options (from material_options.js.md)
+MATERIAL_OPTIONS = {
+    'diffuse': 'Base color texture',
+    'normal': 'Normal map',
+    'emissive': 'Emissive/glow',
+    'transparency': 'Alpha/transparency',
+    'metalness': 'Metalness map (PBR)',
+    'roughness': 'Roughness map (PBR)',
+    'glossiness': 'Glossiness (spec workflow)',
+    'specular': 'Specular map',
+    'f0': 'Fresnel reflectance',
+    'cavity': 'Cavity/AO detail',
+    'ao': 'Ambient occlusion',
+    'displacement': 'Displacement/height map',
+    'wireframe': 'Show wireframe',
+    'vertexColors': 'Show vertex colors',
+}
+
+# Viewer Quality Presets (from viewer_config.js.md)
+QUALITY_PRESETS = {
+    'low': {
+        'name': 'Low',
+        'pixelRatio': 1,
+        'shadows': False,
+        'ssao': False,
+        'antialiasing': False,
+        'textureQuality': 0.5
+    },
+    'medium': {
+        'name': 'Medium',
+        'pixelRatio': 1.5,
+        'shadows': True,
+        'ssao': False,
+        'antialiasing': True,
+        'textureQuality': 0.75
+    },
+    'high': {
+        'name': 'High',
+        'pixelRatio': 2,
+        'shadows': True,
+        'ssao': True,
+        'antialiasing': True,
+        'textureQuality': 1
+    },
+    'ultra': {
+        'name': 'Ultra',
+        'pixelRatio': 2,
+        'shadows': True,
+        'ssao': True,
+        'antialiasing': True,
+        'textureQuality': 1,
+        'supersample': True
+    }
+}
+
+# Environment Presets (from viewer_config.js.md)
+ENVIRONMENT_PRESETS = {
+    'studio': {'name': 'Studio', 'intensity': 1, 'shadows': True},
+    'urban': {'name': 'Urban', 'intensity': 0.8, 'shadows': True},
+    'dawn': {'name': 'Dawn', 'intensity': 0.6, 'shadows': True},
+    'night': {'name': 'Night', 'intensity': 0.3, 'shadows': False},
+    'custom': {'name': 'Custom', 'intensity': 1, 'shadows': True},
+}
+
+# AI Action Types (from ai_tools.js.md)
+AI_ACTIONS = {
+    'text_to_3d': 'Generate 3D model from text prompt',
+    'image_to_3d': 'Generate 3D model from image',
+    'mesh_rigging': 'Auto-rig a 3D mesh',
+    'texture_generation': 'Generate textures with AI',
+    'mesh_retopology': 'Retopologize mesh automatically',
+}
+
+# AI Providers (from ai_tools.js.md)
+AI_PROVIDERS = {
+    'CSM': {'actions': ['text_to_3d', 'image_to_3d']},
+    'FLUX': {'actions': ['image_generation']},
+    'Gemini': {'actions': ['text_to_3d']},
+    'Meshy': {'actions': ['text_to_3d', 'mesh_rigging']},
+    'Rodin': {'actions': ['image_to_3d']},
+    'Stability': {'actions': ['image_to_3d']},
+    'Tripo': {'actions': ['text_to_3d', 'image_to_3d']},
+}
+
+# Download Formats (from model_page.js.md)
+DOWNLOAD_FORMATS = ['glb', 'gltf', 'fbx', 'obj', 'usdz', 'blend']
+
+# Visibility Types (from api_client.js.md)
+VISIBILITY_TYPES = {
+    'public': 'Visible to everyone',
+    'private': 'Only visible to owner',
+    'protected': 'Password protected',
+    'org': 'Organization only',
+}
 
 from src.sketchfab_fetcher import SketchfabFetcher
 from src.model_decryptor import SketchfabDecryptor, decrypt_model
@@ -324,22 +475,44 @@ def cmd_viewer(args):
 def cmd_info(args):
     """Show information about available commands."""
     print("Sketchfab Model Tools CLI")
-    print("=" * 40)
+    print("=" * 60)
     print()
-    print("Available commands:")
-    print("  fetch    - Fetch model info and download files from Sketchfab")
-    print("  decrypt  - Decrypt an encrypted .binz file")
-    print("  inspect  - Inspect a .binz file structure")
-    print("  export   - Export decrypted model to 3MF format")
-    print("  scrape   - Scrape webpage content using requests and BeautifulSoup")
-    print("  session  - Demonstrate session management with cookiejar")
+    print("Core Commands:")
+    print("  fetch       - Fetch model info and download files from Sketchfab")
+    print("  decrypt     - Decrypt an encrypted .binz file")
+    print("  inspect     - Inspect a .binz file structure")
+    print("  export      - Export decrypted model to 3MF format")
+    print("  viewer      - Launch 3D model viewer")
+    print()
+    print("URL & Embed Commands (from Sketchfab JS analysis):")
+    print("  embed       - Generate embed URL or iframe code for a model")
+    print("  parse-url   - Parse and analyze Sketchfab URLs")
+    print("  stats       - Fetch and display model statistics from API")
+    print()
+    print("Configuration Commands:")
+    print("  config      - Display or generate viewer configuration")
+    print("  api         - Display API endpoint information and utilities")
+    print("  ai-info     - Show information about Sketchfab AI tools")
+    print()
+    print("Web Scraping Commands:")
+    print("  scrape      - Scrape webpage content using requests/BeautifulSoup")
+    print("  session     - Demonstrate session management with cookiejar")
     print("  download-js - Download all JavaScript files from a website")
-    print("  viewer   - Launch 3D model viewer")
-    print("  demo     - Launch demonstration scripts")
-    print("  gui      - Launch graphical user interface")
-    print("  info     - Show this help information")
     print()
-    print("Use 'sketchfab-cli <command> --help' for command-specific help.")
+    print("Other Commands:")
+    print("  demo        - Launch demonstration scripts")
+    print("  gui         - Launch graphical user interface")
+    print("  info        - Show this help information")
+    print()
+    print("Configuration Constants (from JS analysis):")
+    print(f"  API Base URL: {SKETCHFAB_API_BASE}")
+    print(f"  Embed Options: {len(EMBED_OPTIONS)} parameters available")
+    print(f"  Quality Presets: {', '.join(QUALITY_PRESETS.keys())}")
+    print(f"  Environment Presets: {', '.join(ENVIRONMENT_PRESETS.keys())}")
+    print(f"  AI Providers: {', '.join(AI_PROVIDERS.keys())}")
+    print(f"  Download Formats: {', '.join(DOWNLOAD_FORMATS)}")
+    print()
+    print("Use 'python cli.py <command> --help' for command-specific help.")
 
 
 def cmd_scrape(args):
@@ -676,6 +849,411 @@ def cmd_download_js(args):
         return 1
 
 
+# =============================================================================
+# NEW COMMANDS - Based on Sketchfab JavaScript Analysis
+# =============================================================================
+
+def cmd_embed(args):
+    """Generate embed URL or iframe code for a Sketchfab model."""
+    model_id = extract_model_id(args.model_id_or_url)
+    
+    if not model_id:
+        print(f"Error: Could not extract model ID from: {args.model_id_or_url}")
+        return 1
+    
+    # Build embed parameters
+    params = {}
+    
+    if args.autostart:
+        params['autostart'] = 1
+    if args.autospin is not None:
+        params['autospin'] = args.autospin
+    if args.no_ui:
+        params['ui_controls'] = 0
+        params['ui_infos'] = 0
+        params['ui_inspector'] = 0
+    if not args.watermark:
+        params['ui_watermark'] = 0
+    if args.transparent:
+        params['transparent'] = 1
+    if args.no_scrollwheel:
+        params['scrollwheel'] = 0
+    if args.animation_autoplay:
+        params['animation_autoplay'] = 1
+    if args.annotation is not None:
+        params['annotation'] = args.annotation
+    if args.preload:
+        params['preload'] = 1
+    
+    # Build URL
+    embed_url = f"{SKETCHFAB_BASE_URL}/models/{model_id}/embed"
+    if params:
+        embed_url += '?' + urlencode(params)
+    
+    print(f"Model ID: {model_id}")
+    print(f"\nEmbed URL:")
+    print(f"  {embed_url}")
+    
+    if args.iframe:
+        width = args.width or 640
+        height = args.height or 480
+        iframe = f'''<iframe title="Sketchfab Model" width="{width}" height="{height}" src="{embed_url}" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>'''
+        print(f"\niFrame Code:")
+        print(f"  {iframe}")
+    
+    if args.copy:
+        try:
+            import pyperclip
+            pyperclip.copy(embed_url if not args.iframe else iframe)
+            print("\n✓ Copied to clipboard!")
+        except ImportError:
+            print("\n(Install pyperclip to enable clipboard copy: pip install pyperclip)")
+    
+    return 0
+
+
+def cmd_config(args):
+    """Display or generate viewer configuration."""
+    
+    if args.list_presets:
+        print("Quality Presets:")
+        print("=" * 50)
+        for name, preset in QUALITY_PRESETS.items():
+            print(f"\n{name.upper()}:")
+            for key, value in preset.items():
+                print(f"  {key}: {value}")
+        
+        print("\n\nEnvironment Presets:")
+        print("=" * 50)
+        for name, preset in ENVIRONMENT_PRESETS.items():
+            print(f"\n{name.upper()}:")
+            for key, value in preset.items():
+                print(f"  {key}: {value}")
+        return 0
+    
+    if args.list_embed_options:
+        print("Embed URL Options:")
+        print("=" * 50)
+        for name, info in EMBED_OPTIONS.items():
+            type_str = info['type'].__name__
+            default = info['default']
+            desc = info['desc']
+            print(f"\n{name}:")
+            print(f"  Type: {type_str}")
+            print(f"  Default: {default}")
+            print(f"  Description: {desc}")
+        return 0
+    
+    if args.list_materials:
+        print("Material Display Options:")
+        print("=" * 50)
+        for name, desc in MATERIAL_OPTIONS.items():
+            print(f"  {name}: {desc}")
+        return 0
+    
+    if args.generate:
+        config = {
+            'renderer': {
+                'antialias': True,
+                'alpha': False,
+                'powerPreference': 'high-performance',
+            },
+            'camera': {
+                'fov': args.fov or 45,
+                'near': 0.1,
+                'far': 10000,
+            },
+            'controls': {
+                'enabled': True,
+                'autoRotate': args.auto_rotate or False,
+                'enablePan': True,
+                'enableZoom': True,
+            },
+            'lighting': {
+                'environment': args.environment or 'studio',
+                'exposure': args.exposure or 1,
+                'shadowsEnabled': not args.no_shadows,
+            },
+            'postProcessing': {
+                'enabled': not args.no_postprocessing,
+                'ssaoEnabled': args.ssao or False,
+                'bloomEnabled': args.bloom or False,
+            },
+        }
+        
+        if args.quality and args.quality in QUALITY_PRESETS:
+            config['quality'] = QUALITY_PRESETS[args.quality]
+        
+        print(json.dumps(config, indent=2))
+        
+        if args.output:
+            with open(args.output, 'w') as f:
+                json.dump(config, f, indent=2)
+            print(f"\nConfig saved to: {args.output}")
+        
+        return 0
+    
+    # Default: show help
+    print("Use one of the following options:")
+    print("  --list-presets       Show quality and environment presets")
+    print("  --list-embed-options Show embed URL parameters")
+    print("  --list-materials     Show material display options")
+    print("  --generate           Generate viewer configuration JSON")
+    return 0
+
+
+def cmd_api(args):
+    """Display API endpoint information and utilities."""
+    
+    if args.list_endpoints:
+        print("Sketchfab API Endpoints:")
+        print("=" * 60)
+        print(f"Base URL: {SKETCHFAB_API_BASE}")
+        print()
+        for name, endpoint in API_ENDPOINTS.items():
+            full_url = SKETCHFAB_API_BASE + endpoint
+            print(f"  {name}:")
+            print(f"    {full_url}")
+        return 0
+    
+    if args.build_url:
+        endpoint_name = args.build_url
+        if endpoint_name not in API_ENDPOINTS:
+            print(f"Error: Unknown endpoint '{endpoint_name}'")
+            print(f"Available: {', '.join(API_ENDPOINTS.keys())}")
+            return 1
+        
+        endpoint = API_ENDPOINTS[endpoint_name]
+        
+        # Replace placeholders
+        if args.model_id:
+            endpoint = endpoint.replace('{model_id}', args.model_id)
+        if args.username:
+            endpoint = endpoint.replace('{username}', args.username)
+        
+        # Add query parameters
+        params = {}
+        if args.params:
+            for param in args.params:
+                if '=' in param:
+                    key, value = param.split('=', 1)
+                    params[key] = value
+        
+        url = SKETCHFAB_API_BASE + endpoint
+        if params:
+            url += '?' + urlencode(params)
+        
+        print(f"API URL: {url}")
+        
+        if args.curl:
+            curl_cmd = f'curl -X GET "{url}"'
+            if args.token:
+                curl_cmd += f' -H "Authorization: Token {args.token}"'
+            print(f"\ncURL command:\n  {curl_cmd}")
+        
+        return 0
+    
+    if args.formats:
+        print("Available Download Formats:")
+        print("=" * 40)
+        for fmt in DOWNLOAD_FORMATS:
+            print(f"  - {fmt}")
+        return 0
+    
+    if args.visibility:
+        print("Visibility Types:")
+        print("=" * 40)
+        for vis_type, desc in VISIBILITY_TYPES.items():
+            print(f"  {vis_type}: {desc}")
+        return 0
+    
+    # Default
+    print("API Information Commands:")
+    print("  --list-endpoints   Show all API endpoints")
+    print("  --build-url NAME   Build a specific API URL")
+    print("  --formats          Show download formats")
+    print("  --visibility       Show visibility types")
+    return 0
+
+
+def cmd_ai_info(args):
+    """Display information about Sketchfab AI tools and providers."""
+    
+    print("Sketchfab AI Tools")
+    print("=" * 60)
+    print("\nSupported AI Actions:")
+    print("-" * 40)
+    for action, desc in AI_ACTIONS.items():
+        print(f"  {action}:")
+        print(f"    {desc}")
+    
+    print("\n\nAI Providers:")
+    print("-" * 40)
+    for provider, info in AI_PROVIDERS.items():
+        print(f"  {provider}:")
+        print(f"    Supported actions: {', '.join(info['actions'])}")
+    
+    print("\n\nText-to-3D Providers:")
+    print("-" * 40)
+    text_to_3d = [p for p, i in AI_PROVIDERS.items() if 'text_to_3d' in i['actions']]
+    print(f"  {', '.join(text_to_3d)}")
+    
+    print("\nImage-to-3D Providers:")
+    print("-" * 40)
+    img_to_3d = [p for p, i in AI_PROVIDERS.items() if 'image_to_3d' in i['actions']]
+    print(f"  {', '.join(img_to_3d)}")
+    
+    return 0
+
+
+def cmd_parse_url(args):
+    """Parse and analyze Sketchfab URLs."""
+    url = args.url
+    
+    print(f"Parsing: {url}")
+    print("=" * 60)
+    
+    # Parse URL components
+    parsed = urlparse(url)
+    print(f"\nURL Components:")
+    print(f"  Scheme: {parsed.scheme}")
+    print(f"  Host: {parsed.netloc}")
+    print(f"  Path: {parsed.path}")
+    
+    if parsed.query:
+        print(f"  Query: {parsed.query}")
+        query_params = parse_qs(parsed.query)
+        print(f"  Query Parameters:")
+        for key, values in query_params.items():
+            print(f"    {key}: {', '.join(values)}")
+    
+    if parsed.fragment:
+        print(f"  Fragment: {parsed.fragment}")
+    
+    # Try to extract model ID
+    model_id = extract_model_id(url)
+    if model_id:
+        print(f"\n  Extracted Model ID: {model_id}")
+        print(f"  Direct URL: {SKETCHFAB_BASE_URL}/models/{model_id}")
+        print(f"  Embed URL: {SKETCHFAB_BASE_URL}/models/{model_id}/embed")
+        print(f"  API URL: {SKETCHFAB_API_BASE}/models/{model_id}")
+    
+    # Check for embed parameters
+    if '/embed' in parsed.path and parsed.query:
+        print(f"\nEmbed Options Detected:")
+        for key, values in query_params.items():
+            if key in EMBED_OPTIONS:
+                info = EMBED_OPTIONS[key]
+                print(f"  {key} = {values[0]} ({info['desc']})")
+            else:
+                print(f"  {key} = {values[0]} (custom)")
+    
+    return 0
+
+
+def cmd_stats(args):
+    """Fetch and display model statistics."""
+    try:
+        import requests
+    except ImportError:
+        print("Error: requests library required. Install with: pip install requests")
+        return 1
+    
+    model_id = extract_model_id(args.model_id_or_url)
+    if not model_id:
+        print(f"Error: Could not extract model ID from: {args.model_id_or_url}")
+        return 1
+    
+    print(f"Fetching stats for model: {model_id}")
+    
+    api_url = f"{SKETCHFAB_API_BASE}/models/{model_id}"
+    
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    if args.token:
+        headers['Authorization'] = f'Token {args.token}'
+    
+    try:
+        response = requests.get(api_url, headers=headers, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        
+        print("\nModel Information:")
+        print("=" * 50)
+        print(f"  Name: {data.get('name', 'Unknown')}")
+        print(f"  UID: {data.get('uid', model_id)}")
+        
+        user = data.get('user', {})
+        print(f"  Author: {user.get('displayName', user.get('username', 'Unknown'))}")
+        
+        print(f"\nStats:")
+        print(f"  Views: {data.get('viewCount', 0):,}")
+        print(f"  Likes: {data.get('likeCount', 0):,}")
+        print(f"  Comments: {data.get('commentCount', 0):,}")
+        
+        if data.get('isDownloadable'):
+            print(f"  Downloads: {data.get('downloadCount', 0):,}")
+        
+        print(f"\nProperties:")
+        print(f"  Downloadable: {'Yes' if data.get('isDownloadable') else 'No'}")
+        print(f"  Animated: {'Yes' if data.get('isAnimated') else 'No'}")
+        print(f"  Staff Pick: {'Yes' if data.get('staffpickedAt') else 'No'}")
+        
+        license_info = data.get('license', {})
+        if license_info:
+            print(f"  License: {license_info.get('label', 'Unknown')}")
+        
+        categories = data.get('categories', [])
+        if categories:
+            cat_names = [c.get('name', 'Unknown') for c in categories]
+            print(f"  Categories: {', '.join(cat_names)}")
+        
+        tags = data.get('tags', [])
+        if tags:
+            tag_names = [t.get('name', t) if isinstance(t, dict) else t for t in tags[:10]]
+            print(f"  Tags: {', '.join(tag_names)}")
+        
+        if args.json:
+            print(f"\nRaw JSON:")
+            print(json.dumps(data, indent=2))
+        
+        return 0
+        
+    except requests.RequestException as e:
+        print(f"Error fetching model: {e}")
+        return 1
+
+
+def extract_model_id(url_or_id):
+    """Extract model ID from URL or return if already an ID."""
+    # If it's already just an ID (alphanumeric, 32 chars)
+    if re.match(r'^[a-f0-9]{32}$', url_or_id, re.IGNORECASE):
+        return url_or_id
+    
+    # Try to extract from URL patterns
+    patterns = [
+        r'sketchfab\.com/(?:3d-)?models/[^/]+-([a-f0-9]{32})',  # /models/name-id
+        r'sketchfab\.com/(?:3d-)?models/([a-f0-9]{32})',         # /models/id
+        r'sketchfab\.com/models/([a-f0-9]{32})',                  # Direct model ID
+        r'/([a-f0-9]{32})(?:/embed)?(?:\?|$)',                    # ID in path
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, url_or_id, re.IGNORECASE)
+        if match:
+            return match.group(1)
+    
+    return None
+
+
+def format_number(num):
+    """Format large numbers with K, M suffixes."""
+    if num >= 1000000:
+        return f"{num/1000000:.1f}M"
+    elif num >= 1000:
+        return f"{num/1000:.1f}K"
+    return str(num)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Sketchfab Model Tools CLI",
@@ -780,6 +1358,122 @@ def main():
     download_js_parser.add_argument('--verbose', action='store_true',
                                    help='Show verbose output')
     download_js_parser.set_defaults(func=cmd_download_js)
+
+    # =========================================================================
+    # NEW COMMANDS - Based on JavaScript analysis
+    # =========================================================================
+    
+    # Embed command - Generate embed URLs and iframe code
+    embed_parser = subparsers.add_parser('embed', 
+        help='Generate embed URL or iframe code for a Sketchfab model')
+    embed_parser.add_argument('model_id_or_url', 
+        help='Model ID or Sketchfab URL')
+    embed_parser.add_argument('--iframe', action='store_true',
+        help='Generate iframe HTML code')
+    embed_parser.add_argument('--width', type=int, default=640,
+        help='iFrame width (default: 640)')
+    embed_parser.add_argument('--height', type=int, default=480,
+        help='iFrame height (default: 480)')
+    embed_parser.add_argument('--autostart', action='store_true',
+        help='Auto-load model on page load')
+    embed_parser.add_argument('--autospin', type=float,
+        help='Auto-rotate speed (0 to disable)')
+    embed_parser.add_argument('--no-ui', action='store_true',
+        help='Hide all UI controls')
+    embed_parser.add_argument('--no-watermark', dest='watermark', action='store_false',
+        help='Hide watermark (requires plan)')
+    embed_parser.add_argument('--transparent', action='store_true',
+        help='Transparent background')
+    embed_parser.add_argument('--no-scrollwheel', action='store_true',
+        help='Disable scroll wheel zoom')
+    embed_parser.add_argument('--animation-autoplay', action='store_true',
+        help='Auto-play animations')
+    embed_parser.add_argument('--annotation', type=int,
+        help='Open specific annotation by index')
+    embed_parser.add_argument('--preload', action='store_true',
+        help='Preload textures')
+    embed_parser.add_argument('--copy', action='store_true',
+        help='Copy URL to clipboard')
+    embed_parser.set_defaults(func=cmd_embed, watermark=True)
+
+    # Config command - Viewer configuration utilities
+    config_parser = subparsers.add_parser('config',
+        help='Display or generate viewer configuration')
+    config_parser.add_argument('--list-presets', action='store_true',
+        help='Show quality and environment presets')
+    config_parser.add_argument('--list-embed-options', action='store_true',
+        help='Show all embed URL parameters')
+    config_parser.add_argument('--list-materials', action='store_true',
+        help='Show material display options')
+    config_parser.add_argument('--generate', action='store_true',
+        help='Generate viewer configuration JSON')
+    config_parser.add_argument('--quality', choices=['low', 'medium', 'high', 'ultra'],
+        help='Quality preset for generated config')
+    config_parser.add_argument('--environment', choices=['studio', 'urban', 'dawn', 'night', 'custom'],
+        help='Environment preset')
+    config_parser.add_argument('--fov', type=int,
+        help='Camera field of view')
+    config_parser.add_argument('--exposure', type=float,
+        help='Lighting exposure')
+    config_parser.add_argument('--auto-rotate', action='store_true',
+        help='Enable auto-rotation')
+    config_parser.add_argument('--no-shadows', action='store_true',
+        help='Disable shadows')
+    config_parser.add_argument('--no-postprocessing', action='store_true',
+        help='Disable post-processing')
+    config_parser.add_argument('--ssao', action='store_true',
+        help='Enable SSAO')
+    config_parser.add_argument('--bloom', action='store_true',
+        help='Enable bloom effect')
+    config_parser.add_argument('--output', '-o',
+        help='Save generated config to file')
+    config_parser.set_defaults(func=cmd_config)
+
+    # API command - API endpoint utilities
+    api_parser = subparsers.add_parser('api',
+        help='Display API endpoint information and utilities')
+    api_parser.add_argument('--list-endpoints', action='store_true',
+        help='Show all API endpoints')
+    api_parser.add_argument('--build-url',
+        help='Build a specific API URL (endpoint name)')
+    api_parser.add_argument('--model-id',
+        help='Model ID for URL building')
+    api_parser.add_argument('--username',
+        help='Username for URL building')
+    api_parser.add_argument('--params', nargs='*',
+        help='Query parameters (key=value format)')
+    api_parser.add_argument('--token',
+        help='API token for authentication')
+    api_parser.add_argument('--curl', action='store_true',
+        help='Output as curl command')
+    api_parser.add_argument('--formats', action='store_true',
+        help='Show download formats')
+    api_parser.add_argument('--visibility', action='store_true',
+        help='Show visibility types')
+    api_parser.set_defaults(func=cmd_api)
+
+    # AI Info command - AI tools information
+    ai_parser = subparsers.add_parser('ai-info',
+        help='Display information about Sketchfab AI tools and providers')
+    ai_parser.set_defaults(func=cmd_ai_info)
+
+    # Parse URL command - URL analysis
+    parse_url_parser = subparsers.add_parser('parse-url',
+        help='Parse and analyze Sketchfab URLs')
+    parse_url_parser.add_argument('url',
+        help='URL to parse')
+    parse_url_parser.set_defaults(func=cmd_parse_url)
+
+    # Stats command - Fetch model statistics
+    stats_parser = subparsers.add_parser('stats',
+        help='Fetch and display model statistics')
+    stats_parser.add_argument('model_id_or_url',
+        help='Model ID or Sketchfab URL')
+    stats_parser.add_argument('--token',
+        help='API token for authenticated requests')
+    stats_parser.add_argument('--json', action='store_true',
+        help='Output raw JSON response')
+    stats_parser.set_defaults(func=cmd_stats)
 
     # Parse args
     args = parser.parse_args()
