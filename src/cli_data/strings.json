@@ -435,5 +435,50 @@
     "consent_usage": "// Check consent before loading tracking\nif (OneTrust.IsActiveGroup('C0002')) {\n  // Load analytics (Performance)\n  loadGoogleAnalytics();\n}\n\nif (OneTrust.IsActiveGroup('C0004')) {\n  // Load advertising (Targeting)\n  loadFacebookPixel();\n}",
     "css_grid": ".grid {\n  display: grid;\n  gap: 16px;\n}\n\n/* Mobile: 2 columns */\n@media (max-width: 767px) {\n  .grid { grid-template-columns: repeat(2, 1fr); }\n}\n\n/* Tablet: 3 columns */\n@media (min-width: 768px) and (max-width: 1023px) {\n  .grid { grid-template-columns: repeat(3, 1fr); }\n}\n\n/* Desktop: 4 columns */\n@media (min-width: 1024px) and (max-width: 1439px) {\n  .grid { grid-template-columns: repeat(4, 1fr); }\n}\n\n/* Wide: 5 columns */\n@media (min-width: 1440px) {\n  .grid { grid-template-columns: repeat(5, 1fr); }\n}",
     "floating_ui": "const { x, y } = useFloating({\n  placement: 'bottom-start',\n  middleware: [\n    offset(8),\n    flip(),\n    shift({ padding: 8 })\n  ]\n});"
+  },
+  "http": {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "user_agent_short": "Mozilla/5.0",
+    "timeout": 10
+  },
+  "url_templates": {
+    "media_thumbnails": "https://media.sketchfab.com/models/{model_id}/thumbnails",
+    "model_embed": "{base_url}/models/{model_id}/embed",
+    "model_direct": "{base_url}/models/{model_id}",
+    "model_3d": "{base_url}/3d-models/{model_id}",
+    "user_profile": "{base_url}/@{username}",
+    "user_models": "{base_url}/@{username}/models",
+    "api_model": "{api_base}/models/{model_id}",
+    "api_user": "{api_base}/users/{username}",
+    "api_user_models": "{api_base}/users/{username}/models",
+    "api_search": "{api_base}/search"
+  },
+  "model_id_patterns": [
+    {"pattern": "sketchfab\\.com/(?:3d-)?models/[^/]+-([a-f0-9]{32})", "description": "/models/name-id"},
+    {"pattern": "sketchfab\\.com/(?:3d-)?models/([a-f0-9]{32})", "description": "/models/id"},
+    {"pattern": "sketchfab\\.com/models/([a-f0-9]{32})", "description": "Direct model ID"},
+    {"pattern": "/([a-f0-9]{32})(?:/embed)?(?:\\?|$)", "description": "ID in path"}
+  ],
+  "model_id_regex": "^[a-f0-9]{32}$",
+  "geometry_labels": {
+    "vertices": "vertices",
+    "normals": "normals",
+    "uvs": "UVs",
+    "indices": "indices"
+  },
+  "yes_no": {
+    "yes": "Yes",
+    "no": "No"
+  },
+  "number_suffixes": {
+    "million": "M",
+    "thousand": "K"
+  },
+  "gui_file": "sketchfab_gui.py",
+  "separator_lengths": {
+    "default": 60,
+    "short": 40,
+    "long": 65,
+    "medium": 50
   }
 }

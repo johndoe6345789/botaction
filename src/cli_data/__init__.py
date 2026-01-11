@@ -403,3 +403,48 @@ def get_spring_variables():
 def get_code_snippets():
     """Load code snippets."""
     return load_json('strings.json')['code_snippets']
+
+
+def get_http_config():
+    """Load HTTP configuration (user agent, timeout)."""
+    return load_json('strings.json')['http']
+
+
+def get_url_templates():
+    """Load URL templates."""
+    return load_json('strings.json')['url_templates']
+
+
+def get_model_id_patterns():
+    """Load model ID extraction patterns."""
+    return load_json('strings.json')['model_id_patterns']
+
+
+def get_model_id_regex():
+    """Load model ID validation regex."""
+    return load_json('strings.json')['model_id_regex']
+
+
+def get_geometry_labels():
+    """Load geometry component labels."""
+    return load_json('strings.json')['geometry_labels']
+
+
+def get_yes_no():
+    """Load yes/no labels."""
+    return load_json('strings.json')['yes_no']
+
+
+def get_number_suffixes():
+    """Load number format suffixes (K, M)."""
+    return load_json('strings.json')['number_suffixes']
+
+
+def get_gui_file():
+    """Load GUI filename."""
+    return load_json('strings.json')['gui_file']
+
+
+def get_separator_lengths():
+    """Load separator line lengths."""
+    return load_json('strings.json')['separator_lengths']
