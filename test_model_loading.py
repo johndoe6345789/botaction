@@ -3,11 +3,16 @@
 Simple test to verify model loading works
 """
 
+import sys
 from pathlib import Path
+from PyQt6.QtWidgets import QApplication
 from model_viewer import ModelViewerWidget
 from binz_reader import BinzReader
 
 print("Testing model loading...")
+
+# Create QApplication
+app = QApplication(sys.argv)
 
 # Find test models
 downloads = Path("downloads")
