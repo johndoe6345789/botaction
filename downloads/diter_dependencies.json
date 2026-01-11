@@ -1,0 +1,21 @@
+{
+  "entry": "kbo/",
+  "modules": [
+    "7NZM",
+    "C04p",
+    "VHcI",
+    "kbo/"
+  ],
+  "edges": {
+    "kbo/": [
+      "7NZM",
+      "VHcI"
+    ],
+    "VHcI": [
+      "C04p"
+    ],
+    "C04p": [],
+    "7NZM": []
+  },
+  "externals": []
+}
