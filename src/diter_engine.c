@@ -5,32 +5,32 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "diter_wasm_blob_wasm2c.h"
+#include "diter_core.h"
 
 #define DEFAULT_HEAP_BASE 83360u
 #define DEFAULT_MAX_PAGES 8192u
 
-struct w2c_env {
+struct diter_env {
   wasm_rt_memory_t memory;
   uint32_t heap_ptr;
 };
 
 struct DiterEngine {
-  struct w2c_env env;
-  w2c_diter__wasm__blob instance;
+  struct diter_env env;
+  diter_core instance;
 };
 
-wasm_rt_memory_t* w2c_env_memory(struct w2c_env* env) {
+wasm_rt_memory_t* diter_env_memory(struct diter_env* env) {
   return &env->memory;
 }
 
-void w2c_env_abort(struct w2c_env* env) {
+void diter_env_abort(struct diter_env* env) {
   (void)env;
-  fprintf(stderr, "DITER wasm abort\n");
+  fprintf(stderr, "DITER abort\n");
   exit(1);
 }
 
-uint32_t w2c_env_sbrk(struct w2c_env* env, uint32_t increment) {
+uint32_t diter_env_sbrk(struct diter_env* env, uint32_t increment) {
   uint32_t old = env->heap_ptr;
   uint64_t next = (uint64_t)old + increment;
   if (next > env->memory.size) {
@@ -38,7 +38,7 @@ uint32_t w2c_env_sbrk(struct w2c_env* env, uint32_t increment) {
     uint64_t pages = (needed + 65535u) >> 16;
     uint64_t grown = wasm_rt_grow_memory(&env->memory, pages);
     if (grown == UINT64_MAX || grown == 0xffffffffu) {
-      fprintf(stderr, "DITER wasm memory grow failed\n");
+      fprintf(stderr, "DITER memory grow failed\n");
       exit(1);
     }
   }
@@ -46,9 +46,9 @@ uint32_t w2c_env_sbrk(struct w2c_env* env, uint32_t increment) {
   return old;
 }
 
-static void init_memory(struct w2c_env* env) {
+static void init_memory(struct diter_env* env) {
   uint32_t heap_base = DEFAULT_HEAP_BASE;
-  uint32_t mem_min = wasm2c_diter__wasm__blob_min_env_memory;
+  uint32_t mem_min = diter_core_min_env_memory;
 
   uint32_t aligned = ((heap_base + 65535u) >> 16) << 16;
   uint32_t total_bytes = 262144u + aligned;
@@ -64,8 +64,8 @@ static void init_memory(struct w2c_env* env) {
   wasm_rt_allocate_memory(&env->memory,
                           initial_pages,
                           max_pages,
-                          wasm2c_diter__wasm__blob_is64_env_memory != 0,
-                          wasm2c_diter__wasm__blob_pagesize_env_memory);
+                          diter_core_is64_env_memory != 0,
+                          diter_core_pagesize_env_memory);
   env->heap_ptr = heap_base;
 }
 
@@ -80,7 +80,7 @@ static void write_key_hex(struct DiterEngine* engine, const char* key_hex) {
   while (pos < 40) cleaned[pos++] = '0';
   cleaned[40] = '\0';
 
-  uint32_t ptr = w2c_diter__wasm__blob_Umlja1JvbGxlZDRV(&engine->instance, 0, 40);
+  uint32_t ptr = diter_core_Umlja1JvbGxlZDRV(&engine->instance, 0, 40);
   if ((uint64_t)ptr + 40 > engine->env.memory.size) {
     fprintf(stderr, "Key pointer out of bounds\n");
     exit(1);
@@ -97,21 +97,21 @@ DiterEngine* diter_engine_create(void) {
     return NULL;
   }
   init_memory(&engine->env);
-  wasm2c_diter__wasm__blob_instantiate(&engine->instance, &engine->env);
-  w2c_diter__wasm__blob_0x5F_wasm_call_ctors(&engine->instance);
+  diter_core_instantiate(&engine->instance, &engine->env);
+  diter_core_0x5F_wasm_call_ctors(&engine->instance);
   return engine;
 }
 
 void diter_engine_destroy(DiterEngine* engine) {
   if (!engine) return;
-  wasm2c_diter__wasm__blob_free(&engine->instance);
+  diter_core_free(&engine->instance);
   wasm_rt_free_memory(&engine->env.memory);
   free(engine);
 }
 
 void diter_engine_init(DiterEngine* engine) {
   if (!engine) return;
-  w2c_diter__wasm__blob_mV2ZXIgZ29ubmEgbGV0IHlvdSBkb3duCk5l(&engine->instance);
+  diter_core_mV2ZXIgZ29ubmEgbGV0IHlvdSBkb3duCk5l(&engine->instance);
 }
 
 void diter_engine_set_key_hex(DiterEngine* engine, const char* key_hex) {
@@ -121,7 +121,7 @@ void diter_engine_set_key_hex(DiterEngine* engine, const char* key_hex) {
 
 int diter_engine_write_dict(DiterEngine* engine, const uint8_t* data, size_t len) {
   if (!engine || !data || !len) return 0;
-  uint32_t ptr = w2c_diter__wasm__blob_dmVyIGdvbm5hIHJ1biBhcm91bmQgYW5kI(
+  uint32_t ptr = diter_core_dmVyIGdvbm5hIHJ1biBhcm91bmQgYW5kI(
       &engine->instance, (uint32_t)len);
   if ((uint64_t)ptr + len > engine->env.memory.size) {
     return 0;
@@ -132,7 +132,7 @@ int diter_engine_write_dict(DiterEngine* engine, const uint8_t* data, size_t len
 
 int diter_engine_write_chunk(DiterEngine* engine, const uint8_t* data, size_t len) {
   if (!engine || !data || !len) return 0;
-  uint32_t ptr = w2c_diter__wasm__blob_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl(
+  uint32_t ptr = diter_core_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl(
       &engine->instance, (uint32_t)len);
   if ((uint64_t)ptr + len > engine->env.memory.size) {
     return 0;
@@ -143,13 +143,13 @@ int diter_engine_write_chunk(DiterEngine* engine, const uint8_t* data, size_t le
 
 int diter_engine_pump(DiterEngine* engine) {
   if (!engine) return 0;
-  return (int)w2c_diter__wasm__blob_GRlc2VydCB5b3UKTmV2ZXIgZ29ubmEgbW(&engine->instance);
+  return (int)diter_core_GRlc2VydCB5b3UKTmV2ZXIgZ29ubmEgbW(&engine->instance);
 }
 
 const uint8_t* diter_engine_output(DiterEngine* engine, uint32_t* out_len) {
   if (!engine || !out_len) return NULL;
-  uint32_t ptr = w2c_diter__wasm__blob_TmV2ZXIgZ29ubmEgZ2l2ZSB5b3UgdXAKT(&engine->instance);
-  uint32_t len = w2c_diter__wasm__blob_bGwgYSBsaWUgYW5kIGh1cnQgeW91Cg(&engine->instance);
+  uint32_t ptr = diter_core_TmV2ZXIgZ29ubmEgZ2l2ZSB5b3UgdXAKT(&engine->instance);
+  uint32_t len = diter_core_bGwgYSBsaWUgYW5kIGh1cnQgeW91Cg(&engine->instance);
   if (len == 0) {
     *out_len = 0;
     return NULL;
@@ -164,5 +164,5 @@ const uint8_t* diter_engine_output(DiterEngine* engine, uint32_t* out_len) {
 
 void diter_engine_output_advance(DiterEngine* engine) {
   if (!engine) return;
-  w2c_diter__wasm__blob_FrZSB5b3UgY3J5Ck5ldmVyIGdvbm5hIHN(&engine->instance);
+  diter_core_FrZSB5b3UgY3J5Ck5ldmVyIGdvbm5hIHN(&engine->instance);
 }

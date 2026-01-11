@@ -41,12 +41,12 @@ def build_decoder(build_dir: Path | None = None) -> Path:
     exe_name = "diter_decode_c.exe" if os.name == "nt" else "diter_decode_c"
     exe = build_dir / exe_name
     src_dir = root / "src"
-    wasm2c_c = src_dir / "diter_wasm_blob_wasm2c.c"
-    wasm2c_h = src_dir / "diter_wasm_blob_wasm2c.h"
+    core_c = src_dir / "diter_core.c"
+    core_h = src_dir / "diter_core.h"
     rt_impl = src_dir / "diter_rt.c"
     wrapper = src_dir / "diter_decode_c.c"
     engine = src_dir / "diter_engine.c"
-    if _needs_rebuild(exe, [wasm2c_c, wasm2c_h, rt_impl, wrapper, engine]):
+    if _needs_rebuild(exe, [core_c, core_h, rt_impl, wrapper, engine]):
         cmd = [
             cc,
             "-O2",
@@ -57,7 +57,7 @@ def build_decoder(build_dir: Path | None = None) -> Path:
             str(exe),
             str(wrapper),
             str(engine),
-            str(wasm2c_c),
+            str(core_c),
             str(rt_impl),
         ]
         subprocess.run(cmd, check=True)
