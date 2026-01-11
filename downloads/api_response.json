@@ -1,0 +1,155 @@
+{
+  "animationCount": 0,
+  "categories": [
+    {
+      "uid": "3badf36bd9f549bdba295334d75e04d3",
+      "name": "Weapons & Military",
+      "slug": "weapons-military",
+      "uri": "https://api.sketchfab.com/v3/categories/3badf36bd9f549bdba295334d75e04d3",
+      "icon": "https://static.sketchfab.com/static/builds/web/dist/static/assets/images/icons/categories/6f71af8dadcca706c7404c9a0f82c1a3-v2.svg",
+      "thumbnails": [
+        {
+          "width": "512",
+          "height": "288",
+          "url": "https://static.sketchfab.com/categories/3badf36bd9f549bdba295334d75e04d3/512x288.png"
+        },
+        {
+          "width": "800",
+          "height": "450",
+          "url": "https://static.sketchfab.com/categories/3badf36bd9f549bdba295334d75e04d3/800x450.png"
+        }
+      ]
+    }
+  ],
+  "commentCount": 4,
+  "createdAt": "2023-07-03T21:52:49.922997",
+  "embedUrl": "https://sketchfab.com/models/dea4f17e94974e1fa720cbadc531ed63/embed",
+  "faceCount": 97887,
+  "isAgeRestricted": false,
+  "license": {},
+  "likeCount": 17,
+  "name": "Annihilator 2000",
+  "publishedAt": "2023-07-03T22:26:31.664197",
+  "soundCount": 0,
+  "staffpickedAt": null,
+  "tags": [
+    {
+      "name": "movie",
+      "slug": "movie",
+      "uri": "https://api.sketchfab.com/v3/tags/movie"
+    },
+    {
+      "name": "Annihilator",
+      "slug": "annihilator",
+      "uri": "https://api.sketchfab.com/v3/tags/annihilator"
+    },
+    {
+      "name": "weapon",
+      "slug": "weapon",
+      "uri": "https://api.sketchfab.com/v3/tags/weapon"
+    },
+    {
+      "name": "blender",
+      "slug": "blender",
+      "uri": "https://api.sketchfab.com/v3/tags/blender"
+    }
+  ],
+  "thumbnails": {
+    "images": [
+      {
+        "uid": "ef0e8ba1ec6f46b697724513290dc7c0",
+        "width": 1920,
+        "height": 1080,
+        "size": 124102,
+        "url": "https://media.sketchfab.com/models/dea4f17e94974e1fa720cbadc531ed63/thumbnails/482433a424d644dba2e6e938643d1de4/12bec8ba87124da29b1112283f29617e.jpeg"
+      },
+      {
+        "uid": "4ee2c3ba0b8e40e6aa3b5d008aab7f57",
+        "width": 1024,
+        "height": 576,
+        "size": 40818,
+        "url": "https://media.sketchfab.com/models/dea4f17e94974e1fa720cbadc531ed63/thumbnails/482433a424d644dba2e6e938643d1de4/fce849faa4f346b984142901acdff509.jpeg"
+      },
+      {
+        "uid": "d78a71c54907472ab906c8c04dd38b75",
+        "width": 720,
+        "height": 405,
+        "size": 24336,
+        "url": "https://media.sketchfab.com/models/dea4f17e94974e1fa720cbadc531ed63/thumbnails/482433a424d644dba2e6e938643d1de4/d218f1dd63f94ef08e46aeb320aaee73.jpeg"
+      },
+      {
+        "uid": "f3f771ec99834c9fb992994d4bb7adf2",
+        "width": 256,
+        "height": 144,
+        "size": 5203,
+        "url": "https://media.sketchfab.com/models/dea4f17e94974e1fa720cbadc531ed63/thumbnails/482433a424d644dba2e6e938643d1de4/ad0e2f0deaa34af3b4c2c1716c899016.jpeg"
+      },
+      {
+        "uid": "0ed61f5d471d4bb285e32228ba74328e",
+        "width": 64,
+        "height": 36,
+        "size": 1144,
+        "url": "https://media.sketchfab.com/models/dea4f17e94974e1fa720cbadc531ed63/thumbnails/482433a424d644dba2e6e938643d1de4/0deddda8f2ee425ebc3a9e90cd6db403.jpeg"
+      }
+    ]
+  },
+  "uid": "dea4f17e94974e1fa720cbadc531ed63",
+  "uri": "https://api.sketchfab.com/v3/models/dea4f17e94974e1fa720cbadc531ed63",
+  "user": {
+    "uid": "5c4018668ee84c0b9b9ee25304798c05",
+    "username": "juang3d",
+    "displayName": "JuanG3D",
+    "account": "prem",
+    "profileUrl": "https://sketchfab.com/juang3d",
+    "avatar": {
+      "uid": "d68d0e030d0b4758b36333e71c3894b2",
+      "uri": "https://api.sketchfab.com/v3/avatars/d68d0e030d0b4758b36333e71c3894b2",
+      "images": [
+        {
+          "width": 90,
+          "height": 90,
+          "size": 21746,
+          "url": "https://media.sketchfab.com/avatars/d68d0e030d0b4758b36333e71c3894b2/aacf9980345e46f7a3eff3435442df92.jpeg"
+        },
+        {
+          "width": 100,
+          "height": 100,
+          "size": 22539,
+          "url": "https://media.sketchfab.com/avatars/d68d0e030d0b4758b36333e71c3894b2/ee2dd1f3a6cf4a918f49c9126e8ade14.jpeg"
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "size": 18101,
+          "url": "https://media.sketchfab.com/avatars/d68d0e030d0b4758b36333e71c3894b2/1cda488b3b6241e9bdbb381169f09dec.jpeg"
+        },
+        {
+          "width": 48,
+          "height": 48,
+          "size": 18818,
+          "url": "https://media.sketchfab.com/avatars/d68d0e030d0b4758b36333e71c3894b2/ec336d8c9a484c5e8af33deded4ae839.jpeg"
+        }
+      ]
+    },
+    "uri": "https://api.sketchfab.com/v3/users/5c4018668ee84c0b9b9ee25304798c05"
+  },
+  "vertexCount": 53629,
+  "viewCount": 800,
+  "viewerUrl": "https://sketchfab.com/3d-models/annihilator-2000-dea4f17e94974e1fa720cbadc531ed63",
+  "isDownloadable": false,
+  "isProtected": false,
+  "description": "The Annihilator 2000 is a weapon invented by Serge in the movie Beverly Hills Cop III (1994). \nThe dawn of a new generation in luxury personal weaponry, the Annihilator 2000 is America's premier survival, home and travel total security unit.\nThe Annihilator 2000 is a lightweight, high-performance weapon that meets the demands of the new generation of upper-income urban survivalists.\nThe Annihilator 2000 has the conveniences of a cellular telephone with fax machine and a microwave oven.\nNight-vision goggles, microprocessor, verbal alarm systems, a compact disc player, digital AM/FM radio, video camera and playback functions are just a few of the features of the extraordinary Annihilator 2000.\nStopping power is a matter of convenience with your Annihilator 2000.\nThe Annihilator 2000 is constructed of lightweight aluminium alloy, combined with a new polymer technology, making it totally resistant to corrosion.\n3D model made in Blender 3.5.1.",
+  "price": null,
+  "downloadCount": 0,
+  "editorUrl": "https://sketchfab.com/models/dea4f17e94974e1fa720cbadc531ed63/edit",
+  "status": {
+    "warning": {},
+    "processing": "SUCCEEDED"
+  },
+  "source": "website",
+  "hasCommentsDisabled": false,
+  "updatedAt": "2023-07-03T22:26:31.745024",
+  "pbrType": null,
+  "textureCount": 8,
+  "materialCount": 19
+}
