@@ -289,6 +289,86 @@ VALIDATION_PATTERNS = {
     'url': r'^https?://[^\s]+$',
 }
 
+# Typography Scale (from viewer_postprocessing.js.md)
+TYPOGRAPHY_SCALE = {
+    'h1': {'fontSize': '2.5rem', 'fontWeight': 700, 'lineHeight': 1.2},
+    'h2': {'fontSize': '2rem', 'fontWeight': 700, 'lineHeight': 1.25},
+    'h3': {'fontSize': '1.5rem', 'fontWeight': 600, 'lineHeight': 1.3},
+    'h4': {'fontSize': '1.25rem', 'fontWeight': 600, 'lineHeight': 1.4},
+    'body': {'fontSize': '1rem', 'fontWeight': 400, 'lineHeight': 1.5},
+    'small': {'fontSize': '0.875rem', 'fontWeight': 400, 'lineHeight': 1.5},
+    'caption': {'fontSize': '0.75rem', 'fontWeight': 400, 'lineHeight': 1.4},
+}
+
+# Full Theme Colors (from viewer_postprocessing.js.md)
+THEME_COLORS = {
+    'light': {
+        'background': '#ffffff',
+        'backgroundSecondary': '#f5f5f5',
+        'surface': '#ffffff',
+        'surfaceHover': '#f8f8f8',
+        'text': '#1a1a1a',
+        'textSecondary': '#666666',
+        'textMuted': '#999999',
+        'primary': '#1caad9',
+        'primaryHover': '#0e8ab8',
+        'success': '#10b981',
+        'warning': '#f59e0b',
+        'error': '#ef4444',
+        'info': '#3b82f6',
+        'border': '#e0e0e0',
+    },
+    'dark': {
+        'background': '#1a1a1a',
+        'backgroundSecondary': '#2d2d2d',
+        'surface': '#2d2d2d',
+        'surfaceHover': '#3d3d3d',
+        'text': '#ffffff',
+        'textSecondary': '#b0b0b0',
+        'textMuted': '#808080',
+        'primary': '#1caad9',
+        'primaryHover': '#3dbde8',
+        'success': '#34d399',
+        'warning': '#fbbf24',
+        'error': '#f87171',
+        'info': '#60a5fa',
+        'border': '#404040',
+    },
+}
+
+# Gradient Presets (from viewer_components.js.md)
+GRADIENT_PRESETS = {
+    'primary': {'start': '#1caad9', 'end': '#0e7490'},
+    'success': {'start': '#10b981', 'end': '#059669'},
+    'warning': {'start': '#f59e0b', 'end': '#d97706'},
+    'danger': {'start': '#ef4444', 'end': '#dc2626'},
+    'purple': {'start': '#8b5cf6', 'end': '#7c3aed'},
+    'rainbow': {'start': '#ec4899', 'middle': '#8b5cf6', 'end': '#3b82f6'},
+}
+
+# Rating System (from viewer_components.js.md)
+RATING_CONFIG = {
+    'max': 5,
+    'allowHalf': True,
+    'sizes': ['small', 'medium', 'large'],
+}
+
+# Notification Types (from viewer_annotations.js.md)
+NOTIFICATION_TYPES = {
+    'info': {'backgroundColor': '#e3f2fd', 'borderColor': '#1976d2', 'textColor': '#1565c0'},
+    'warning': {'backgroundColor': '#fff3e0', 'borderColor': '#f57c00', 'textColor': '#e65100'},
+    'success': {'backgroundColor': '#e8f5e9', 'borderColor': '#4caf50', 'textColor': '#2e7d32'},
+    'error': {'backgroundColor': '#ffebee', 'borderColor': '#f44336', 'textColor': '#c62828'},
+}
+
+# Shadow Presets (from viewer_postprocessing.js.md)
+SHADOW_PRESETS = {
+    'sm': '0 1px 2px rgba(0, 0, 0, 0.05)',
+    'md': '0 4px 6px rgba(0, 0, 0, 0.1)',
+    'lg': '0 10px 15px rgba(0, 0, 0, 0.1)',
+    'xl': '0 20px 25px rgba(0, 0, 0, 0.15)',
+}
+
 from src.sketchfab_fetcher import SketchfabFetcher
 from src.model_decryptor import SketchfabDecryptor, decrypt_model
 from src.binz_reader import BinzReader
@@ -618,11 +698,12 @@ def cmd_info(args):
     print("  parse-url   - Parse and analyze Sketchfab URLs")
     print("  thumbnail   - Generate thumbnail URLs for a model")
     print()
-    print("Configuration Commands:")
+    print("Configuration & Design Commands:")
     print("  config      - Display or generate viewer configuration")
     print("  api         - Display API endpoint information and utilities")
     print("  ai-info     - Show information about Sketchfab AI tools")
     print("  tiers       - Display subscription tier information")
+    print("  design      - Show design system (colors, typography, gradients)")
     print("  validate    - Validate input values (username, email, model_id, url)")
     print()
     print("Web Scraping Commands:")
@@ -1643,6 +1724,104 @@ def cmd_categories(args):
     return 0
 
 
+def cmd_design(args):
+    """Display Sketchfab design system information."""
+    
+    if args.colors:
+        print("Sketchfab Color Palette")
+        print("=" * 60)
+        
+        for theme_name, colors in THEME_COLORS.items():
+            print(f"\n{theme_name.upper()} THEME:")
+            print("-" * 40)
+            for color_name, color_value in colors.items():
+                print(f"  {color_name:20} {color_value}")
+        return 0
+    
+    if args.typography:
+        print("Sketchfab Typography Scale")
+        print("=" * 60)
+        
+        for level, props in TYPOGRAPHY_SCALE.items():
+            print(f"\n{level.upper()}:")
+            for prop, value in props.items():
+                print(f"  {prop}: {value}")
+        return 0
+    
+    if args.gradients:
+        print("Sketchfab Gradient Presets")
+        print("=" * 60)
+        
+        for name, colors in GRADIENT_PRESETS.items():
+            print(f"\n{name.upper()}:")
+            for key, value in colors.items():
+                print(f"  {key}: {value}")
+        return 0
+    
+    if args.shadows:
+        print("Sketchfab Shadow Presets")
+        print("=" * 60)
+        
+        for name, value in SHADOW_PRESETS.items():
+            print(f"\n{name.upper()}:")
+            print(f"  {value}")
+        return 0
+    
+    if args.notifications:
+        print("Sketchfab Notification Types")
+        print("=" * 60)
+        
+        for notif_type, colors in NOTIFICATION_TYPES.items():
+            print(f"\n{notif_type.upper()}:")
+            for key, value in colors.items():
+                print(f"  {key}: {value}")
+        return 0
+    
+    if args.generate_css:
+        theme = args.theme or 'light'
+        if theme not in THEME_COLORS:
+            print(f"Unknown theme: {theme}. Available: {', '.join(THEME_COLORS.keys())}")
+            return 1
+        
+        print(f"/* Sketchfab {theme.title()} Theme CSS Variables */")
+        print(":root {")
+        for color_name, color_value in THEME_COLORS[theme].items():
+            css_name = ''.join(['-' + c.lower() if c.isupper() else c for c in color_name]).lstrip('-')
+            print(f"  --color-{css_name}: {color_value};")
+        print("}")
+        print()
+        print("/* Typography */")
+        for level, props in TYPOGRAPHY_SCALE.items():
+            print(f".text-{level} {{")
+            print(f"  font-size: {props['fontSize']};")
+            print(f"  font-weight: {props['fontWeight']};")
+            print(f"  line-height: {props['lineHeight']};")
+            print("}")
+        return 0
+    
+    # Default: show summary
+    print("Sketchfab Design System")
+    print("=" * 60)
+    print("\nAvailable design information:")
+    print("  --colors         Show color palettes (light/dark themes)")
+    print("  --typography     Show typography scale")
+    print("  --gradients      Show gradient presets")
+    print("  --shadows        Show shadow presets")
+    print("  --notifications  Show notification type colors")
+    print("  --generate-css   Generate CSS variables")
+    print("                   Use with --theme light|dark")
+    print()
+    print("Quick Stats:")
+    print(f"  Themes: {', '.join(THEME_COLORS.keys())}")
+    print(f"  Colors per theme: {len(THEME_COLORS['light'])}")
+    print(f"  Typography levels: {len(TYPOGRAPHY_SCALE)}")
+    print(f"  Gradient presets: {len(GRADIENT_PRESETS)}")
+    print(f"  Shadow presets: {len(SHADOW_PRESETS)}")
+    print(f"  Notification types: {len(NOTIFICATION_TYPES)}")
+    
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Sketchfab Model Tools CLI",
@@ -1927,6 +2106,25 @@ def main():
     categories_parser = subparsers.add_parser('categories',
         help='Display Sketchfab model categories')
     categories_parser.set_defaults(func=cmd_categories)
+
+    # Design command - Design system information
+    design_parser = subparsers.add_parser('design',
+        help='Display Sketchfab design system information')
+    design_parser.add_argument('--colors', action='store_true',
+        help='Show color palettes')
+    design_parser.add_argument('--typography', action='store_true',
+        help='Show typography scale')
+    design_parser.add_argument('--gradients', action='store_true',
+        help='Show gradient presets')
+    design_parser.add_argument('--shadows', action='store_true',
+        help='Show shadow presets')
+    design_parser.add_argument('--notifications', action='store_true',
+        help='Show notification type colors')
+    design_parser.add_argument('--generate-css', action='store_true',
+        help='Generate CSS variables')
+    design_parser.add_argument('--theme', choices=['light', 'dark'],
+        help='Theme for CSS generation')
+    design_parser.set_defaults(func=cmd_design)
 
     # Parse args
     args = parser.parse_args()
