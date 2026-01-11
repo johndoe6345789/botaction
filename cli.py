@@ -21,10 +21,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
 from cli_data import get_commands
+from importlib import import_module
 from src.cli_context import (
     CLI_DESCRIPTION,
     INTERRUPT_MESSAGE,
     UNEXPECTED_ERROR,
+    LICENSE_TYPES,
 )
 
 
@@ -33,6 +35,17 @@ TYPE_MAP = {
     'float': float,
     'str': str,
 }
+
+
+MODULE_CACHE = {}
+
+
+def load_command_func(name: str):
+    module = MODULE_CACHE.get(name)
+    if module is None:
+        module = import_module(f"src.cli_function_dumps.{name}")
+        MODULE_CACHE[name] = module
+    return getattr(module, name)
 
 
 def main():
@@ -65,18 +78,15 @@ def main():
 
             choices_key = arg.get('choices_from')
             if choices_key:
-                choices_source = globals().get(choices_key)
-                if isinstance(choices_source, dict):
-                    kwargs['choices'] = list(choices_source.keys())
-                elif isinstance(choices_source, (list, tuple)):
-                    kwargs['choices'] = choices_source
+                if choices_key == 'LICENSE_TYPES':
+                    kwargs['choices'] = list(LICENSE_TYPES.keys())
 
             command_parser.add_argument(*names, **kwargs)
 
         if 'defaults' in command_data:
             command_parser.set_defaults(**command_data['defaults'])
 
-        command_parser.set_defaults(func=globals()[command_data['func']])
+        command_parser.set_defaults(func=load_command_func(command_data['func']))
 
     args = parser.parse_args()
 
