@@ -2,12 +2,31 @@
 Sketchfab Model Fetcher
 
 Fetches model data from Sketchfab including metadata and file URLs.
+
+Key findings about Sketchfab's model format:
+- Models are stored as .binz files (encrypted binary geometry)
+- The 'p' parameter in file config contains base64-encoded encryption params
+- 'd: true' in the config indicates the file is encrypted
+- Encryption uses AES (exact mode TBD - likely in their osgjs viewer code)
+- The osgjs viewer decrypts at runtime in the browser
+
+File structure:
+- osgjsUrl: URL to the encrypted .binz file
+- osgjsSize: Size of the scene description
+- modelSize: Size of the geometry data
+- wireframeSize: Size of wireframe data
+- p[].b: Base64-encoded key material (first 32 bytes = key, next 16 = IV)
+- p[].d: Boolean indicating encryption status
+- p[].v: Version number
 """
 
 import requests
 import json
 import re
-from typing import Dict, Any, Optional
+import base64
+from pathlib import Path
+from typing import Dict, Any, Optional, List
+from dataclasses import dataclass
 
 
 class SketchfabFetcher:
