@@ -158,12 +158,135 @@ AI_PROVIDERS = {
 # Download Formats (from model_page.js.md)
 DOWNLOAD_FORMATS = ['glb', 'gltf', 'fbx', 'obj', 'usdz', 'blend']
 
-# Visibility Types (from api_client.js.md)
+# Visibility Types (from api_client.js.md / visibility_popup.js.md)
 VISIBILITY_TYPES = {
-    'public': 'Visible to everyone',
-    'private': 'Only visible to owner',
-    'protected': 'Password protected',
-    'org': 'Organization only',
+    'public': 'Visible to everyone - anyone can find and view',
+    'unlisted': 'Accessible via direct link only',
+    'private': 'Only visible to owner (requires Pro)',
+    'password': 'Password protected (requires Pro)',
+    'org': 'Organization members only',
+}
+
+# Subscription Tiers (from visibility_popup.js.md)
+SUBSCRIPTION_TIERS = {
+    'free': {
+        'name': 'Free',
+        'features': {
+            'privateModels': False,
+            'passwordProtected': False,
+            'downloadableModels': 0,
+            'customBranding': False,
+            'maxFileSize': '100MB',
+            'monthlyUploads': 10,
+        }
+    },
+    'plus': {
+        'name': 'Plus',
+        'badgeColor': '#1caad9',
+        'features': {
+            'privateModels': True,
+            'passwordProtected': True,
+            'downloadableModels': 5,
+            'customBranding': False,
+            'maxFileSize': '500MB',
+            'monthlyUploads': 50,
+        }
+    },
+    'pro': {
+        'name': 'Pro',
+        'badgeColor': '#ffc107',
+        'features': {
+            'privateModels': True,
+            'passwordProtected': True,
+            'downloadableModels': 20,
+            'customBranding': True,
+            'maxFileSize': '1GB',
+            'monthlyUploads': 200,
+        }
+    },
+    'business': {
+        'name': 'Business',
+        'badgeColor': '#9c27b0',
+        'features': {
+            'privateModels': True,
+            'passwordProtected': True,
+            'downloadableModels': 'unlimited',
+            'customBranding': True,
+            'maxFileSize': '2GB',
+            'monthlyUploads': 'unlimited',
+        }
+    },
+}
+
+# Thumbnail Sizes (from viewer_utils.js.md)
+THUMBNAIL_SIZES = {
+    'small': {'width': 200, 'height': 150},
+    'medium': {'width': 320, 'height': 240},
+    'large': {'width': 640, 'height': 480},
+    'xlarge': {'width': 1280, 'height': 720},
+}
+
+# Model Badges (from viewer_utils.js.md)
+MODEL_BADGES = {
+    'staffpick': 'Featured by Sketchfab staff',
+    'store': 'Available for purchase in store',
+    'downloadable': 'Free to download',
+    'animated': 'Contains animation',
+    'sound': 'Has audio/sound',
+    'restricted': 'Age-restricted content',
+}
+
+# Search Filters (from navigation.js.md)
+SEARCH_FILTERS = {
+    'type': ['models', 'collections', 'users'],
+    'sort': ['relevance', 'likeCount', 'viewCount', 'createdAt', 'publishedAt'],
+    'downloadable': [True, False],
+    'animated': [True, False],
+    'staffpicked': [True, False],
+    'rigged': [True, False],
+    'pbr': [True, False],
+}
+
+# Search Categories (from navigation.js.md)
+SEARCH_CATEGORIES = [
+    'animals-pets', 'architecture', 'art-abstract',
+    'cars-vehicles', 'characters-creatures', 'cultural-heritage-history',
+    'electronics-gadgets', 'fashion-style', 'food-drink',
+    'furniture-home', 'music', 'nature-plants',
+    'news-politics', 'people', 'places-travel',
+    'science-technology', 'sports-fitness', 'weapons-military',
+]
+
+# User Roles (from viewer_loading.js.md)
+ORG_MEMBER_ROLES = {
+    'owner': {'permissions': ['all'], 'description': 'Full access to organization'},
+    'admin': {'permissions': ['manage_members', 'manage_projects', 'manage_settings'], 'description': 'Can manage team and projects'},
+    'member': {'permissions': ['view', 'edit_models', 'create_projects'], 'description': 'Can create and edit content'},
+    'viewer': {'permissions': ['view'], 'description': 'Can only view content'},
+}
+
+# Themes (from visibility_popup.js.md)
+THEMES = {
+    'light': {
+        'background': '#ffffff',
+        'surface': '#f5f5f5',
+        'text': '#1a1a1a',
+        'primary': '#1caad9',
+    },
+    'dark': {
+        'background': '#1a1a1a',
+        'surface': '#2d2d2d',
+        'text': '#ffffff',
+        'primary': '#1caad9',
+    },
+}
+
+# Validation Patterns (from viewer_inspector.js.md)
+VALIDATION_PATTERNS = {
+    'username': r'^[a-zA-Z0-9_]{3,20}$',
+    'email': r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+    'model_id': r'^[a-f0-9]{32}$',
+    'url': r'^https?://[^\s]+$',
 }
 
 from src.sketchfab_fetcher import SketchfabFetcher
@@ -475,7 +598,7 @@ def cmd_viewer(args):
 def cmd_info(args):
     """Show information about available commands."""
     print("Sketchfab Model Tools CLI")
-    print("=" * 60)
+    print("=" * 65)
     print()
     print("Core Commands:")
     print("  fetch       - Fetch model info and download files from Sketchfab")
@@ -484,15 +607,23 @@ def cmd_info(args):
     print("  export      - Export decrypted model to 3MF format")
     print("  viewer      - Launch 3D model viewer")
     print()
-    print("URL & Embed Commands (from Sketchfab JS analysis):")
+    print("Search & Discovery Commands (from Sketchfab JS analysis):")
+    print("  search      - Search for models on Sketchfab")
+    print("  user        - Look up a Sketchfab user")
+    print("  stats       - Fetch and display model statistics from API")
+    print("  categories  - Display model categories")
+    print()
+    print("URL & Embed Commands:")
     print("  embed       - Generate embed URL or iframe code for a model")
     print("  parse-url   - Parse and analyze Sketchfab URLs")
-    print("  stats       - Fetch and display model statistics from API")
+    print("  thumbnail   - Generate thumbnail URLs for a model")
     print()
     print("Configuration Commands:")
     print("  config      - Display or generate viewer configuration")
     print("  api         - Display API endpoint information and utilities")
     print("  ai-info     - Show information about Sketchfab AI tools")
+    print("  tiers       - Display subscription tier information")
+    print("  validate    - Validate input values (username, email, model_id, url)")
     print()
     print("Web Scraping Commands:")
     print("  scrape      - Scrape webpage content using requests/BeautifulSoup")
@@ -1254,6 +1385,264 @@ def format_number(num):
     return str(num)
 
 
+def cmd_search(args):
+    """Search for models on Sketchfab."""
+    try:
+        import requests
+    except ImportError:
+        print("Error: requests library required. Install with: pip install requests")
+        return 1
+    
+    print(f"Searching for: {args.query}")
+    
+    # Build search URL
+    params = {
+        'q': args.query,
+        'type': args.type or 'models',
+    }
+    
+    if args.sort:
+        params['sort_by'] = f"-{args.sort}" if args.sort != 'relevance' else args.sort
+    if args.downloadable:
+        params['downloadable'] = 'true'
+    if args.animated:
+        params['animated'] = 'true'
+    if args.staffpicked:
+        params['staffpicked'] = 'true'
+    if args.category:
+        params['categories'] = args.category
+    if args.count:
+        params['count'] = min(args.count, 24)  # Max 24 per request
+    
+    api_url = f"{SKETCHFAB_API_BASE}/search"
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    
+    try:
+        response = requests.get(api_url, params=params, headers=headers, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        
+        results = data.get('results', [])
+        total = data.get('totalCount', len(results))
+        
+        print(f"\nFound {total:,} results:")
+        print("=" * 60)
+        
+        for i, item in enumerate(results, 1):
+            name = item.get('name', 'Unknown')
+            uid = item.get('uid', 'N/A')
+            user = item.get('user', {}).get('displayName', item.get('user', {}).get('username', 'Unknown'))
+            views = item.get('viewCount', 0)
+            likes = item.get('likeCount', 0)
+            
+            print(f"\n{i}. {name}")
+            print(f"   ID: {uid}")
+            print(f"   Author: {user}")
+            print(f"   Views: {format_number(views)} | Likes: {format_number(likes)}")
+            
+            if item.get('isDownloadable'):
+                print(f"   ✓ Downloadable")
+            if item.get('isAnimated'):
+                print(f"   ✓ Animated")
+            if item.get('staffpickedAt'):
+                print(f"   ★ Staff Pick")
+        
+        if args.json:
+            print(f"\n\nRaw JSON:")
+            print(json.dumps(data, indent=2))
+        
+        return 0
+        
+    except requests.RequestException as e:
+        print(f"Error searching: {e}")
+        return 1
+
+
+def cmd_user(args):
+    """Look up a Sketchfab user."""
+    try:
+        import requests
+    except ImportError:
+        print("Error: requests library required. Install with: pip install requests")
+        return 1
+    
+    username = args.username.lstrip('@')
+    print(f"Looking up user: {username}")
+    
+    api_url = f"{SKETCHFAB_API_BASE}/users/{username}"
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    
+    try:
+        response = requests.get(api_url, headers=headers, timeout=10)
+        response.raise_for_status()
+        user = response.json()
+        
+        print("\nUser Information:")
+        print("=" * 50)
+        print(f"  Username: {user.get('username', 'N/A')}")
+        print(f"  Display Name: {user.get('displayName', 'N/A')}")
+        print(f"  UID: {user.get('uid', 'N/A')}")
+        
+        if user.get('bio'):
+            bio = user['bio'][:100] + '...' if len(user.get('bio', '')) > 100 else user.get('bio', '')
+            print(f"  Bio: {bio}")
+        
+        if user.get('location'):
+            print(f"  Location: {user.get('location')}")
+        if user.get('website'):
+            print(f"  Website: {user.get('website')}")
+        
+        print(f"\nStats:")
+        print(f"  Models: {user.get('modelCount', 0):,}")
+        print(f"  Followers: {user.get('followerCount', 0):,}")
+        print(f"  Following: {user.get('followingCount', 0):,}")
+        print(f"  Likes: {user.get('likeCount', 0):,}")
+        
+        print(f"\nStatus:")
+        if user.get('isVerified'):
+            print(f"  ✓ Verified")
+        if user.get('isPro'):
+            print(f"  ★ Pro Account")
+        if user.get('isStaff'):
+            print(f"  ⚡ Staff")
+        
+        print(f"\nProfile URL: {SKETCHFAB_BASE_URL}/@{username}")
+        print(f"Models URL: {SKETCHFAB_BASE_URL}/@{username}/models")
+        
+        if args.models:
+            # Fetch user's models
+            models_url = f"{SKETCHFAB_API_BASE}/users/{username}/models"
+            models_response = requests.get(models_url, headers=headers, timeout=10)
+            models_response.raise_for_status()
+            models_data = models_response.json()
+            
+            models = models_data.get('results', [])
+            print(f"\nRecent Models ({len(models)} shown):")
+            print("-" * 40)
+            for model in models[:10]:
+                name = model.get('name', 'Unknown')
+                uid = model.get('uid', '')
+                views = format_number(model.get('viewCount', 0))
+                print(f"  - {name} ({views} views)")
+                print(f"    ID: {uid}")
+        
+        if args.json:
+            print(f"\nRaw JSON:")
+            print(json.dumps(user, indent=2))
+        
+        return 0
+        
+    except requests.RequestException as e:
+        print(f"Error fetching user: {e}")
+        return 1
+
+
+def cmd_thumbnail(args):
+    """Generate thumbnail URLs for a model."""
+    model_id = extract_model_id(args.model_id_or_url)
+    
+    if not model_id:
+        print(f"Error: Could not extract model ID from: {args.model_id_or_url}")
+        return 1
+    
+    print(f"Thumbnail URLs for model: {model_id}")
+    print("=" * 60)
+    
+    # Generate Sketchfab CDN thumbnail URLs
+    base_url = f"https://media.sketchfab.com/models/{model_id}/thumbnails"
+    
+    print("\nStandard Thumbnails:")
+    for size_name, dims in THUMBNAIL_SIZES.items():
+        url = f"{base_url}/{dims['width']}x{dims['height']}.jpeg"
+        print(f"  {size_name.capitalize()} ({dims['width']}x{dims['height']}):")
+        print(f"    {url}")
+    
+    print("\nAlternative Formats:")
+    print(f"  Default: {base_url}/default.jpeg")
+    print(f"  Square: {base_url}/200x200.jpeg")
+    
+    if args.fetch:
+        try:
+            import requests
+            api_url = f"{SKETCHFAB_API_BASE}/models/{model_id}"
+            response = requests.get(api_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            
+            thumbnails = data.get('thumbnails', {}).get('images', [])
+            if thumbnails:
+                print(f"\nActual Thumbnails from API ({len(thumbnails)} available):")
+                for thumb in thumbnails:
+                    width = thumb.get('width', 'N/A')
+                    height = thumb.get('height', 'N/A')
+                    url = thumb.get('url', 'N/A')
+                    print(f"  {width}x{height}: {url}")
+        except Exception as e:
+            print(f"\nCould not fetch actual thumbnails: {e}")
+    
+    return 0
+
+
+def cmd_tiers(args):
+    """Display subscription tier information."""
+    print("Sketchfab Subscription Tiers")
+    print("=" * 60)
+    
+    for tier_id, tier_info in SUBSCRIPTION_TIERS.items():
+        print(f"\n{tier_info['name'].upper()}")
+        if tier_info.get('badgeColor'):
+            print(f"  Badge Color: {tier_info['badgeColor']}")
+        print(f"  Features:")
+        for feature, value in tier_info['features'].items():
+            display_value = '✓' if value is True else ('✗' if value is False else value)
+            print(f"    {feature}: {display_value}")
+    
+    print("\n\nVisibility Options by Tier:")
+    print("-" * 40)
+    for vis_type, desc in VISIBILITY_TYPES.items():
+        print(f"  {vis_type}: {desc}")
+    
+    return 0
+
+
+def cmd_validate(args):
+    """Validate input values against Sketchfab patterns."""
+    value = args.value
+    val_type = args.type
+    
+    if val_type not in VALIDATION_PATTERNS:
+        print(f"Unknown validation type: {val_type}")
+        print(f"Available types: {', '.join(VALIDATION_PATTERNS.keys())}")
+        return 1
+    
+    pattern = VALIDATION_PATTERNS[val_type]
+    
+    if re.match(pattern, value):
+        print(f"✓ Valid {val_type}: {value}")
+        return 0
+    else:
+        print(f"✗ Invalid {val_type}: {value}")
+        print(f"  Expected pattern: {pattern}")
+        return 1
+
+
+def cmd_categories(args):
+    """Display Sketchfab model categories."""
+    print("Sketchfab Model Categories")
+    print("=" * 40)
+    
+    for i, category in enumerate(SEARCH_CATEGORIES, 1):
+        # Convert slug to display name
+        display_name = category.replace('-', ' & ' if '-' in category else ' ').title()
+        print(f"  {i:2}. {display_name}")
+        print(f"      Slug: {category}")
+    
+    print(f"\nTotal: {len(SEARCH_CATEGORIES)} categories")
+    print("\nUse these slugs with: python cli.py search --category <slug> <query>")
+    
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Sketchfab Model Tools CLI",
@@ -1474,6 +1863,70 @@ def main():
     stats_parser.add_argument('--json', action='store_true',
         help='Output raw JSON response')
     stats_parser.set_defaults(func=cmd_stats)
+
+    # Search command - Search for models
+    search_parser = subparsers.add_parser('search',
+        help='Search for models on Sketchfab')
+    search_parser.add_argument('query',
+        help='Search query')
+    search_parser.add_argument('--type', choices=['models', 'collections', 'users'],
+        default='models', help='Type of results (default: models)')
+    search_parser.add_argument('--sort', 
+        choices=['relevance', 'likeCount', 'viewCount', 'createdAt', 'publishedAt'],
+        help='Sort results by')
+    search_parser.add_argument('--downloadable', action='store_true',
+        help='Only show downloadable models')
+    search_parser.add_argument('--animated', action='store_true',
+        help='Only show animated models')
+    search_parser.add_argument('--staffpicked', action='store_true',
+        help='Only show staff picks')
+    search_parser.add_argument('--category',
+        help='Filter by category slug')
+    search_parser.add_argument('--count', type=int, default=10,
+        help='Number of results (default: 10, max: 24)')
+    search_parser.add_argument('--json', action='store_true',
+        help='Output raw JSON response')
+    search_parser.set_defaults(func=cmd_search)
+
+    # User command - Look up user
+    user_parser = subparsers.add_parser('user',
+        help='Look up a Sketchfab user')
+    user_parser.add_argument('username',
+        help='Username to look up (with or without @)')
+    user_parser.add_argument('--models', action='store_true',
+        help='Show user\'s recent models')
+    user_parser.add_argument('--json', action='store_true',
+        help='Output raw JSON response')
+    user_parser.set_defaults(func=cmd_user)
+
+    # Thumbnail command - Generate thumbnail URLs
+    thumbnail_parser = subparsers.add_parser('thumbnail',
+        help='Generate thumbnail URLs for a model')
+    thumbnail_parser.add_argument('model_id_or_url',
+        help='Model ID or Sketchfab URL')
+    thumbnail_parser.add_argument('--fetch', action='store_true',
+        help='Fetch actual thumbnails from API')
+    thumbnail_parser.set_defaults(func=cmd_thumbnail)
+
+    # Tiers command - Subscription tier info
+    tiers_parser = subparsers.add_parser('tiers',
+        help='Display subscription tier information')
+    tiers_parser.set_defaults(func=cmd_tiers)
+
+    # Validate command - Validate input values
+    validate_parser = subparsers.add_parser('validate',
+        help='Validate input values against Sketchfab patterns')
+    validate_parser.add_argument('type',
+        choices=['username', 'email', 'model_id', 'url'],
+        help='Type of value to validate')
+    validate_parser.add_argument('value',
+        help='Value to validate')
+    validate_parser.set_defaults(func=cmd_validate)
+
+    # Categories command - List categories
+    categories_parser = subparsers.add_parser('categories',
+        help='Display Sketchfab model categories')
+    categories_parser.set_defaults(func=cmd_categories)
 
     # Parse args
     args = parser.parse_args()
