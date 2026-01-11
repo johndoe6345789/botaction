@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -48,6 +49,12 @@ struct VmState {
   std::unordered_map<std::string, uint64_t> op_counts;
   std::vector<uint8_t> memory;
   size_t stack_top = 0;
+  uint64_t instance_addr = 0;
+  uint64_t env_mem_addr = 0;
+  uint64_t linear_mem_base = 0;
+  uint64_t linear_mem_size = 0;
+  uint64_t heap_ptr = 0;
+  Value last_return_value{};
   std::vector<uint8_t> dict;
   std::vector<uint8_t> chunk;
   std::string key_hex;
@@ -276,6 +283,45 @@ void ensure_memory(VmState &state, size_t size) {
   if (state.memory.size() < size) {
     state.memory.resize(size, 0);
   }
+}
+
+void store_u32(VmState &state, uint64_t addr, uint32_t value) {
+  ensure_memory(state, addr + 4);
+  state.memory[addr + 0] = static_cast<uint8_t>(value & 0xff);
+  state.memory[addr + 1] = static_cast<uint8_t>((value >> 8) & 0xff);
+  state.memory[addr + 2] = static_cast<uint8_t>((value >> 16) & 0xff);
+  state.memory[addr + 3] = static_cast<uint8_t>((value >> 24) & 0xff);
+}
+
+void store_u64(VmState &state, uint64_t addr, uint64_t value) {
+  ensure_memory(state, addr + 8);
+  for (size_t i = 0; i < 8; i++) {
+    state.memory[addr + i] = static_cast<uint8_t>((value >> (i * 8)) & 0xff);
+  }
+}
+
+void init_instance_layout(VmState &state) {
+  state.instance_addr = 0x1000;
+  state.env_mem_addr = 0x2000;
+  state.linear_mem_base = 0x100000;
+  state.linear_mem_size = 8 * 1024 * 1024;
+  state.heap_ptr = 0x140000;
+
+  ensure_memory(state, state.linear_mem_base + state.linear_mem_size + 0x10000);
+
+  store_u64(state, state.instance_addr + 0, 0);
+  store_u64(state, state.instance_addr + 8, state.env_mem_addr);
+  store_u32(state, state.instance_addr + 16, 0);
+
+  store_u64(state, state.env_mem_addr + 0, state.linear_mem_base);
+  store_u64(state, state.env_mem_addr + 8, state.linear_mem_base + state.linear_mem_size);
+  store_u32(state, state.env_mem_addr + 16, 65536);
+  store_u64(state, state.env_mem_addr + 24, state.linear_mem_size / 65536);
+  store_u64(state, state.env_mem_addr + 32, 8192);
+  store_u64(state, state.env_mem_addr + 40, state.linear_mem_size);
+  state.memory[state.env_mem_addr + 48] = 0;
+
+  state.stack_top = state.linear_mem_base + state.linear_mem_size + 0x1000;
 }
 
 void store_value(VmState &state, uint64_t addr, Value value, size_t size) {
@@ -600,6 +646,7 @@ DiterVm* diter_vm_create(const char* runbook_path) {
   DiterVm* vm = new DiterVm();
   try {
     vm->state = load_workflow(runbook_path);
+    init_instance_layout(vm->state);
   } catch (...) {
     delete vm;
     return nullptr;
@@ -623,12 +670,10 @@ void diter_vm_load_inputs(DiterVm* vm,
   vm->state.dict.assign(dict, dict + dict_len);
   vm->state.chunk.assign(chunk, chunk + chunk_len);
   vm->state.key_hex = key_hex ? key_hex : "";
-  vm->state.memory.clear();
-  vm->state.stack_top = 0;
-  size_t dict_base = 0x10000;
-  size_t chunk_base = 0x20000;
-  size_t key_base = 0x30000;
-  ensure_memory(vm->state, key_base + 128);
+  init_instance_layout(vm->state);
+  size_t dict_base = vm->state.linear_mem_base + 0x10000;
+  size_t chunk_base = vm->state.linear_mem_base + 0x20000;
+  size_t key_base = vm->state.linear_mem_base + 0x30000;
   if (!vm->state.dict.empty()) {
     ensure_memory(vm->state, dict_base + vm->state.dict.size());
     std::copy(vm->state.dict.begin(), vm->state.dict.end(), vm->state.memory.begin() + dict_base);
@@ -685,6 +730,17 @@ void diter_vm_execute(DiterVm* vm) {
       }
 
       auto args = parse_call_args(inst.text);
+      if (callee == "diter_env_abort") {
+        throw std::runtime_error("VM abort");
+      }
+      if (callee == "diter_env_sbrk" && args.size() >= 2) {
+        auto incr = parse_last_token(frame.regs, args[1]);
+        uint64_t old = vm->state.heap_ptr;
+        vm->state.heap_ptr += incr.u;
+        ensure_memory(vm->state, vm->state.heap_ptr + 16);
+        if (!inst.dest.empty()) frame.regs[inst.dest] = {old};
+        continue;
+      }
       if (callee.find("llvm.memcpy") != std::string::npos && args.size() >= 3) {
         auto dest = parse_last_token(frame.regs, args[0]);
         auto src = parse_last_token(frame.regs, args[1]);
@@ -757,6 +813,8 @@ void diter_vm_execute(DiterVm* vm) {
       stack.pop_back();
       if (!stack.empty() && !frame.ret_dest.empty()) {
         stack.back().regs[frame.ret_dest] = ret_value;
+      } else if (stack.empty()) {
+        vm->state.last_return_value = ret_value;
       }
       continue;
     }
@@ -771,4 +829,163 @@ size_t diter_vm_instruction_count(const DiterVm* vm) {
     return 0;
   }
   return vm->state.instructions.size();
+}
+
+uint64_t diter_vm_call(DiterVm* vm, const char* func, const uint64_t* args, size_t arg_count) {
+  if (!vm || !func) {
+    return 0;
+  }
+  auto it = vm->state.functions.find(func);
+  if (it == vm->state.functions.end()) {
+    return 0;
+  }
+  vm->state.last_return_value = {};
+  Frame entry;
+  entry.func = func;
+  entry.saved_stack_top = vm->state.stack_top;
+  for (size_t i = 0; i < arg_count; i++) {
+    std::string reg_name = "%" + std::to_string(i);
+    entry.regs[reg_name] = {args[i]};
+  }
+  std::vector<Frame> stack;
+  stack.push_back(std::move(entry));
+
+  while (!stack.empty()) {
+    Frame &frame = stack.back();
+    auto fn_it = vm->state.functions.find(frame.func);
+    if (fn_it == vm->state.functions.end()) {
+      stack.pop_back();
+      continue;
+    }
+    auto &func_state = fn_it->second;
+    if (frame.pc >= func_state.insts.size()) {
+      vm->state.stack_top = frame.saved_stack_top;
+      stack.pop_back();
+      if (!stack.empty() && !frame.ret_dest.empty()) {
+        stack.back().regs[frame.ret_dest] = {0};
+      } else if (stack.empty()) {
+        vm->state.last_return_value = {0};
+      }
+      continue;
+    }
+    Instruction inst = func_state.insts[frame.pc++];
+
+    if (inst.op == "call") {
+      std::string callee;
+      auto at = inst.text.find("@");
+      if (at != std::string::npos) {
+        auto end = inst.text.find("(", at);
+        callee = inst.text.substr(at + 1, end == std::string::npos ? std::string::npos : end - at - 1);
+      }
+      auto call_args = parse_call_args(inst.text);
+      if (callee == "diter_env_abort") {
+        throw std::runtime_error("VM abort");
+      }
+      if (callee == "diter_env_sbrk" && call_args.size() >= 2) {
+        auto incr = parse_last_token(frame.regs, call_args[1]);
+        uint64_t old = vm->state.heap_ptr;
+        vm->state.heap_ptr += incr.u;
+        ensure_memory(vm->state, vm->state.heap_ptr + 16);
+        if (!inst.dest.empty()) {
+          frame.regs[inst.dest] = {old};
+        }
+        continue;
+      }
+      if (callee.find("llvm.memcpy") != std::string::npos && call_args.size() >= 3) {
+        auto dest = parse_last_token(frame.regs, call_args[0]);
+        auto src = parse_last_token(frame.regs, call_args[1]);
+        auto len = parse_last_token(frame.regs, call_args[2]);
+        ensure_memory(vm->state, dest.u + len.u);
+        ensure_memory(vm->state, src.u + len.u);
+        std::memmove(&vm->state.memory[dest.u], &vm->state.memory[src.u], len.u);
+        if (!inst.dest.empty()) frame.regs[inst.dest] = {0};
+        continue;
+      }
+      if (callee.find("llvm.memset") != std::string::npos && call_args.size() >= 3) {
+        auto dest = parse_last_token(frame.regs, call_args[0]);
+        auto val = parse_last_token(frame.regs, call_args[1]);
+        auto len = parse_last_token(frame.regs, call_args[2]);
+        ensure_memory(vm->state, dest.u + len.u);
+        std::memset(&vm->state.memory[dest.u], static_cast<int>(val.u & 0xff), len.u);
+        if (!inst.dest.empty()) frame.regs[inst.dest] = {0};
+        continue;
+      }
+      if (!callee.empty() && vm->state.functions.find(callee) != vm->state.functions.end()) {
+        Frame next;
+        next.func = callee;
+        next.saved_stack_top = vm->state.stack_top;
+        next.ret_dest = inst.dest;
+        for (size_t i = 0; i < call_args.size(); i++) {
+          std::string reg_name = "%" + std::to_string(i);
+          next.regs[reg_name] = parse_last_token(frame.regs, call_args[i]);
+        }
+        stack.push_back(std::move(next));
+        continue;
+      }
+      if (!inst.dest.empty()) {
+        frame.regs[inst.dest] = {0};
+      }
+      continue;
+    }
+
+    if (inst.op == "br") {
+      auto tokens = split_tokens(inst.text);
+      std::string target;
+      if (tokens.size() >= 3 && tokens[1] == "label") {
+        target = tokens[2];
+      } else if (tokens.size() >= 7 && tokens[1] == "i1") {
+        std::string cond_token = tokens[2];
+        if (cond_token.back() == ',') cond_token.pop_back();
+        Value cond = parse_operand(frame.regs, cond_token);
+        std::string true_label = tokens[4];
+        std::string false_label = tokens[6];
+        target = (cond.u != 0) ? true_label : false_label;
+      }
+      if (!target.empty()) {
+        frame.prev_label = frame.last_label;
+        target = normalize_label(target);
+        auto it_label = func_state.labels.find(target);
+        if (it_label != func_state.labels.end()) {
+          frame.pc = it_label->second;
+        }
+      }
+      continue;
+    }
+
+    if (inst.op == "ret") {
+      Value ret_value{};
+      auto tokens = split_tokens(inst.text);
+      if (tokens.size() >= 3) {
+        ret_value = parse_operand(frame.regs, tokens[2]);
+      }
+      vm->state.stack_top = frame.saved_stack_top;
+      stack.pop_back();
+      if (!stack.empty() && !frame.ret_dest.empty()) {
+        stack.back().regs[frame.ret_dest] = ret_value;
+      } else if (stack.empty()) {
+        vm->state.last_return_value = ret_value;
+      }
+      continue;
+    }
+
+    execute_instruction(vm->state, frame, inst);
+    vm->state.executed++;
+  }
+
+  return vm->state.last_return_value.u;
+}
+
+const uint8_t* diter_vm_memory(const DiterVm* vm) {
+  if (!vm) return nullptr;
+  return vm->state.memory.data();
+}
+
+size_t diter_vm_memory_size(const DiterVm* vm) {
+  if (!vm) return 0;
+  return vm->state.memory.size();
+}
+
+uint64_t diter_vm_instance_ptr(const DiterVm* vm) {
+  if (!vm) return 0;
+  return vm->state.instance_addr;
 }

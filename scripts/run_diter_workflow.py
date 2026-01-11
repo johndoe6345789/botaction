@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 import re
 import subprocess
 import sys
@@ -37,17 +38,32 @@ def _resolve_cc() -> str | None:
     return None
 
 
+def _resolve_cxx() -> str | None:
+    for name in ("c++", "g++", "clang++"):
+        found = shutil.which(name)
+        if found:
+            return found
+    return None
+
+
 def build_engine_lib() -> Path:
     root = Path(__file__).resolve().parents[1]
     build_dir = root / "build" / "diter_engine"
     build_dir.mkdir(parents=True, exist_ok=True)
 
     src_dir = root / "src"
-    sources = [
-        src_dir / "diter_engine_legacy.c",
-        Path(root / "legacy" / "diter_core.c"),
-        src_dir / "diter_rt.c",
-    ]
+    use_vm = os.environ.get("DITER_USE_VM", "").lower() in ("1", "true", "yes")
+    if use_vm:
+        sources = [
+            src_dir / "diter_engine.cc",
+            src_dir / "diter_vm.cc",
+        ]
+    else:
+        sources = [
+            src_dir / "diter_engine_legacy.c",
+            Path(root / "legacy" / "diter_core.c"),
+            src_dir / "diter_rt.c",
+        ]
 
     if sys.platform.startswith("linux"):
         lib_name = "libditer.so"
@@ -57,17 +73,24 @@ def build_engine_lib() -> Path:
         lib_name = "diter.dll"
     output = build_dir / lib_name
 
-    if not _needs_rebuild(output, sources):
+    if not use_vm and not _needs_rebuild(output, sources):
         return output
+    if output.exists():
+        output.unlink()
 
     cc = _resolve_cc()
-    if not cc:
-        raise RuntimeError("C compiler not found (need cc/gcc/clang).")
+    if use_vm:
+        cc = _resolve_cxx()
+        if not cc:
+            raise RuntimeError("C++ compiler not found (need c++/g++/clang++).")
+    else:
+        cc = _resolve_cc()
+        if not cc:
+            raise RuntimeError("C compiler not found (need cc/gcc/clang).")
 
     cmd = [
         cc,
         "-O2",
-        "-std=c11",
         "-shared",
         "-fPIC",
         "-I",
@@ -75,6 +98,10 @@ def build_engine_lib() -> Path:
         "-o",
         str(output),
     ] + [str(src) for src in sources]
+    if use_vm:
+        cmd.insert(2, "-std=c++17")
+    else:
+        cmd.insert(2, "-std=c11")
     subprocess.run(cmd, check=True)
     return output
 

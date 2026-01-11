@@ -12,6 +12,8 @@ typedef struct DiterVm DiterVm;
 
 DiterVm* diter_vm_create(const char* runbook_path);
 void diter_vm_destroy(DiterVm* vm);
+uint64_t diter_vm_call(DiterVm* vm, const char* func, const uint64_t* args, size_t arg_count);
+uint64_t diter_vm_instance_ptr(const DiterVm* vm);
 void diter_vm_load_inputs(DiterVm* vm,
                           const uint8_t* dict,
                           size_t dict_len,
@@ -20,6 +22,8 @@ void diter_vm_load_inputs(DiterVm* vm,
                           const char* key_hex);
 void diter_vm_execute(DiterVm* vm);
 size_t diter_vm_instruction_count(const DiterVm* vm);
+const uint8_t* diter_vm_memory(const DiterVm* vm);
+size_t diter_vm_memory_size(const DiterVm* vm);
 
 #ifdef __cplusplus
 }
