@@ -1,0 +1,103 @@
+{
+  "name": "Diter Core Actions 015",
+  "active": false,
+  "nodes": [
+    {
+      "id": "wf015-trigger",
+      "name": "Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "wf015-fn-000",
+      "name": "diter_core_Umlja1JvbGxlZDRV_0",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "function": "diter_core_Umlja1JvbGxlZDRV_0",
+        "role": "internal",
+        "exportName": null,
+        "calls": []
+      }
+    },
+    {
+      "id": "wf015-fn-001",
+      "name": "diter_core_f105",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ],
+      "parameters": {
+        "function": "diter_core_f105",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f126"
+        ]
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_Umlja1JvbGxlZDRV_0",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_Umlja1JvbGxlZDRV_0": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f105",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "diter"
+    },
+    {
+      "name": "actions"
+    }
+  ],
+  "meta": {
+    "source": "src/diter_core.c",
+    "chunkIndex": 15,
+    "functionCount": 2
+  },
+  "settings": {
+    "timezone": "UTC",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveDataManualExecution": "all"
+  },
+  "triggers": [
+    {
+      "nodeId": "wf015-trigger",
+      "kind": "manual",
+      "enabled": true
+    }
+  ]
+}

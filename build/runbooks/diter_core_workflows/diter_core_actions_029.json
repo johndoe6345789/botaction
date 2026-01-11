@@ -1,0 +1,108 @@
+{
+  "name": "Diter Core Actions 029",
+  "active": false,
+  "nodes": [
+    {
+      "id": "wf029-trigger",
+      "name": "Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "wf029-fn-000",
+      "name": "diter_core_f19",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "function": "diter_core_f19",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f18"
+        ]
+      }
+    },
+    {
+      "id": "wf029-fn-001",
+      "name": "diter_core_f119",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ],
+      "parameters": {
+        "function": "diter_core_f119",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f113",
+          "diter_core_f120",
+          "diter_core_f22",
+          "diter_core_f60"
+        ]
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f19",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_f19": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f119",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "diter"
+    },
+    {
+      "name": "actions"
+    }
+  ],
+  "meta": {
+    "source": "src/diter_core.c",
+    "chunkIndex": 29,
+    "functionCount": 2
+  },
+  "settings": {
+    "timezone": "UTC",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveDataManualExecution": "all"
+  },
+  "triggers": [
+    {
+      "nodeId": "wf029-trigger",
+      "kind": "manual",
+      "enabled": true
+    }
+  ]
+}

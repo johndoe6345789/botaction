@@ -1,0 +1,137 @@
+{
+  "name": "Diter Core Actions 004",
+  "active": false,
+  "nodes": [
+    {
+      "id": "wf004-trigger",
+      "name": "Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "wf004-fn-000",
+      "name": "diter_core_Umlja1JvbGxlZDRV",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "function": "diter_core_Umlja1JvbGxlZDRV",
+        "role": "export",
+        "exportName": "Umlja1JvbGxlZDRV",
+        "calls": [
+          "diter_core_Umlja1JvbGxlZDRV_0"
+        ]
+      }
+    },
+    {
+      "id": "wf004-fn-001",
+      "name": "diter_core_f94",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ],
+      "parameters": {
+        "function": "diter_core_f94",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f14"
+        ]
+      }
+    },
+    {
+      "id": "wf004-fn-002",
+      "name": "diter_core_f194",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        440
+      ],
+      "parameters": {
+        "function": "diter_core_f194",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f142",
+          "diter_core_f146",
+          "diter_core_f152",
+          "diter_core_f191"
+        ]
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_Umlja1JvbGxlZDRV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_Umlja1JvbGxlZDRV": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f94",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_f94": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f194",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "diter"
+    },
+    {
+      "name": "actions"
+    }
+  ],
+  "meta": {
+    "source": "src/diter_core.c",
+    "chunkIndex": 4,
+    "functionCount": 3
+  },
+  "settings": {
+    "timezone": "UTC",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveDataManualExecution": "all"
+  },
+  "triggers": [
+    {
+      "nodeId": "wf004-trigger",
+      "kind": "manual",
+      "enabled": true
+    }
+  ]
+}

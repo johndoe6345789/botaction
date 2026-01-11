@@ -1,0 +1,105 @@
+{
+  "name": "Diter Core Actions 090",
+  "active": false,
+  "nodes": [
+    {
+      "id": "wf090-trigger",
+      "name": "Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "wf090-fn-000",
+      "name": "diter_core_f80",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "function": "diter_core_f80",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f100"
+        ]
+      }
+    },
+    {
+      "id": "wf090-fn-001",
+      "name": "diter_core_f180",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ],
+      "parameters": {
+        "function": "diter_core_f180",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f130"
+        ]
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f80",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_f80": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f180",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "diter"
+    },
+    {
+      "name": "actions"
+    }
+  ],
+  "meta": {
+    "source": "src/diter_core.c",
+    "chunkIndex": 90,
+    "functionCount": 2
+  },
+  "settings": {
+    "timezone": "UTC",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveDataManualExecution": "all"
+  },
+  "triggers": [
+    {
+      "nodeId": "wf090-trigger",
+      "kind": "manual",
+      "enabled": true
+    }
+  ]
+}

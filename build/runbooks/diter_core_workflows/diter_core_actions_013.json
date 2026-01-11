@@ -1,0 +1,103 @@
+{
+  "name": "Diter Core Actions 013",
+  "active": false,
+  "nodes": [
+    {
+      "id": "wf013-trigger",
+      "name": "Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "wf013-fn-000",
+      "name": "diter_core_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl_0",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "function": "diter_core_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl_0",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f162"
+        ]
+      }
+    },
+    {
+      "id": "wf013-fn-001",
+      "name": "diter_core_f103",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ],
+      "parameters": {
+        "function": "diter_core_f103",
+        "role": "internal",
+        "exportName": null,
+        "calls": []
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl_0",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_heSBnb29kYnllCk5ldmVyIGdvbm5hIHRl_0": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f103",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "diter"
+    },
+    {
+      "name": "actions"
+    }
+  ],
+  "meta": {
+    "source": "src/diter_core.c",
+    "chunkIndex": 13,
+    "functionCount": 2
+  },
+  "settings": {
+    "timezone": "UTC",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveDataManualExecution": "all"
+  },
+  "triggers": [
+    {
+      "nodeId": "wf013-trigger",
+      "kind": "manual",
+      "enabled": true
+    }
+  ]
+}

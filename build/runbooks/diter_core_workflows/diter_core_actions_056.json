@@ -1,0 +1,105 @@
+{
+  "name": "Diter Core Actions 056",
+  "active": false,
+  "nodes": [
+    {
+      "id": "wf056-trigger",
+      "name": "Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "wf056-fn-000",
+      "name": "diter_core_f46",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "function": "diter_core_f46",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f22",
+          "diter_core_f39",
+          "diter_core_f45"
+        ]
+      }
+    },
+    {
+      "id": "wf056-fn-001",
+      "name": "diter_core_f146",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ],
+      "parameters": {
+        "function": "diter_core_f146",
+        "role": "internal",
+        "exportName": null,
+        "calls": []
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f46",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_f46": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f146",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "diter"
+    },
+    {
+      "name": "actions"
+    }
+  ],
+  "meta": {
+    "source": "src/diter_core.c",
+    "chunkIndex": 56,
+    "functionCount": 2
+  },
+  "settings": {
+    "timezone": "UTC",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveDataManualExecution": "all"
+  },
+  "triggers": [
+    {
+      "nodeId": "wf056-trigger",
+      "kind": "manual",
+      "enabled": true
+    }
+  ]
+}

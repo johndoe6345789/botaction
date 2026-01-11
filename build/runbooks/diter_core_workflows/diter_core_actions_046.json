@@ -1,0 +1,107 @@
+{
+  "name": "Diter Core Actions 046",
+  "active": false,
+  "nodes": [
+    {
+      "id": "wf046-trigger",
+      "name": "Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "wf046-fn-000",
+      "name": "diter_core_f36",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "function": "diter_core_f36",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f27",
+          "diter_core_f76"
+        ]
+      }
+    },
+    {
+      "id": "wf046-fn-001",
+      "name": "diter_core_f136",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ],
+      "parameters": {
+        "function": "diter_core_f136",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f122",
+          "diter_core_f25"
+        ]
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f36",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_f36": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f136",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "diter"
+    },
+    {
+      "name": "actions"
+    }
+  ],
+  "meta": {
+    "source": "src/diter_core.c",
+    "chunkIndex": 46,
+    "functionCount": 2
+  },
+  "settings": {
+    "timezone": "UTC",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveDataManualExecution": "all"
+  },
+  "triggers": [
+    {
+      "nodeId": "wf046-trigger",
+      "kind": "manual",
+      "enabled": true
+    }
+  ]
+}

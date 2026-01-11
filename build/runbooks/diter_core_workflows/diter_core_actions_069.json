@@ -1,0 +1,105 @@
+{
+  "name": "Diter Core Actions 069",
+  "active": false,
+  "nodes": [
+    {
+      "id": "wf069-trigger",
+      "name": "Manual Trigger",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "wf069-fn-000",
+      "name": "diter_core_f59",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "function": "diter_core_f59",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f60"
+        ]
+      }
+    },
+    {
+      "id": "wf069-fn-001",
+      "name": "diter_core_f159",
+      "type": "analysis.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ],
+      "parameters": {
+        "function": "diter_core_f159",
+        "role": "internal",
+        "exportName": null,
+        "calls": [
+          "diter_core_f151"
+        ]
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f59",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    },
+    "diter_core_f59": {
+      "main": {
+        "0": [
+          {
+            "node": "diter_core_f159",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "diter"
+    },
+    {
+      "name": "actions"
+    }
+  ],
+  "meta": {
+    "source": "src/diter_core.c",
+    "chunkIndex": 69,
+    "functionCount": 2
+  },
+  "settings": {
+    "timezone": "UTC",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveDataManualExecution": "all"
+  },
+  "triggers": [
+    {
+      "nodeId": "wf069-trigger",
+      "kind": "manual",
+      "enabled": true
+    }
+  ]
+}
