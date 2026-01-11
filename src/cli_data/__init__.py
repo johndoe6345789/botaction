@@ -448,3 +448,173 @@ def get_gui_file():
 def get_separator_lengths():
     """Load separator line lengths."""
     return load_json('strings.json')['separator_lengths']
+
+
+def get_constants():
+    """Load URL constants (api base, base url)."""
+    return load_json('strings.json')['constants']
+
+
+def get_headers():
+    """Load section headers."""
+    return load_json('strings.json')['headers']
+
+
+def get_subheaders():
+    """Load section subheaders."""
+    return load_json('strings.json')['subheaders']
+
+
+def get_config_defaults():
+    """Load configuration defaults."""
+    return load_json('strings.json')['config_defaults']
+
+
+def get_embed_defaults():
+    """Load embed defaults (width, height)."""
+    return load_json('strings.json')['embed_defaults']
+
+
+def get_viewer_info_template():
+    """Load viewer info label template."""
+    return load_json('strings.json')['viewer_info_template']
+
+
+def get_window_sizes():
+    """Load default window sizes."""
+    return load_json('strings.json')['window_sizes']
+
+
+def get_search_defaults():
+    """Load search defaults."""
+    return load_json('strings.json')['search_defaults']
+
+
+def get_truncate_lengths():
+    """Load truncate lengths."""
+    return load_json('strings.json')['truncate_lengths']
+
+
+def get_css_comments():
+    """Load CSS/SCSS comment templates."""
+    return load_json('strings.json')['css_comments']
+
+
+def get_format_strings():
+    """Load format string templates."""
+    return load_json('strings.json')['format_strings']
+
+
+def get_error_messages():
+    """Load error message templates."""
+    return load_json('strings.json')['error_messages']
+
+
+def get_valid_invalid():
+    """Load valid/invalid message templates."""
+    return load_json('strings.json')['valid_invalid']
+
+
+def get_result_indicators():
+    """Load result indicator strings."""
+    return load_json('strings.json')['result_indicators']
+
+
+def get_info_config():
+    """Load info command config strings."""
+    return load_json('strings.json')['info_config']
+
+
+def get_stats_labels():
+    """Load stats command labels."""
+    return load_json('strings.json')['stats_labels']
+
+
+def get_user_labels():
+    """Load user command labels."""
+    return load_json('strings.json')['user_labels']
+
+
+def get_tier_labels():
+    """Load tier command labels."""
+    return load_json('strings.json')['tier_labels']
+
+
+def get_design_summary():
+    """Load design command summary strings."""
+    return load_json('strings.json')['design_summary']
+
+
+def get_layout_summary():
+    """Load layout command summary strings."""
+    return load_json('strings.json')['layout_summary']
+
+
+def get_string_conversions():
+    """Load string conversion labels."""
+    return load_json('strings.json')['string_conversions']
+
+
+def get_date_labels():
+    """Load date command labels."""
+    return load_json('strings.json')['date_labels']
+
+
+def get_license_labels():
+    """Load license command labels."""
+    return load_json('strings.json')['license_labels']
+
+
+def get_webgl_labels():
+    """Load webgl command labels."""
+    return load_json('strings.json')['webgl_labels']
+
+
+def get_animation_labels():
+    """Load animation command labels."""
+    return load_json('strings.json')['animation_labels']
+
+
+def get_privacy_labels():
+    """Load privacy command labels."""
+    return load_json('strings.json')['privacy_labels']
+
+
+def get_model_fields_labels():
+    """Load model fields command labels."""
+    return load_json('strings.json')['model_fields_labels']
+
+
+def get_grid_labels():
+    """Load grid command labels."""
+    return load_json('strings.json')['grid_labels']
+
+
+def get_placements_labels():
+    """Load placements command labels."""
+    return load_json('strings.json')['placements_labels']
+
+
+def get_main_labels():
+    """Load main/common labels."""
+    return load_json('strings.json')['main_labels']
+
+
+def get_print_templates():
+    """Load print formatting templates."""
+    return load_json('strings.json')['print_templates']
+
+
+def get_cli_description():
+    """Load CLI description."""
+    return load_json('strings.json')['cli_description']
+
+
+def get_interrupt_message():
+    """Load interrupt message."""
+    return load_json('strings.json')['interrupt_message']
+
+
+def get_unexpected_error():
+    """Load unexpected error template."""
+    return load_json('strings.json')['unexpected_error']

@@ -1,4 +1,8 @@
 {
+  "constants": {
+    "sketchfab_api_base": "https://api.sketchfab.com/v3",
+    "sketchfab_base_url": "https://sketchfab.com"
+  },
   "demos": {
     "decryption": "demos/demo_decryption.py",
     "viewer": "demos/demo_viewer.py",
@@ -480,5 +484,271 @@
     "short": 40,
     "long": 65,
     "medium": 50
-  }
+  },
+  "headers": {
+    "quality_presets": "Quality Presets:",
+    "environment_presets": "Environment Presets:",
+    "embed_url_options": "Embed URL Options:",
+    "material_display_options": "Material Display Options:",
+    "sketchfab_api_endpoints": "Sketchfab API Endpoints:",
+    "api_info_commands": "API Information Commands:",
+    "sketchfab_ai_tools": "Sketchfab AI Tools",
+    "supported_ai_actions": "Supported AI Actions:",
+    "ai_providers": "AI Providers:",
+    "text_to_3d_providers": "Text-to-3D Providers:",
+    "image_to_3d_providers": "Image-to-3D Providers:",
+    "model_info": "Model Information:",
+    "user_info": "User Information:",
+    "sketchfab_tiers": "Sketchfab Subscription Tiers",
+    "sketchfab_categories": "Sketchfab Model Categories",
+    "sketchfab_design": "Sketchfab Design System",
+    "sketchfab_colors": "Sketchfab Color Palette",
+    "sketchfab_typography": "Sketchfab Typography Scale",
+    "sketchfab_gradients": "Sketchfab Gradient Presets",
+    "sketchfab_shadows": "Sketchfab Shadow Presets",
+    "sketchfab_notifications": "Sketchfab Notification Types",
+    "responsive_breakpoints": "Responsive Breakpoints",
+    "layout_dimensions": "Layout Dimensions",
+    "spacing_scale": "Spacing Scale",
+    "layout_responsive": "Layout & Responsive Design",
+    "social_sharing": "Social Sharing URLs for Model:",
+    "markdown_reference": "Markdown Syntax Reference",
+    "brand_colors": "Brand & Social Media Colors",
+    "date_formats": "Date Format Patterns",
+    "cc_licenses": "Creative Commons Licenses",
+    "webgl_errors": "WebGL Error Types & Troubleshooting",
+    "spring_animation": "Spring Animation Presets",
+    "cookie_consent": "Cookie Consent Categories",
+    "model_props": "Model Property Fields",
+    "responsive_grid": "Responsive Grid Configuration",
+    "popup_placements": "Popup/Tooltip Placements",
+    "available_download_formats": "Available Download Formats:",
+    "visibility_types": "Visibility Types:",
+    "thumbnail_urls": "Thumbnail URLs for model:",
+    "standard_thumbnails": "Standard Thumbnails:",
+    "alternative_formats": "Alternative Formats:",
+    "actual_thumbnails": "Actual Thumbnails from API ({count} available):"
+  },
+  "subheaders": {
+    "based_on_dayjs": "(Based on Day.js patterns used by Sketchfab)",
+    "based_on_editor": "(Based on Sketchfab's markdown editor toolbar)",
+    "used_for_licensing": "(Used for model licensing on Sketchfab)",
+    "physics_based": "(Physics-based animation configurations)",
+    "onetrust_gdpr": "(OneTrust/GDPR consent management)",
+    "field_definitions": "(Field definitions for model metadata)",
+    "floating_ui": "(Floating UI positioning options)"
+  },
+  "config_defaults": {
+    "renderer": {
+      "antialias": true,
+      "alpha": false,
+      "powerPreference": "high-performance"
+    },
+    "camera": {
+      "near": 0.1,
+      "far": 10000,
+      "default_fov": 45
+    },
+    "controls": {
+      "enabled": true,
+      "enablePan": true,
+      "enableZoom": true
+    },
+    "lighting": {
+      "default_environment": "studio",
+      "default_exposure": 1
+    }
+  },
+  "embed_defaults": {
+    "width": 640,
+    "height": 480
+  },
+  "viewer_info_template": "Loaded: {name} | Vertices: {vertices:,} | Triangles: {triangles:,}",
+  "window_sizes": {
+    "min_width": 800,
+    "min_height": 600
+  },
+  "search_defaults": {
+    "max_count": 24,
+    "default_type": "models"
+  },
+  "truncate_lengths": {
+    "bio": 100
+  },
+  "css_comments": {
+    "theme_header": "/* Sketchfab {theme} Theme CSS Variables */",
+    "typography_header": "/* Typography */",
+    "scss_header": "// Sketchfab SCSS Variables",
+    "breakpoints_section": "// Breakpoints",
+    "spacing_section": "// Spacing",
+    "layout_section": "// Layout"
+  },
+  "format_strings": {
+    "curl_get": "curl -X GET \"{url}\"",
+    "curl_auth_header": " -H \"Authorization: Token {token}\"",
+    "auth_header": "Token {token}",
+    "media_query_max": "@media (max-width: {max}px)",
+    "media_query_min": "@media (min-width: {min}px)",
+    "media_query_range": "@media (min-width: {min}px) and (max-width: {max}px)",
+    "grid_columns_repeat": "grid-template-columns: repeat({cols}, 1fr)"
+  },
+  "error_messages": {
+    "model_id_extract_failed": "Error: Could not extract model ID from: {input}",
+    "unknown_endpoint": "Error: Unknown endpoint '{name}'",
+    "available_endpoints": "Available: {list}",
+    "unknown_validation_type": "Unknown validation type: {type}",
+    "available_types": "Available types: {list}",
+    "unknown_license": "Unknown license: {license}",
+    "available_licenses": "Available: {list}",
+    "unknown_theme": "Unknown theme: {theme}. Available: {list}",
+    "size_must_be_positive": "Error: Size must be a positive number",
+    "requests_required": "Error: requests library required. Install with: pip install requests"
+  },
+  "valid_invalid": {
+    "valid": "\u2713 Valid {type}: {value}",
+    "invalid": "\u2717 Invalid {type}: {value}"
+  },
+  "result_indicators": {
+    "downloadable": "\u2713 Downloadable",
+    "animated": "\u2713 Animated",
+    "staff_pick": "\u2605 Staff Pick",
+    "verified": "\u2713 Verified",
+    "pro_account": "\u2605 Pro Account",
+    "staff": "\u26a1 Staff",
+    "required": "\u2713 Required",
+    "optional": "\u25cb Optional"
+  },
+  "info_config": {
+    "config_constants_header": "Configuration Constants (from JS analysis):",
+    "api_base_url": "API Base URL:",
+    "embed_options_count": "Embed Options: {count} parameters available",
+    "quality_presets_list": "Quality Presets: {list}",
+    "environment_presets_list": "Environment Presets: {list}",
+    "ai_providers_list": "AI Providers: {list}",
+    "download_formats_list": "Download Formats: {list}",
+    "brand_colors_count": "Brand Colors: {count} brands",
+    "breakpoints_info": "Breakpoints: {count} ({list})",
+    "license_types_count": "License Types: {count} Creative Commons licenses",
+    "spring_presets_count": "Spring Presets: {count} animation configs"
+  },
+  "stats_labels": {
+    "name": "Name:",
+    "uid": "UID:",
+    "author": "Author:",
+    "views": "Views:",
+    "likes": "Likes:",
+    "comments": "Comments:",
+    "downloads": "Downloads:",
+    "downloadable": "Downloadable:",
+    "animated": "Animated:",
+    "staff_pick": "Staff Pick:",
+    "license": "License:",
+    "categories": "Categories:",
+    "tags": "Tags:"
+  },
+  "user_labels": {
+    "username": "Username:",
+    "display_name": "Display Name:",
+    "uid": "UID:",
+    "bio": "Bio:",
+    "location": "Location:",
+    "website": "Website:",
+    "models": "Models:",
+    "followers": "Followers:",
+    "following": "Following:",
+    "likes": "Likes:",
+    "profile_url": "Profile URL:",
+    "models_url": "Models URL:",
+    "recent_models": "Recent Models ({count} shown):"
+  },
+  "tier_labels": {
+    "badge_color": "Badge Color:",
+    "features": "Features:",
+    "visibility_by_tier": "Visibility Options by Tier:"
+  },
+  "design_summary": {
+    "available_info": "Available design information:",
+    "themes": "Themes:",
+    "colors_per_theme": "Colors per theme:",
+    "typography_levels": "Typography levels:",
+    "gradient_presets": "Gradient presets:",
+    "shadow_presets": "Shadow presets:",
+    "notification_types": "Notification types:"
+  },
+  "layout_summary": {
+    "options_header": "Options:",
+    "quick_stats": "Quick Stats:",
+    "breakpoints": "Breakpoints:",
+    "spacing_levels": "Spacing levels:",
+    "layout_components": "Layout components:"
+  },
+  "string_conversions": {
+    "original": "Original:",
+    "slug": "Slug:",
+    "camelcase": "camelCase:",
+    "kebabcase": "kebab-case:",
+    "snakecase": "snake_case:",
+    "titlecase": "Title Case:"
+  },
+  "date_labels": {
+    "format_patterns": "Format Patterns:",
+    "dayjs_tokens": "Day.js Token Reference:"
+  },
+  "license_labels": {
+    "name": "Name:",
+    "url": "URL:",
+    "allows": "Allows:",
+    "requires": "Requires:",
+    "permission_types_header": "Permission Types:"
+  },
+  "webgl_labels": {
+    "title": "Title:",
+    "message": "Message:",
+    "suggestions": "Suggestions:",
+    "detection_header": "WebGL Detection Code:"
+  },
+  "animation_labels": {
+    "stiffness": "Stiffness:",
+    "damping": "Damping:",
+    "description": "Description:",
+    "formula_header": "Spring Physics Formula:",
+    "js_impl_header": "JavaScript Implementation:"
+  },
+  "privacy_labels": {
+    "usage_header": "Usage Pattern:"
+  },
+  "model_fields_labels": {
+    "type": "Type:",
+    "groups_header": "User Profile Field Groups:"
+  },
+  "grid_labels": {
+    "columns_at": "{cols} columns @ {breakpoint}px+",
+    "css_impl_header": "CSS Grid Implementation:"
+  },
+  "placements_labels": {
+    "aligned": "(aligned {suffix})",
+    "usage_header": "Usage Example (Floating UI):"
+  },
+  "main_labels": {
+    "use_one_of": "Use one of the following options:",
+    "unknown": "Unknown",
+    "na": "N/A",
+    "none": "None",
+    "custom": "(custom)",
+    "no_title": "No title found",
+    "no_limit": "No limit",
+    "infinity": "\u221e"
+  },
+  "print_templates": {
+    "indent_2": "  {text}",
+    "indent_4": "    {text}",
+    "key_value": "  {key}: {value}",
+    "key_value_indent": "    {key}: {value}",
+    "numbered_item": "{num}. {text}",
+    "bullet_item": "  - {text}",
+    "bullet_circle": "  \u2022 {text}"
+  },
+  "cli_description": "Sketchfab Model Tools CLI",
+  "interrupt_message": "Interrupted by user",
+  "unexpected_error": "Unexpected error: {error}"
 }
