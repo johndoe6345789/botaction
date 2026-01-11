@@ -1,0 +1,9 @@
+{
+  "consent_categories": {
+    "C0001": {"name": "Strictly Necessary", "required": true, "description": "Essential for site functionality"},
+    "C0002": {"name": "Performance", "required": false, "description": "Analytics and metrics"},
+    "C0003": {"name": "Functional", "required": false, "description": "Preferences and features"},
+    "C0004": {"name": "Targeting", "required": false, "description": "Advertising and retargeting"},
+    "C0005": {"name": "Social Media", "required": false, "description": "Social sharing and embeds"}
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "quality_presets": {
+    "low": {
+      "name": "Low",
+      "pixelRatio": 1,
+      "shadows": false,
+      "ssao": false,
+      "antialiasing": false,
+      "textureQuality": 0.5
+    },
+    "medium": {
+      "name": "Medium",
+      "pixelRatio": 1.5,
+      "shadows": true,
+      "ssao": false,
+      "antialiasing": true,
+      "textureQuality": 0.75
+    },
+    "high": {
+      "name": "High",
+      "pixelRatio": 2,
+      "shadows": true,
+      "ssao": true,
+      "antialiasing": true,
+      "textureQuality": 1
+    },
+    "ultra": {
+      "name": "Ultra",
+      "pixelRatio": 2,
+      "shadows": true,
+      "ssao": true,
+      "antialiasing": true,
+      "textureQuality": 1,
+      "supersample": true
+    }
+  },
+  "environment_presets": {
+    "studio": {"name": "Studio", "intensity": 1, "shadows": true},
+    "urban": {"name": "Urban", "intensity": 0.8, "shadows": true},
+    "dawn": {"name": "Dawn", "intensity": 0.6, "shadows": true},
+    "night": {"name": "Night", "intensity": 0.3, "shadows": false},
+    "custom": {"name": "Custom", "intensity": 1, "shadows": true}
+  }
+}

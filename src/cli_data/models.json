@@ -1,0 +1,33 @@
+{
+  "download_formats": ["glb", "gltf", "fbx", "obj", "usdz", "blend"],
+  "visibility_types": {
+    "public": "Visible to everyone - anyone can find and view",
+    "unlisted": "Accessible via direct link only",
+    "private": "Only visible to owner (requires Pro)",
+    "password": "Password protected (requires Pro)",
+    "org": "Organization members only"
+  },
+  "badges": {
+    "staffpick": "Featured by Sketchfab staff",
+    "store": "Available for purchase in store",
+    "downloadable": "Free to download",
+    "animated": "Contains animation",
+    "sound": "Has audio/sound",
+    "restricted": "Age-restricted content"
+  },
+  "thumbnail_sizes": {
+    "small": {"width": 200, "height": 150},
+    "medium": {"width": 320, "height": 240},
+    "large": {"width": 640, "height": 480},
+    "xlarge": {"width": 1280, "height": 720}
+  },
+  "properties": {
+    "name": {"type": "text", "maxLength": 100, "required": true},
+    "description": {"type": "textarea", "maxLength": 5000, "required": false, "supportMarkdown": true},
+    "tags": {"type": "tags", "maxTags": 20, "minTags": 1},
+    "categories": {"type": "multiselect", "maxSelections": 3},
+    "license": {"type": "select", "options": ["cc0", "cc-by", "cc-by-sa", "cc-by-nd", "cc-by-nc", "cc-by-nc-sa", "cc-by-nc-nd", "all-rights-reserved"]},
+    "isDownloadable": {"type": "toggle", "label": "Allow downloads"},
+    "isPublished": {"type": "toggle", "label": "Published"}
+  }
+}

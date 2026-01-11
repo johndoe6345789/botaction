@@ -1,0 +1,47 @@
+{
+  "typography": {
+    "h1": {"fontSize": "2.5rem", "fontWeight": 700, "lineHeight": 1.2},
+    "h2": {"fontSize": "2rem", "fontWeight": 700, "lineHeight": 1.25},
+    "h3": {"fontSize": "1.5rem", "fontWeight": 600, "lineHeight": 1.3},
+    "h4": {"fontSize": "1.25rem", "fontWeight": 600, "lineHeight": 1.4},
+    "body": {"fontSize": "1rem", "fontWeight": 400, "lineHeight": 1.5},
+    "small": {"fontSize": "0.875rem", "fontWeight": 400, "lineHeight": 1.5},
+    "caption": {"fontSize": "0.75rem", "fontWeight": 400, "lineHeight": 1.4}
+  },
+  "breakpoints": {
+    "xs": {"min": 0, "max": 599, "desc": "Extra small (phones)"},
+    "sm": {"min": 600, "max": 899, "desc": "Small (tablets portrait)"},
+    "md": {"min": 900, "max": 1199, "desc": "Medium (tablets landscape)"},
+    "lg": {"min": 1200, "max": 1535, "desc": "Large (desktops)"},
+    "xl": {"min": 1536, "max": null, "desc": "Extra large (wide screens)"}
+  },
+  "layout": {
+    "header": {"height": 64, "heightMobile": 56},
+    "sidebar": {"width": 240, "collapsedWidth": 64},
+    "container": {"maxWidth": 1440, "padding": 24}
+  },
+  "spacing": {
+    "0": "0",
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "5": "20px",
+    "6": "24px",
+    "8": "32px",
+    "10": "40px",
+    "12": "48px",
+    "16": "64px"
+  },
+  "grid_columns": {
+    "mobile": {"breakpoint": 0, "columns": 2},
+    "tablet": {"breakpoint": 768, "columns": 3},
+    "desktop": {"breakpoint": 1024, "columns": 4},
+    "wide": {"breakpoint": 1440, "columns": 5}
+  },
+  "rating": {
+    "max": 5,
+    "allowHalf": true,
+    "sizes": ["small", "medium", "large"]
+  }
+}

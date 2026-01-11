@@ -1,0 +1,40 @@
+{
+  "errors": {
+    "not_supported": {
+      "title": "WebGL Not Supported",
+      "message": "Your browser does not support WebGL.",
+      "suggestions": [
+        "Try Chrome, Firefox, or Edge",
+        "Update your browser to the latest version",
+        "Enable hardware acceleration in browser settings"
+      ]
+    },
+    "disabled": {
+      "title": "WebGL Disabled",
+      "message": "WebGL is disabled in your browser settings.",
+      "suggestions": [
+        "Enable WebGL in browser settings",
+        "Check if an extension is blocking WebGL",
+        "Try disabling ad blockers temporarily"
+      ]
+    },
+    "context_lost": {
+      "title": "Graphics Context Lost",
+      "message": "The graphics context was lost due to GPU overload.",
+      "suggestions": [
+        "Refresh the page",
+        "Close other GPU-intensive applications",
+        "Update your graphics drivers"
+      ]
+    },
+    "extension_missing": {
+      "title": "Missing WebGL Extension",
+      "message": "A required WebGL extension is not available.",
+      "suggestions": [
+        "Try a different browser",
+        "Update your graphics drivers",
+        "Model may use unsupported GPU features"
+      ]
+    }
+  }
+}

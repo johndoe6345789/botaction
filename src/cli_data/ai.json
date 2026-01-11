@@ -1,0 +1,18 @@
+{
+  "actions": {
+    "text_to_3d": "Generate 3D model from text prompt",
+    "image_to_3d": "Generate 3D model from image",
+    "mesh_rigging": "Auto-rig a 3D mesh",
+    "texture_generation": "Generate textures with AI",
+    "mesh_retopology": "Retopologize mesh automatically"
+  },
+  "providers": {
+    "CSM": {"actions": ["text_to_3d", "image_to_3d"]},
+    "FLUX": {"actions": ["image_generation"]},
+    "Gemini": {"actions": ["text_to_3d"]},
+    "Meshy": {"actions": ["text_to_3d", "mesh_rigging"]},
+    "Rodin": {"actions": ["image_to_3d"]},
+    "Stability": {"actions": ["image_to_3d"]},
+    "Tripo": {"actions": ["text_to_3d", "image_to_3d"]}
+  }
+}

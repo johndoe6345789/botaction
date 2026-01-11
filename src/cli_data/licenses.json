@@ -1,0 +1,52 @@
+{
+  "licenses": {
+    "cc0": {
+      "name": "CC0 - Public Domain",
+      "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "allows": ["commercial", "modify", "distribute"],
+      "requires": []
+    },
+    "cc-by": {
+      "name": "CC Attribution",
+      "url": "https://creativecommons.org/licenses/by/4.0/",
+      "allows": ["commercial", "modify", "distribute"],
+      "requires": ["attribution"]
+    },
+    "cc-by-sa": {
+      "name": "CC Attribution-ShareAlike",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "allows": ["commercial", "modify", "distribute"],
+      "requires": ["attribution", "share-alike"]
+    },
+    "cc-by-nd": {
+      "name": "CC Attribution-NoDerivs",
+      "url": "https://creativecommons.org/licenses/by-nd/4.0/",
+      "allows": ["commercial", "distribute"],
+      "requires": ["attribution"]
+    },
+    "cc-by-nc": {
+      "name": "CC Attribution-NonCommercial",
+      "url": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "allows": ["modify", "distribute"],
+      "requires": ["attribution", "non-commercial"]
+    },
+    "cc-by-nc-sa": {
+      "name": "CC Attribution-NonCommercial-ShareAlike",
+      "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "allows": ["modify", "distribute"],
+      "requires": ["attribution", "non-commercial", "share-alike"]
+    },
+    "cc-by-nc-nd": {
+      "name": "CC Attribution-NonCommercial-NoDerivs",
+      "url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+      "allows": ["distribute"],
+      "requires": ["attribution", "non-commercial"]
+    },
+    "all-rights-reserved": {
+      "name": "All Rights Reserved",
+      "url": null,
+      "allows": [],
+      "requires": ["permission"]
+    }
+  }
+}

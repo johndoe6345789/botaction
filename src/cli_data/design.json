@@ -1,0 +1,68 @@
+{
+  "themes": {
+    "light": {
+      "background": "#ffffff",
+      "backgroundSecondary": "#f5f5f5",
+      "surface": "#ffffff",
+      "surfaceHover": "#f8f8f8",
+      "text": "#1a1a1a",
+      "textSecondary": "#666666",
+      "textMuted": "#999999",
+      "primary": "#1caad9",
+      "primaryHover": "#0e8ab8",
+      "success": "#10b981",
+      "warning": "#f59e0b",
+      "error": "#ef4444",
+      "info": "#3b82f6",
+      "border": "#e0e0e0"
+    },
+    "dark": {
+      "background": "#1a1a1a",
+      "backgroundSecondary": "#2d2d2d",
+      "surface": "#2d2d2d",
+      "surfaceHover": "#3d3d3d",
+      "text": "#ffffff",
+      "textSecondary": "#b0b0b0",
+      "textMuted": "#808080",
+      "primary": "#1caad9",
+      "primaryHover": "#3dbde8",
+      "success": "#34d399",
+      "warning": "#fbbf24",
+      "error": "#f87171",
+      "info": "#60a5fa",
+      "border": "#404040"
+    }
+  },
+  "gradients": {
+    "primary": {"start": "#1caad9", "end": "#0e7490"},
+    "success": {"start": "#10b981", "end": "#059669"},
+    "warning": {"start": "#f59e0b", "end": "#d97706"},
+    "danger": {"start": "#ef4444", "end": "#dc2626"},
+    "purple": {"start": "#8b5cf6", "end": "#7c3aed"},
+    "rainbow": {"start": "#ec4899", "middle": "#8b5cf6", "end": "#3b82f6"}
+  },
+  "shadows": {
+    "sm": "0 1px 2px rgba(0, 0, 0, 0.05)",
+    "md": "0 4px 6px rgba(0, 0, 0, 0.1)",
+    "lg": "0 10px 15px rgba(0, 0, 0, 0.1)",
+    "xl": "0 20px 25px rgba(0, 0, 0, 0.15)"
+  },
+  "brands": {
+    "sketchfab": "#1d7df6",
+    "epic": "#2a2a2a",
+    "fab": "#1a73e8",
+    "facebook": "#3b5998",
+    "twitter": "#1da1f2",
+    "google": "#db4437",
+    "apple": "#000000",
+    "instagram": "#c13584",
+    "youtube": "#ff0000",
+    "pinterest": "#bd081c"
+  },
+  "notification_types": {
+    "info": {"backgroundColor": "#e3f2fd", "borderColor": "#1976d2", "textColor": "#1565c0"},
+    "warning": {"backgroundColor": "#fff3e0", "borderColor": "#f57c00", "textColor": "#e65100"},
+    "success": {"backgroundColor": "#e8f5e9", "borderColor": "#4caf50", "textColor": "#2e7d32"},
+    "error": {"backgroundColor": "#ffebee", "borderColor": "#f44336", "textColor": "#c62828"}
+  }
+}

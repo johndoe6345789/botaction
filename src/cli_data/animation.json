@@ -1,0 +1,15 @@
+{
+  "spring_presets": {
+    "default": {"stiffness": 170, "damping": 26, "desc": "Smooth and natural"},
+    "snappy": {"stiffness": 300, "damping": 30, "desc": "Quick and responsive"},
+    "gentle": {"stiffness": 120, "damping": 14, "desc": "Slow and smooth"},
+    "bouncy": {"stiffness": 500, "damping": 15, "desc": "Bouncy and playful"},
+    "stiff": {"stiffness": 210, "damping": 20, "desc": "Minimal bounce"}
+  },
+  "popup_placements": [
+    "top", "top-start", "top-end",
+    "right", "right-start", "right-end",
+    "bottom", "bottom-start", "bottom-end",
+    "left", "left-start", "left-end"
+  ]
+}

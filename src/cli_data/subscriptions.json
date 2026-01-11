@@ -1,0 +1,57 @@
+{
+  "tiers": {
+    "free": {
+      "name": "Free",
+      "features": {
+        "privateModels": false,
+        "passwordProtected": false,
+        "downloadableModels": 0,
+        "customBranding": false,
+        "maxFileSize": "100MB",
+        "monthlyUploads": 10
+      }
+    },
+    "plus": {
+      "name": "Plus",
+      "badgeColor": "#1caad9",
+      "features": {
+        "privateModels": true,
+        "passwordProtected": true,
+        "downloadableModels": 5,
+        "customBranding": false,
+        "maxFileSize": "500MB",
+        "monthlyUploads": 50
+      }
+    },
+    "pro": {
+      "name": "Pro",
+      "badgeColor": "#ffc107",
+      "features": {
+        "privateModels": true,
+        "passwordProtected": true,
+        "downloadableModels": 20,
+        "customBranding": true,
+        "maxFileSize": "1GB",
+        "monthlyUploads": 200
+      }
+    },
+    "business": {
+      "name": "Business",
+      "badgeColor": "#9c27b0",
+      "features": {
+        "privateModels": true,
+        "passwordProtected": true,
+        "downloadableModels": "unlimited",
+        "customBranding": true,
+        "maxFileSize": "2GB",
+        "monthlyUploads": "unlimited"
+      }
+    }
+  },
+  "org_roles": {
+    "owner": {"permissions": ["all"], "description": "Full access to organization"},
+    "admin": {"permissions": ["manage_members", "manage_projects", "manage_settings"], "description": "Can manage team and projects"},
+    "member": {"permissions": ["view", "edit_models", "create_projects"], "description": "Can create and edit content"},
+    "viewer": {"permissions": ["view"], "description": "Can only view content"}
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "options": {
+    "autostart": {"type": "bool", "default": false, "desc": "Auto-load model on page load"},
+    "autospin": {"type": "float", "default": 0, "desc": "Auto-rotate speed (0 to disable)"},
+    "camera": {"type": "bool", "default": true, "desc": "Enable camera controls"},
+    "preload": {"type": "bool", "default": true, "desc": "Preload textures"},
+    "transparent": {"type": "bool", "default": false, "desc": "Transparent background"},
+    "ui_controls": {"type": "bool", "default": true, "desc": "Show UI controls"},
+    "ui_infos": {"type": "bool", "default": true, "desc": "Show info panel"},
+    "ui_inspector": {"type": "bool", "default": true, "desc": "Show inspector"},
+    "ui_watermark": {"type": "bool", "default": true, "desc": "Show watermark"},
+    "ui_help": {"type": "bool", "default": true, "desc": "Show help button"},
+    "ui_settings": {"type": "bool", "default": true, "desc": "Show settings button"},
+    "ui_fullscreen": {"type": "bool", "default": true, "desc": "Show fullscreen button"},
+    "ui_annotations": {"type": "bool", "default": true, "desc": "Show annotations"},
+    "annotations_visible": {"type": "bool", "default": true, "desc": "Annotations visible on load"},
+    "animation_autoplay": {"type": "bool", "default": false, "desc": "Auto-play animations"},
+    "scrollwheel": {"type": "bool", "default": true, "desc": "Enable scroll wheel zoom"},
+    "double_click": {"type": "bool", "default": true, "desc": "Enable double-click to focus"},
+    "orbit_constraint_pan": {"type": "bool", "default": false, "desc": "Constrain panning"},
+    "orbit_constraint_zoom_in": {"type": "float", "default": null, "desc": "Min zoom distance"},
+    "orbit_constraint_zoom_out": {"type": "float", "default": null, "desc": "Max zoom distance"}
+  }
+}

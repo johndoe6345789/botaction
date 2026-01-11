@@ -1,0 +1,19 @@
+{
+  "filters": {
+    "type": ["models", "collections", "users"],
+    "sort": ["relevance", "likeCount", "viewCount", "createdAt", "publishedAt"],
+    "downloadable": [true, false],
+    "animated": [true, false],
+    "staffpicked": [true, false],
+    "rigged": [true, false],
+    "pbr": [true, false]
+  },
+  "categories": [
+    "animals-pets", "architecture", "art-abstract",
+    "cars-vehicles", "characters-creatures", "cultural-heritage-history",
+    "electronics-gadgets", "fashion-style", "food-drink",
+    "furniture-home", "music", "nature-plants",
+    "news-politics", "people", "places-travel",
+    "science-technology", "sports-fitness", "weapons-military"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "options": {
+    "diffuse": "Base color texture",
+    "normal": "Normal map",
+    "emissive": "Emissive/glow",
+    "transparency": "Alpha/transparency",
+    "metalness": "Metalness map (PBR)",
+    "roughness": "Roughness map (PBR)",
+    "glossiness": "Glossiness (spec workflow)",
+    "specular": "Specular map",
+    "f0": "Fresnel reflectance",
+    "cavity": "Cavity/AO detail",
+    "ao": "Ambient occlusion",
+    "displacement": "Displacement/height map",
+    "wireframe": "Show wireframe",
+    "vertexColors": "Show vertex colors"
+  }
+}

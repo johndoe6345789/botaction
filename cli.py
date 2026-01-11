@@ -24,26 +24,161 @@ import re
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
+# Import data loader
+from cli_data import (
+    get_api_config, get_embed_options, get_material_options,
+    get_quality_presets, get_environment_presets,
+    get_ai_actions, get_ai_providers, get_download_formats,
+    get_visibility_types, get_model_badges, get_thumbnail_sizes,
+    get_model_properties, get_subscription_tiers, get_org_roles,
+    get_search_filters, get_search_categories, get_themes,
+    get_gradients, get_shadows, get_brand_colors, get_notification_types,
+    get_typography, get_breakpoints, get_layout_dimensions,
+    get_spacing_scale, get_grid_columns, get_rating_config,
+    get_validation_patterns, get_date_formats, get_user_profile_fields,
+    get_markdown_toolbar, get_report_reasons, get_share_platforms,
+    get_emoji_categories, get_licenses, get_webgl_errors,
+    get_consent_categories, get_spring_presets, get_popup_placements
+)
+
 # =============================================================================
-# CONSTANTS - Derived from Sketchfab JavaScript analysis
+# CONSTANTS - Loaded from JSON files in src/cli_data/
 # =============================================================================
 
-# API Endpoints (from error_messages.js.md / api_client.js.md)
+# Lazy-load API config
+_api_config = None
+def _get_api():
+    global _api_config
+    if _api_config is None:
+        _api_config = get_api_config()
+    return _api_config
+
+# API Endpoints
+@property
+def SKETCHFAB_API_BASE():
+    return _get_api()['base_url']
+
+@property  
+def SKETCHFAB_BASE_URL():
+    return _get_api()['sketchfab_url']
+
+# For backward compatibility, define these as module-level
 SKETCHFAB_API_BASE = "https://api.sketchfab.com/v3"
 SKETCHFAB_BASE_URL = "https://sketchfab.com"
 
-API_ENDPOINTS = {
-    'models': '/models',
-    'model_detail': '/models/{model_id}',
-    'model_download': '/models/{model_id}/download',
-    'model_embed': '/models/{model_id}/embed',
-    'user': '/users/{username}',
-    'user_models': '/users/{username}/models',
-    'search': '/search',
-    'categories': '/categories',
-    'collections': '/collections',
-    'me': '/me',
-    'likes': '/me/likes',
+# Lazy-loaded constants from JSON - use getter functions for dynamic access
+# These are loaded on first access via the get_* functions from cli_data
+
+def _lazy_load(getter_func, cache_attr):
+    """Helper to lazy-load data from JSON."""
+    cache = {}
+    def wrapper():
+        if cache_attr not in cache:
+            cache[cache_attr] = getter_func()
+        return cache[cache_attr]
+    return wrapper
+
+# Create lazy properties for all data
+API_ENDPOINTS = None  # Loaded from api.json
+EMBED_OPTIONS = None  # Loaded from embed.json
+MATERIAL_OPTIONS = None  # Loaded from materials.json
+QUALITY_PRESETS = None  # Loaded from viewer.json
+ENVIRONMENT_PRESETS = None  # Loaded from viewer.json
+AI_ACTIONS = None  # Loaded from ai.json
+AI_PROVIDERS = None  # Loaded from ai.json
+DOWNLOAD_FORMATS = None  # Loaded from models.json
+VISIBILITY_TYPES = None  # Loaded from models.json
+SUBSCRIPTION_TIERS = None  # Loaded from subscriptions.json
+THUMBNAIL_SIZES = None  # Loaded from models.json
+MODEL_BADGES = None  # Loaded from models.json
+SEARCH_FILTERS = None  # Loaded from search.json
+SEARCH_CATEGORIES = None  # Loaded from search.json
+ORG_MEMBER_ROLES = None  # Loaded from subscriptions.json
+THEMES = None  # Loaded from design.json
+VALIDATION_PATTERNS = None  # Loaded from validation.json
+TYPOGRAPHY_SCALE = None  # Loaded from layout.json
+THEME_COLORS = None  # Loaded from design.json
+GRADIENT_PRESETS = None  # Loaded from design.json
+RATING_CONFIG = None  # Loaded from layout.json
+NOTIFICATION_TYPES = None  # Loaded from design.json
+SHADOW_PRESETS = None  # Loaded from design.json
+BRAND_COLORS = None  # Loaded from design.json
+BREAKPOINTS = None  # Loaded from layout.json
+LAYOUT_DIMENSIONS = None  # Loaded from layout.json
+SPACING_SCALE = None  # Loaded from layout.json
+DATE_FORMATS = None  # Loaded from validation.json
+MARKDOWN_TOOLBAR = None  # Loaded from markdown.json
+REPORT_REASONS = None  # Loaded from social.json
+SHARE_PLATFORMS = None  # Loaded from social.json
+LICENSE_TYPES = None  # Loaded from licenses.json
+WEBGL_ERRORS = None  # Loaded from webgl.json
+CONSENT_CATEGORIES = None  # Loaded from privacy.json
+SPRING_PRESETS = None  # Loaded from animation.json
+POPUP_PLACEMENTS = None  # Loaded from animation.json
+USER_PROFILE_FIELDS = None  # Loaded from validation.json
+GRID_COLUMNS = None  # Loaded from layout.json
+EMOJI_CATEGORIES = None  # Loaded from social.json
+MODEL_PROPERTIES = None  # Loaded from models.json
+
+
+def _init_constants():
+    """Initialize all constants from JSON files."""
+    global API_ENDPOINTS, EMBED_OPTIONS, MATERIAL_OPTIONS, QUALITY_PRESETS
+    global ENVIRONMENT_PRESETS, AI_ACTIONS, AI_PROVIDERS, DOWNLOAD_FORMATS
+    global VISIBILITY_TYPES, SUBSCRIPTION_TIERS, THUMBNAIL_SIZES, MODEL_BADGES
+    global SEARCH_FILTERS, SEARCH_CATEGORIES, ORG_MEMBER_ROLES, THEMES
+    global VALIDATION_PATTERNS, TYPOGRAPHY_SCALE, THEME_COLORS, GRADIENT_PRESETS
+    global RATING_CONFIG, NOTIFICATION_TYPES, SHADOW_PRESETS, BRAND_COLORS
+    global BREAKPOINTS, LAYOUT_DIMENSIONS, SPACING_SCALE, DATE_FORMATS
+    global MARKDOWN_TOOLBAR, REPORT_REASONS, SHARE_PLATFORMS, LICENSE_TYPES
+    global WEBGL_ERRORS, CONSENT_CATEGORIES, SPRING_PRESETS, POPUP_PLACEMENTS
+    global USER_PROFILE_FIELDS, GRID_COLUMNS, EMOJI_CATEGORIES, MODEL_PROPERTIES
+    
+    api_config = get_api_config()
+    API_ENDPOINTS = api_config.get('endpoints', {})
+    EMBED_OPTIONS = get_embed_options()
+    MATERIAL_OPTIONS = get_material_options()
+    QUALITY_PRESETS = get_quality_presets()
+    ENVIRONMENT_PRESETS = get_environment_presets()
+    AI_ACTIONS = get_ai_actions()
+    AI_PROVIDERS = get_ai_providers()
+    DOWNLOAD_FORMATS = get_download_formats()
+    VISIBILITY_TYPES = get_visibility_types()
+    SUBSCRIPTION_TIERS = get_subscription_tiers()
+    THUMBNAIL_SIZES = get_thumbnail_sizes()
+    MODEL_BADGES = get_model_badges()
+    SEARCH_FILTERS = get_search_filters()
+    SEARCH_CATEGORIES = get_search_categories()
+    ORG_MEMBER_ROLES = get_org_roles()
+    THEMES = get_themes()
+    VALIDATION_PATTERNS = get_validation_patterns()
+    TYPOGRAPHY_SCALE = get_typography()
+    THEME_COLORS = get_themes()  # Same as THEMES
+    GRADIENT_PRESETS = get_gradients()
+    RATING_CONFIG = get_rating_config()
+    NOTIFICATION_TYPES = get_notification_types()
+    SHADOW_PRESETS = get_shadows()
+    BRAND_COLORS = get_brand_colors()
+    BREAKPOINTS = get_breakpoints()
+    LAYOUT_DIMENSIONS = get_layout_dimensions()
+    SPACING_SCALE = get_spacing_scale()
+    DATE_FORMATS = get_date_formats()
+    MARKDOWN_TOOLBAR = get_markdown_toolbar()
+    REPORT_REASONS = get_report_reasons()
+    SHARE_PLATFORMS = get_share_platforms()
+    LICENSE_TYPES = get_licenses()
+    WEBGL_ERRORS = get_webgl_errors()
+    CONSENT_CATEGORIES = get_consent_categories()
+    SPRING_PRESETS = get_spring_presets()
+    POPUP_PLACEMENTS = get_popup_placements()
+    USER_PROFILE_FIELDS = get_user_profile_fields()
+    GRID_COLUMNS = get_grid_columns()
+    EMOJI_CATEGORIES = get_emoji_categories()
+    MODEL_PROPERTIES = get_model_properties()
+
+
+# Initialize constants on module load
+_init_constants()
     'purchases': '/me/purchases',
 }
 
@@ -472,6 +607,154 @@ SHARE_PLATFORMS = [
     {'id': 'email', 'name': 'Email', 'url_template': 'mailto:?subject={text}&body={url}'},
 ]
 
+# Creative Commons Licenses (from missing_webgl_popup.js.md)
+LICENSE_TYPES = {
+    'cc0': {
+        'name': 'CC0 - Public Domain',
+        'url': 'https://creativecommons.org/publicdomain/zero/1.0/',
+        'allows': ['commercial', 'modify', 'distribute'],
+        'requires': []
+    },
+    'cc-by': {
+        'name': 'CC Attribution',
+        'url': 'https://creativecommons.org/licenses/by/4.0/',
+        'allows': ['commercial', 'modify', 'distribute'],
+        'requires': ['attribution']
+    },
+    'cc-by-sa': {
+        'name': 'CC Attribution-ShareAlike',
+        'url': 'https://creativecommons.org/licenses/by-sa/4.0/',
+        'allows': ['commercial', 'modify', 'distribute'],
+        'requires': ['attribution', 'share-alike']
+    },
+    'cc-by-nd': {
+        'name': 'CC Attribution-NoDerivs',
+        'url': 'https://creativecommons.org/licenses/by-nd/4.0/',
+        'allows': ['commercial', 'distribute'],
+        'requires': ['attribution']
+    },
+    'cc-by-nc': {
+        'name': 'CC Attribution-NonCommercial',
+        'url': 'https://creativecommons.org/licenses/by-nc/4.0/',
+        'allows': ['modify', 'distribute'],
+        'requires': ['attribution', 'non-commercial']
+    },
+    'cc-by-nc-sa': {
+        'name': 'CC Attribution-NonCommercial-ShareAlike',
+        'url': 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+        'allows': ['modify', 'distribute'],
+        'requires': ['attribution', 'non-commercial', 'share-alike']
+    },
+    'cc-by-nc-nd': {
+        'name': 'CC Attribution-NonCommercial-NoDerivs',
+        'url': 'https://creativecommons.org/licenses/by-nc-nd/4.0/',
+        'allows': ['distribute'],
+        'requires': ['attribution', 'non-commercial']
+    },
+    'all-rights-reserved': {
+        'name': 'All Rights Reserved',
+        'url': None,
+        'allows': [],
+        'requires': ['permission']
+    }
+}
+
+# WebGL Error Types (from missing_webgl_popup.js.md)
+WEBGL_ERRORS = {
+    'not_supported': {
+        'title': 'WebGL Not Supported',
+        'message': 'Your browser does not support WebGL.',
+        'suggestions': [
+            'Try Chrome, Firefox, or Edge',
+            'Update your browser to the latest version',
+            'Enable hardware acceleration in browser settings'
+        ]
+    },
+    'disabled': {
+        'title': 'WebGL Disabled',
+        'message': 'WebGL is disabled in your browser settings.',
+        'suggestions': [
+            'Enable WebGL in browser settings',
+            'Check if an extension is blocking WebGL',
+            'Try disabling ad blockers temporarily'
+        ]
+    },
+    'context_lost': {
+        'title': 'Graphics Context Lost',
+        'message': 'The graphics context was lost due to GPU overload.',
+        'suggestions': [
+            'Refresh the page',
+            'Close other GPU-intensive applications',
+            'Update your graphics drivers'
+        ]
+    },
+    'extension_missing': {
+        'title': 'Missing WebGL Extension',
+        'message': 'A required WebGL extension is not available.',
+        'suggestions': [
+            'Try a different browser',
+            'Update your graphics drivers',
+            'Model may use unsupported GPU features'
+        ]
+    }
+}
+
+# Cookie Consent Categories (from otSDKStub.js.md)
+CONSENT_CATEGORIES = {
+    'C0001': {'name': 'Strictly Necessary', 'required': True, 'description': 'Essential for site functionality'},
+    'C0002': {'name': 'Performance', 'required': False, 'description': 'Analytics and metrics'},
+    'C0003': {'name': 'Functional', 'required': False, 'description': 'Preferences and features'},
+    'C0004': {'name': 'Targeting', 'required': False, 'description': 'Advertising and retargeting'},
+    'C0005': {'name': 'Social Media', 'required': False, 'description': 'Social sharing and embeds'},
+}
+
+# Spring Animation Presets (from shaders.js.md)
+SPRING_PRESETS = {
+    'default': {'stiffness': 170, 'damping': 26, 'desc': 'Smooth and natural'},
+    'snappy': {'stiffness': 300, 'damping': 30, 'desc': 'Quick and responsive'},
+    'gentle': {'stiffness': 120, 'damping': 14, 'desc': 'Slow and smooth'},
+    'bouncy': {'stiffness': 500, 'damping': 15, 'desc': 'Bouncy and playful'},
+    'stiff': {'stiffness': 210, 'damping': 20, 'desc': 'Minimal bounce'},
+}
+
+# UI Popup/Tooltip Placements (from viewer_controls.js.md)
+POPUP_PLACEMENTS = [
+    'top', 'top-start', 'top-end',
+    'right', 'right-start', 'right-end',
+    'bottom', 'bottom-start', 'bottom-end',
+    'left', 'left-start', 'left-end'
+]
+
+# User Profile Fields (from user_profile.js.md)
+USER_PROFILE_FIELDS = {
+    'basic': ['uid', 'username', 'displayName', 'bio', 'location', 'website'],
+    'stats': ['followerCount', 'followingCount', 'modelCount', 'likeCount'],
+    'status': ['isVerified', 'isPro', 'isStaff', 'isSeller'],
+    'timestamps': ['createdAt', 'lastSeenAt'],
+}
+
+# Grid Column Configurations (from viewer_textures.js.md)
+GRID_COLUMNS = {
+    'mobile': {'breakpoint': 0, 'columns': 2},
+    'tablet': {'breakpoint': 768, 'columns': 3},
+    'desktop': {'breakpoint': 1024, 'columns': 4},
+    'wide': {'breakpoint': 1440, 'columns': 5},
+}
+
+# Emoji Categories (from viewer_lighting.js.md - Twemoji)
+EMOJI_CATEGORIES = ['people', 'nature', 'food', 'activity', 'travel', 'objects', 'symbols', 'flags']
+
+# Model Property Fields (from missing_webgl_popup.js.md)
+MODEL_PROPERTIES = {
+    'name': {'type': 'text', 'maxLength': 100, 'required': True},
+    'description': {'type': 'textarea', 'maxLength': 5000, 'required': False, 'supportMarkdown': True},
+    'tags': {'type': 'tags', 'maxTags': 20, 'minTags': 1},
+    'categories': {'type': 'multiselect', 'maxSelections': 3},
+    'license': {'type': 'select', 'options': list(LICENSE_TYPES.keys())},
+    'isDownloadable': {'type': 'toggle', 'label': 'Allow downloads'},
+    'isPublished': {'type': 'toggle', 'label': 'Published'},
+}
+
 from src.sketchfab_fetcher import SketchfabFetcher
 from src.model_decryptor import SketchfabDecryptor, decrypt_model
 from src.binz_reader import BinzReader
@@ -818,6 +1101,15 @@ def cmd_info(args):
     print("  markdown    - Display markdown syntax reference")
     print("  dates       - Display date format patterns")
     print()
+    print("Reference Commands:")
+    print("  licenses    - Display Creative Commons license information")
+    print("  webgl       - Show WebGL error types and troubleshooting")
+    print("  animation   - Show spring animation presets and physics")
+    print("  privacy     - Display cookie consent categories (GDPR/OneTrust)")
+    print("  model-fields- Show model property field definitions")
+    print("  grid        - Display responsive grid column configurations")
+    print("  placements  - Show UI popup placement options")
+    print()
     print("Web Scraping Commands:")
     print("  scrape      - Scrape webpage content using requests/BeautifulSoup")
     print("  session     - Demonstrate session management with cookiejar")
@@ -837,6 +1129,8 @@ def cmd_info(args):
     print(f"  Download Formats: {', '.join(DOWNLOAD_FORMATS)}")
     print(f"  Brand Colors: {len(BRAND_COLORS)} brands")
     print(f"  Breakpoints: {len(BREAKPOINTS)} ({', '.join(BREAKPOINTS.keys())})")
+    print(f"  License Types: {len(LICENSE_TYPES)} Creative Commons licenses")
+    print(f"  Spring Presets: {len(SPRING_PRESETS)} animation configs")
     print()
     print("Use 'python cli.py <command> --help' for command-specific help.")
 
@@ -2278,6 +2572,258 @@ def cmd_dates(args):
     return 0
 
 
+def cmd_licenses(args):
+    """Display Creative Commons license information."""
+    
+    if args.license:
+        # Show specific license
+        if args.license not in LICENSE_TYPES:
+            print(f"Unknown license: {args.license}")
+            print(f"Available: {', '.join(LICENSE_TYPES.keys())}")
+            return 1
+        
+        lic = LICENSE_TYPES[args.license]
+        print(f"License: {lic['name']}")
+        print("=" * 60)
+        if lic['url']:
+            print(f"URL: {lic['url']}")
+        print(f"\nAllows: {', '.join(lic['allows']) if lic['allows'] else 'None'}")
+        print(f"Requires: {', '.join(lic['requires']) if lic['requires'] else 'None'}")
+        return 0
+    
+    print("Creative Commons Licenses")
+    print("=" * 60)
+    print("(Used for model licensing on Sketchfab)")
+    print()
+    
+    for code, lic in LICENSE_TYPES.items():
+        print(f"\n{code}")
+        print(f"  Name: {lic['name']}")
+        allows = ', '.join(lic['allows']) if lic['allows'] else 'None'
+        requires = ', '.join(lic['requires']) if lic['requires'] else 'None'
+        print(f"  Allows: {allows}")
+        print(f"  Requires: {requires}")
+    
+    print("\n\nPermission Types:")
+    print("-" * 40)
+    print("  commercial    - Use for commercial purposes")
+    print("  modify        - Create derivative works")
+    print("  distribute    - Share and redistribute")
+    print("  attribution   - Credit the original author")
+    print("  share-alike   - Use same license for derivatives")
+    print("  non-commercial - No commercial use allowed")
+    
+    return 0
+
+
+def cmd_webgl(args):
+    """Display WebGL error types and troubleshooting."""
+    
+    print("WebGL Error Types & Troubleshooting")
+    print("=" * 60)
+    print()
+    
+    for error_type, info in WEBGL_ERRORS.items():
+        print(f"\n{error_type.upper()}")
+        print("-" * 40)
+        print(f"Title: {info['title']}")
+        print(f"Message: {info['message']}")
+        print("Suggestions:")
+        for suggestion in info['suggestions']:
+            print(f"  • {suggestion}")
+    
+    print("\n\nWebGL Detection Code:")
+    print("-" * 40)
+    print("""
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl2') ||
+             canvas.getContext('webgl') ||
+             canvas.getContext('experimental-webgl');
+  if (!gl) {
+    // WebGL not supported
+  }
+""")
+    
+    return 0
+
+
+def cmd_animation(args):
+    """Display spring animation presets."""
+    
+    print("Spring Animation Presets")
+    print("=" * 60)
+    print("(Physics-based animation configurations)")
+    print()
+    
+    for name, preset in SPRING_PRESETS.items():
+        print(f"\n{name.upper()}")
+        print(f"  Stiffness: {preset['stiffness']}")
+        print(f"  Damping: {preset['damping']}")
+        print(f"  Description: {preset['desc']}")
+    
+    print("\n\nSpring Physics Formula:")
+    print("-" * 40)
+    print("  F = -k * x  (Spring force)")
+    print("  F = -c * v  (Damping force)")
+    print("  a = F / m   (Acceleration)")
+    print()
+    print("  k = stiffness (higher = bouncier)")
+    print("  c = damping (higher = less oscillation)")
+    print("  m = mass (default: 1)")
+    
+    if args.generate_js:
+        print("\n\nJavaScript Implementation:")
+        print("-" * 40)
+        print("""
+function springStep(position, velocity, target, config, dt) {
+  const { stiffness, damping, mass = 1 } = config;
+  const springForce = -stiffness * (position - target);
+  const dampingForce = -damping * velocity;
+  const acceleration = (springForce + dampingForce) / mass;
+  return {
+    position: position + velocity * dt,
+    velocity: velocity + acceleration * dt
+  };
+}
+""")
+    
+    return 0
+
+
+def cmd_privacy(args):
+    """Display cookie consent categories."""
+    
+    print("Cookie Consent Categories")
+    print("=" * 60)
+    print("(OneTrust/GDPR consent management)")
+    print()
+    
+    for code, cat in CONSENT_CATEGORIES.items():
+        required = "✓ Required" if cat['required'] else "○ Optional"
+        print(f"\n{code} - {cat['name']} [{required}]")
+        print(f"  {cat['description']}")
+    
+    print("\n\nUsage Pattern:")
+    print("-" * 40)
+    print("""
+  // Check consent before loading tracking
+  if (OneTrust.IsActiveGroup('C0002')) {
+    // Load analytics (Performance)
+    loadGoogleAnalytics();
+  }
+  
+  if (OneTrust.IsActiveGroup('C0004')) {
+    // Load advertising (Targeting)
+    loadFacebookPixel();
+  }
+""")
+    
+    return 0
+
+
+def cmd_model_fields(args):
+    """Display model property field definitions."""
+    
+    print("Model Property Fields")
+    print("=" * 60)
+    print("(Field definitions for model metadata)")
+    print()
+    
+    for field_name, field_def in MODEL_PROPERTIES.items():
+        print(f"\n{field_name}")
+        print(f"  Type: {field_def['type']}")
+        for key, value in field_def.items():
+            if key != 'type':
+                print(f"  {key}: {value}")
+    
+    print("\n\nUser Profile Field Groups:")
+    print("-" * 40)
+    for group, fields in USER_PROFILE_FIELDS.items():
+        print(f"\n{group.upper()}:")
+        for field in fields:
+            print(f"  • {field}")
+    
+    return 0
+
+
+def cmd_grid(args):
+    """Display responsive grid configuration."""
+    
+    print("Responsive Grid Configuration")
+    print("=" * 60)
+    print()
+    
+    for size, config in GRID_COLUMNS.items():
+        print(f"{size.upper():10} {config['columns']} columns @ {config['breakpoint']}px+")
+    
+    print("\n\nCSS Grid Implementation:")
+    print("-" * 40)
+    print("""
+.grid {
+  display: grid;
+  gap: 16px;
+}
+
+/* Mobile: 2 columns */
+@media (max-width: 767px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Tablet: 3 columns */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Desktop: 4 columns */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Wide: 5 columns */
+@media (min-width: 1440px) {
+  .grid { grid-template-columns: repeat(5, 1fr); }
+}
+""")
+    
+    return 0
+
+
+def cmd_placements(args):
+    """Display UI popup/tooltip placement options."""
+    
+    print("Popup/Tooltip Placements")
+    print("=" * 60)
+    print("(Floating UI positioning options)")
+    print()
+    
+    # Group by direction
+    directions = {'top': [], 'right': [], 'bottom': [], 'left': []}
+    for placement in POPUP_PLACEMENTS:
+        direction = placement.split('-')[0]
+        directions[direction].append(placement)
+    
+    for direction, placements in directions.items():
+        print(f"\n{direction.upper()}:")
+        for p in placements:
+            suffix = p.replace(direction, '').lstrip('-') or 'center'
+            print(f"  {p:15} (aligned {suffix})")
+    
+    print("\n\nUsage Example (Floating UI):")
+    print("-" * 40)
+    print("""
+const { x, y } = useFloating({
+  placement: 'bottom-start',
+  middleware: [
+    offset(8),
+    flip(),
+    shift({ padding: 8 })
+  ]
+});
+""")
+    
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Sketchfab Model Tools CLI",
@@ -2647,6 +3193,46 @@ def main():
     dates_parser = subparsers.add_parser('dates',
         help='Display date format patterns')
     dates_parser.set_defaults(func=cmd_dates)
+
+    # Licenses command - Creative Commons licenses
+    licenses_parser = subparsers.add_parser('licenses',
+        help='Display Creative Commons license information')
+    licenses_parser.add_argument('--license', '-l',
+        choices=list(LICENSE_TYPES.keys()),
+        help='Show details for specific license')
+    licenses_parser.set_defaults(func=cmd_licenses)
+
+    # WebGL command - WebGL errors and troubleshooting
+    webgl_parser = subparsers.add_parser('webgl',
+        help='Display WebGL error types and troubleshooting')
+    webgl_parser.set_defaults(func=cmd_webgl)
+
+    # Animation command - Spring animation presets
+    animation_parser = subparsers.add_parser('animation',
+        help='Display spring animation presets')
+    animation_parser.add_argument('--generate-js', action='store_true',
+        help='Generate JavaScript spring implementation')
+    animation_parser.set_defaults(func=cmd_animation)
+
+    # Privacy command - Cookie consent categories
+    privacy_parser = subparsers.add_parser('privacy',
+        help='Display cookie consent categories (GDPR/OneTrust)')
+    privacy_parser.set_defaults(func=cmd_privacy)
+
+    # Model-fields command - Model property definitions
+    model_fields_parser = subparsers.add_parser('model-fields',
+        help='Display model property field definitions')
+    model_fields_parser.set_defaults(func=cmd_model_fields)
+
+    # Grid command - Responsive grid configuration
+    grid_parser = subparsers.add_parser('grid',
+        help='Display responsive grid configuration')
+    grid_parser.set_defaults(func=cmd_grid)
+
+    # Placements command - UI popup/tooltip placements
+    placements_parser = subparsers.add_parser('placements',
+        help='Display UI popup/tooltip placement options')
+    placements_parser.set_defaults(func=cmd_placements)
 
     # Parse args
     args = parser.parse_args()

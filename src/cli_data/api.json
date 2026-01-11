@@ -1,0 +1,18 @@
+{
+  "base_url": "https://api.sketchfab.com/v3",
+  "sketchfab_url": "https://sketchfab.com",
+  "endpoints": {
+    "models": "/models",
+    "model_detail": "/models/{model_id}",
+    "model_download": "/models/{model_id}/download",
+    "model_embed": "/models/{model_id}/embed",
+    "user": "/users/{username}",
+    "user_models": "/users/{username}/models",
+    "search": "/search",
+    "categories": "/categories",
+    "collections": "/collections",
+    "me": "/me",
+    "likes": "/me/likes",
+    "purchases": "/me/purchases"
+  }
+}

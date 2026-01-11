@@ -1,0 +1,16 @@
+{
+  "report_reasons": [
+    {"value": "copyright", "label": "Copyright infringement"},
+    {"value": "inappropriate", "label": "Inappropriate content"},
+    {"value": "spam", "label": "Spam or misleading"},
+    {"value": "other", "label": "Other"}
+  ],
+  "share_platforms": [
+    {"id": "twitter", "name": "Twitter", "url_template": "https://twitter.com/intent/tweet?url={url}&text={text}"},
+    {"id": "facebook", "name": "Facebook", "url_template": "https://www.facebook.com/sharer/sharer.php?u={url}"},
+    {"id": "pinterest", "name": "Pinterest", "url_template": "https://pinterest.com/pin/create/button/?url={url}&description={text}"},
+    {"id": "linkedin", "name": "LinkedIn", "url_template": "https://www.linkedin.com/shareArticle?mini=true&url={url}&title={text}"},
+    {"id": "email", "name": "Email", "url_template": "mailto:?subject={text}&body={url}"}
+  ],
+  "emoji_categories": ["people", "nature", "food", "activity", "travel", "objects", "symbols", "flags"]
+}
