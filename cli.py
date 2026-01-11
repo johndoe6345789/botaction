@@ -40,7 +40,15 @@ from cli_data import (
     get_emoji_categories, get_licenses, get_webgl_errors,
     get_consent_categories, get_spring_presets, get_popup_placements,
     get_commands, get_demos, get_info_strings, get_labels, get_symbols,
-    get_config_options, get_api_options, get_design_options, get_layout_options
+    get_config_options, get_api_options, get_design_options, get_layout_options,
+    # String getters
+    get_constants, get_messages, get_headers, get_subheaders,
+    get_error_messages, get_result_indicators, get_yes_no,
+    get_file_units, get_http_config, get_code_snippets,
+    get_markdown_examples, get_dayjs_tokens, get_permission_types,
+    get_spring_formulas, get_spring_variables, get_defaults,
+    get_separator_lengths, get_gui_file, get_iframe_template,
+    get_url_templates, get_strftime_map
 )
 
 # =============================================================================
@@ -64,9 +72,10 @@ def SKETCHFAB_API_BASE():
 def SKETCHFAB_BASE_URL():
     return _get_api()['sketchfab_url']
 
-# For backward compatibility, define these as module-level
-SKETCHFAB_API_BASE = "https://api.sketchfab.com/v3"
-SKETCHFAB_BASE_URL = "https://sketchfab.com"
+# Load from JSON for backward compatibility
+_constants = get_constants()
+SKETCHFAB_API_BASE = _constants['sketchfab_api_base']
+SKETCHFAB_BASE_URL = _constants['sketchfab_base_url']
 
 # Lazy-loaded constants from JSON - use getter functions for dynamic access
 # These are loaded on first access via the get_* functions from cli_data
@@ -189,31 +198,32 @@ from src.binz_reader import BinzReader
 
 def cmd_fetch(args):
     """Fetch model information and download files."""
-    print(f"Fetching model from: {args.url}")
+    msgs = get_messages()['fetch']
+    print(msgs['fetching'].format(url=args.url))
 
     fetcher = SketchfabFetcher()
     result = fetcher.fetch_model(args.url)
 
     if result['error']:
-        print(f"Error: {result['error']}")
+        print(msgs['error'].format(error=result['error']))
         return 1
 
     # Print summary
     api_data = result.get('api_data', {})
     if api_data:
-        print(f"\nModel: {api_data.get('name', 'Unknown')}")
-        print(f"Author: {api_data.get('user', {}).get('username', 'Unknown')}")
-        print(f"Views: {api_data.get('viewCount', 0):,}")
-        print(f"Likes: {api_data.get('likeCount', 0):,}")
+        print(f"\n{msgs['model'].format(name=api_data.get('name', 'Unknown'))}")
+        print(msgs['author'].format(username=api_data.get('user', {}).get('username', 'Unknown')))
+        print(msgs['views'].format(count=api_data.get('viewCount', 0)))
+        print(msgs['likes'].format(count=api_data.get('likeCount', 0)))
 
     # Download files if requested
     if args.download:
-        print(f"\nDownloading files to: {args.output_dir}")
+        print(f"\n{msgs['downloading'].format(output_dir=args.output_dir)}")
         downloaded = fetcher.download_model_files(
             result['model_id'],
             output_dir=args.output_dir
         )
-        print(f"Downloaded: {len(downloaded)} files")
+        print(msgs['downloaded'].format(count=len(downloaded)))
         for name, path in downloaded.items():
             print(f"  {name}: {path}")
 
@@ -222,25 +232,26 @@ def cmd_fetch(args):
         meta_file = Path(args.output_dir) / f"{result['model_id']}_metadata.json"
         with open(meta_file, 'w') as f:
             json.dump(result, f, indent=2, default=str)
-        print(f"Metadata saved to: {meta_file}")
+        print(msgs['metadata_saved'].format(meta_file=meta_file))
 
     return 0
 
 
 def cmd_decrypt(args):
     """Decrypt an encrypted .binz file."""
+    msgs = get_messages()['decrypt']
     binz_path = Path(args.binz_file)
     params_path = Path(args.params_file) if args.params_file else None
 
     if not binz_path.exists():
-        print(f"Error: .binz file not found: {binz_path}")
+        print(msgs['error_binz_not_found'].format(path=binz_path))
         return 1
 
     if params_path and not params_path.exists():
-        print(f"Error: params file not found: {params_path}")
+        print(msgs['error_params_not_found'].format(path=params_path))
         return 1
 
-    print(f"Decrypting: {binz_path.name}")
+    print(msgs['decrypting'].format(name=binz_path.name))
 
     try:
         if params_path:
@@ -249,14 +260,14 @@ def cmd_decrypt(args):
         else:
             # Manual decryption with key
             if not args.key:
-                print("Error: Must provide --key or --params-file")
+                print(msgs['error_need_key'])
                 return 1
 
             try:
                 from Crypto.Cipher import AES
                 from Crypto.Util.Padding import unpad
             except ImportError:
-                print("Error: PyCryptodome required for manual key decryption")
+                print(msgs['error_pycryptodome'])
                 return 1
 
             decryptor = SketchfabDecryptor()
@@ -284,14 +295,14 @@ def cmd_decrypt(args):
         with open(output_path, 'wb') as f:
             f.write(decrypted_data)
 
-        print(f"Decrypted {len(decrypted_data):,} bytes")
-        print(f"Saved to: {output_path}")
+        print(msgs['decrypted_bytes'].format(count=len(decrypted_data)))
+        print(msgs['saved_to'].format(path=output_path))
 
         # Inspect if requested
         if args.inspect:
             reader = BinzReader()
             info = reader.inspect(decrypted_data)
-            print("\nDecrypted data inspection:")
+            print(f"\n{msgs['inspection_header']}")
             for key, value in info.items():
                 print(f"  {key}: {value}")
 
@@ -304,43 +315,45 @@ def cmd_decrypt(args):
 
 def cmd_inspect(args):
     """Inspect a .binz file."""
+    msgs = get_messages()['inspect']
+    symbols = get_symbols()
     binz_path = Path(args.binz_file)
 
     if not binz_path.exists():
         print(f"Error: File not found: {binz_path}")
         return 1
 
-    print(f"Inspecting: {binz_path.name}")
-    print(f"Size: {binz_path.stat().st_size:,} bytes")
+    print(msgs['inspecting'].format(name=binz_path.name))
+    print(msgs['size'].format(size=binz_path.stat().st_size))
 
     try:
         reader = BinzReader()
         data = reader.read_file(binz_path)
-        print(f"Decompressed size: {len(data):,} bytes")
+        print(msgs['decompressed_size'].format(size=len(data)))
 
         info = reader.inspect(data)
-        print("\nData structure:")
+        print(f"\n{msgs['data_structure']}")
         for key, value in info.items():
             print(f"  {key}: {value}")
 
         # Try to load params and parse geometry
         params_path = binz_path.with_suffix('.binz').parent / f"{binz_path.stem}_params.json"
         if params_path.exists():
-            print(f"\nFound params file: {params_path.name}")
+            print(f"\n{msgs['found_params'].format(name=params_path.name)}")
             with open(params_path, 'r') as f:
                 params = json.load(f)
 
-            print("Attempting to parse geometry...")
+            print(msgs['parsing_geometry'])
             geometry = reader.parse_geometry_from_params(data, params)
 
             if geometry.vertices:
-                print(f"✓ Found vertices: {geometry.vertex_count:,}")
+                print(f"{symbols['checkmark']} {msgs['found_vertices'].format(count=geometry.vertex_count)}")
             if geometry.normals:
-                print(f"✓ Found normals: {geometry.normal_count:,}")
+                print(f"{symbols['checkmark']} {msgs['found_normals'].format(count=geometry.normal_count)}")
             if geometry.uvs:
-                print(f"✓ Found UVs: {geometry.uv_count:,}")
+                print(f"{symbols['checkmark']} {msgs['found_uvs'].format(count=geometry.uv_count)}")
             if geometry.indices:
-                print(f"✓ Found indices: {geometry.index_count:,}")
+                print(f"{symbols['checkmark']} {msgs['found_indices'].format(count=geometry.index_count)}")
 
         return 0
 
@@ -351,29 +364,31 @@ def cmd_inspect(args):
 
 def cmd_export(args):
     """Export decrypted model to 3MF format."""
+    msgs = get_messages()['export']
+    symbols = get_symbols()
     try:
         from src.export_3mf import Model3MFExporter
     except ImportError:
-        print("Error: Could not import 3MF exporter")
+        print(msgs['error_import'])
         return 1
 
     binz_path = Path(args.binz_file)
     output_path = Path(args.output)
 
     if not binz_path.exists():
-        print(f"Error: .binz file not found: {binz_path}")
+        print(msgs['error_not_found'].format(path=binz_path))
         return 1
 
-    print(f"Exporting {binz_path.name} to 3MF...")
+    print(msgs['exporting'].format(name=binz_path.name))
 
     try:
         exporter = Model3MFExporter()
         exporter.load_from_binary(binz_path)
         exporter.export_3mf(output_path)
 
-        print(f"✓ Exported to: {output_path}")
-        print(f"  Vertices: {len(exporter.vertices):,}")
-        print(f"  Triangles: {len(exporter.triangles):,}")
+        print(f"{symbols['checkmark']} {msgs['exported'].format(path=output_path)}")
+        print(f"  {msgs['vertices'].format(count=len(exporter.vertices))}")
+        print(f"  {msgs['triangles'].format(count=len(exporter.triangles))}")
 
         return 0
 
@@ -384,81 +399,86 @@ def cmd_export(args):
 
 def cmd_demo(args):
     """Launch a demonstration script."""
+    msgs = get_messages()['demo']
     demos = get_demos()
 
     if args.demo_name not in demos:
-        print(f"Error: Unknown demo '{args.demo_name}'. Available: {', '.join(demos.keys())}")
+        print(msgs['error_unknown'].format(name=args.demo_name, available=', '.join(demos.keys())))
         return 1
 
     demo_path = Path(__file__).parent / demos[args.demo_name]
     if not demo_path.exists():
-        print(f"Error: Demo file not found: {demo_path}")
+        print(msgs['error_not_found'].format(path=demo_path))
         return 1
 
-    print(f"Launching demo: {args.demo_name}")
+    print(msgs['launching'].format(name=args.demo_name))
     try:
         import subprocess
         result = subprocess.run([sys.executable, str(demo_path)])
         return result.returncode
     except Exception as e:
-        print(f"Error launching demo: {e}")
+        print(msgs['error_launch'].format(error=e))
         return 1
 
 
 def cmd_gui(args):
     """Launch the graphical user interface."""
-    gui_path = Path(__file__).parent / 'sketchfab_gui.py'
+    msgs = get_messages()['gui']
+    gui_file = get_gui_file()
+    gui_path = Path(__file__).parent / gui_file
     if not gui_path.exists():
-        print(f"Error: GUI file not found: {gui_path}")
+        print(msgs['error_not_found'].format(path=gui_path))
         return 1
-    
-    print("Launching GUI...")
+
+    print(msgs['launching'])
     try:
         import subprocess
         result = subprocess.run([sys.executable, str(gui_path)])
         return result.returncode
     except Exception as e:
-        print(f"Error launching GUI: {e}")
+        print(msgs['error_launch'].format(error=e))
         return 1
 
 
 def cmd_viewer(args):
     """Launch the 3D model viewer."""
+    msgs = get_messages()['viewer']
+    window_sizes = get_window_sizes() if hasattr(sys.modules[__name__], 'get_window_sizes') else {'min_width': 800, 'min_height': 600}
     try:
         from PyQt6.QtWidgets import QApplication
         from src.model_viewer import ModelViewerPanel
         import sys
     except ImportError as e:
-        print(f"Error: Missing required packages for viewer: {e}")
-        print("Install with: pip install PyQt6 PyOpenGL")
+        print(msgs['error_packages'].format(error=e))
+        print(msgs['install_hint'])
         return 1
 
-    print("Launching 3D Model Viewer...")
+    print(msgs['launching'])
 
     try:
         # Create Qt application
         app = QApplication(sys.argv)
-        
+
         # Create viewer window
         from PyQt6.QtWidgets import QMainWindow
         window = QMainWindow()
-        window.setWindowTitle("Sketchfab Model Viewer")
+        window.setWindowTitle(msgs['window_title'])
         window.setMinimumSize(800, 600)
-        
+
         # Create viewer panel
         viewer = ModelViewerPanel()
         window.setCentralWidget(viewer)
-        
+
         # Load model if specified
         if args.binz_file:
             binz_path = Path(args.binz_file)
             if binz_path.exists():
-                print(f"Loading model: {binz_path}")
+                print(msgs['loading_model'].format(path=binz_path))
                 # Look for params file
                 params_path = binz_path.with_name(binz_path.stem + "_params.json")
                 if not params_path.exists():
                     params_path = None
-                
+
                 if viewer.viewer.load_model(str(binz_path), str(params_path) if params_path else None):
                     vertex_count = viewer.viewer.geometry.vertex_count if viewer.viewer.geometry else 0
                     triangle_count = viewer.viewer.geometry.triangle_count if viewer.viewer.geometry else 0
@@ -467,20 +487,20 @@ def cmd_viewer(args):
                         f"Vertices: {vertex_count:,} | "
                         f"Triangles: {triangle_count:,}"
                     )
-                    print(f"Model loaded successfully: {vertex_count:,} vertices, {triangle_count:,} triangles")
+                    print(msgs['model_loaded'].format(vertices=vertex_count, triangles=triangle_count))
                 else:
-                    print(f"Failed to load model: {binz_path}")
+                    print(msgs['load_failed'].format(path=binz_path))
             else:
-                print(f"Model file not found: {binz_path}")
-        
+                print(msgs['not_found'].format(path=binz_path))
+
         # Show window
         window.show()
-        
+
         # Run application
         return app.exec()
-        
+
     except Exception as e:
-        print(f"Error launching viewer: {e}")
+        print(msgs['error_launch'].format(error=e))
         return 1
 
 
@@ -517,22 +537,24 @@ def cmd_info(args):
 
 def cmd_scrape(args):
     """Scrape webpage content using requests and BeautifulSoup."""
+    msgs = get_messages()['scrape']
+    http_config = get_http_config()
     try:
         import requests
         from bs4 import BeautifulSoup
     except ImportError as e:
-        print(f"Error: Missing required packages: {e}")
-        print("Install with: pip install requests beautifulsoup4")
+        print(msgs['error_packages'].format(error=e))
+        print(msgs['install_hint'])
         return 1
 
-    print(f"Scraping: {args.url}")
+    print(msgs['scraping'].format(url=args.url))
 
     try:
         # Make request
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'User-Agent': http_config['user_agent']
         }
-        response = requests.get(args.url, headers=headers, timeout=10)
+        response = requests.get(args.url, headers=headers, timeout=http_config['timeout'])
         response.raise_for_status()
 
         # Parse with BeautifulSoup
@@ -540,11 +562,11 @@ def cmd_scrape(args):
 
         if args.title:
             title = soup.title.string if soup.title else "No title found"
-            print(f"Title: {title}")
+            print(msgs['title'].format(title=title))
 
         if args.links:
             links = soup.find_all('a', href=True)
-            print(f"Found {len(links)} links:")
+            print(msgs['found_links'].format(count=len(links)))
             for i, link in enumerate(links[:args.max_links]):
                 print(f"  {i+1}. {link.get('href')} - {link.get_text().strip()[:50]}")
 
@@ -554,7 +576,7 @@ def cmd_scrape(args):
                 script.decompose()
             text = soup.get_text()
             lines = [line.strip() for line in text.splitlines() if line.strip()]
-            print(f"Text content ({len(lines)} lines):")
+            print(msgs['text_content'].format(count=len(lines)))
             for line in lines[:args.max_lines]:
                 print(f"  {line}")
 
@@ -563,12 +585,12 @@ def cmd_scrape(args):
             output_path.parent.mkdir(parents=True, exist_ok=True)
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(str(soup))
-            print(f"HTML saved to: {output_path}")
+            print(msgs['html_saved'].format(path=output_path))
 
         return 0
 
     except requests.RequestException as e:
-        print(f"Request error: {e}")
+        print(msgs['request_error'].format(error=e))
         return 1
     except Exception as e:
         print(f"Error: {e}")
@@ -577,6 +599,7 @@ def cmd_scrape(args):
 
 def cmd_session(args):
     """Demonstrate session management with cookiejar."""
+    msgs = get_messages()['session']
     try:
         import requests
         from bs4 import BeautifulSoup
@@ -585,7 +608,7 @@ def cmd_session(args):
         print("Install with: pip install requests beautifulsoup4")
         return 1
 
-    print("Demonstrating session management with cookiejar...")
+    print(msgs['demonstrating'])
 
     try:
         # Create a cookiejar and session
@@ -594,12 +617,12 @@ def cmd_session(args):
         session.cookies = jar
 
         # First request to establish session
-        print(f"Making initial request to: {args.url}")
+        print(msgs['initial_request'].format(url=args.url))
         response1 = session.get(args.url, timeout=10)
         response1.raise_for_status()
 
-        print(f"Initial response status: {response1.status_code}")
-        print(f"Cookies received: {len(jar)}")
+        print(msgs['response_status'].format(status=response1.status_code))
+        print(msgs['cookies_received'].format(count=len(jar)))
 
         # List cookies
         for cookie in jar:
@@ -615,19 +638,19 @@ def cmd_session(args):
                     from urllib.parse import urljoin
                     next_url = urljoin(args.url, next_url)
 
-                print(f"\nFollowing link to: {next_url}")
+                print(f"\n{msgs['following_link'].format(url=next_url)}")
                 response2 = session.get(next_url, timeout=10)
                 response2.raise_for_status()
-                print(f"Follow-up response status: {response2.status_code}")
-                print(f"Cookies after follow-up: {len(jar)}")
+                print(msgs['followup_status'].format(status=response2.status_code))
+                print(msgs['cookies_after'].format(count=len(jar)))
             else:
-                print("No links found to follow")
+                print(msgs['no_links'])
 
         # Save cookies if requested
         if args.save_cookies:
             cookie_file = Path(args.save_cookies)
             jar.save(cookie_file, ignore_discard=True, ignore_expires=True)
-            print(f"Cookies saved to: {cookie_file}")
+            print(msgs['cookies_saved'].format(path=cookie_file))
 
         return 0
 
@@ -641,6 +664,8 @@ def cmd_session(args):
 
 def cmd_download_js(args):
     """Download all JavaScript files from a website."""
+    msgs = get_messages()['download_js']
+    http_config = get_http_config()
     try:
         import requests
         from bs4 import BeautifulSoup
@@ -651,7 +676,7 @@ def cmd_download_js(args):
         print("Install with: pip install requests beautifulsoup4")
         return 1
 
-    print(f"Downloading JavaScript files from: {args.url}")
+    print(msgs['downloading'].format(url=args.url))
 
     try:
         # Create output directory
@@ -666,7 +691,7 @@ def cmd_download_js(args):
         url_queue = [args.url]
 
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'User-Agent': http_config['user_agent']
         }
 
         while url_queue and (not args.max_pages or len(processed_urls) < args.max_pages):
@@ -676,7 +701,7 @@ def cmd_download_js(args):
                 continue
 
             processed_urls.add(current_url)
-            print(f"Processing: {current_url}")
+            print(msgs['processing'].format(url=current_url))
 
             try:
                 response = requests.get(current_url, headers=headers, timeout=10)
