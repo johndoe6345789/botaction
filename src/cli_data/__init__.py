@@ -618,3 +618,158 @@ def get_interrupt_message():
 def get_unexpected_error():
     """Load unexpected error template."""
     return load_json('strings.json')['unexpected_error']
+
+
+def get_messages_embed():
+    """Load embed command messages."""
+    return load_json('strings.json')['messages_embed']
+
+
+def get_messages_config():
+    """Load config command messages."""
+    return load_json('strings.json')['messages_config']
+
+
+def get_messages_api():
+    """Load api command messages."""
+    return load_json('strings.json')['messages_api']
+
+
+def get_messages_stats():
+    """Load stats command messages."""
+    return load_json('strings.json')['messages_stats']
+
+
+def get_messages_search():
+    """Load search command messages."""
+    return load_json('strings.json')['messages_search']
+
+
+def get_messages_user():
+    """Load user command messages."""
+    return load_json('strings.json')['messages_user']
+
+
+def get_messages_thumbnail():
+    """Load thumbnail command messages."""
+    return load_json('strings.json')['messages_thumbnail']
+
+
+def get_messages_categories():
+    """Load categories command messages."""
+    return load_json('strings.json')['messages_categories']
+
+
+def get_messages_licenses():
+    """Load licenses command messages."""
+    return load_json('strings.json')['messages_licenses']
+
+
+def get_messages_dates():
+    """Load dates command messages."""
+    return load_json('strings.json')['messages_dates']
+
+
+def get_embed_params():
+    """Load embed parameter names."""
+    return load_json('strings.json')['embed_params']
+
+
+def get_config_keys():
+    """Load config JSON keys."""
+    return load_json('strings.json')['config_keys']
+
+
+def get_api_keys():
+    """Load API placeholder keys."""
+    return load_json('strings.json')['api_keys']
+
+
+def get_data_keys():
+    """Load data/response JSON keys."""
+    return load_json('strings.json')['data_keys']
+
+
+def get_search_params():
+    """Load search query parameters."""
+    return load_json('strings.json')['search_params']
+
+
+def get_content_types():
+    """Load content type strings."""
+    return load_json('strings.json')['content_types']
+
+
+def get_file_extensions():
+    """Load file extension strings."""
+    return load_json('strings.json')['file_extensions']
+
+
+def get_url_prefixes():
+    """Load URL prefix strings."""
+    return load_json('strings.json')['url_prefixes']
+
+
+def get_css_selectors():
+    """Load CSS selector strings."""
+    return load_json('strings.json')['css_selectors']
+
+
+def get_html_parser():
+    """Load HTML parser name."""
+    return load_json('strings.json')['html_parser']
+
+
+def get_placeholders():
+    """Load placeholder strings."""
+    return load_json('strings.json')['placeholders']
+
+
+def get_root_selector():
+    """Load CSS root selector."""
+    return load_json('strings.json')['root_selector']
+
+
+def get_css_class_prefix():
+    """Load CSS class prefixes."""
+    return load_json('strings.json')['css_class_prefix']
+
+
+def get_scss_syntax():
+    """Load SCSS syntax strings."""
+    return load_json('strings.json')['scss_syntax']
+
+
+def get_thumbnail_defaults():
+    """Load thumbnail default values."""
+    return load_json('strings.json')['thumbnail_defaults']
+
+
+def get_direction_names():
+    """Load direction name list."""
+    return load_json('strings.json')['direction_names']
+
+
+def get_center_label():
+    """Load center label string."""
+    return load_json('strings.json')['center_label']
+
+
+def get_theme_suffix():
+    """Load theme suffix string."""
+    return load_json('strings.json')['theme_suffix']
+
+
+def get_views_label():
+    """Load views label template."""
+    return load_json('strings.json')['views_label']
+
+
+def get_ellipsis():
+    """Load ellipsis string."""
+    return load_json('strings.json')['ellipsis']
+
+
+def get_truncate_suffix():
+    """Load truncate suffix string."""
+    return load_json('strings.json')['truncate_suffix']

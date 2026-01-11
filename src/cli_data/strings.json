@@ -750,5 +750,203 @@
   },
   "cli_description": "Sketchfab Model Tools CLI",
   "interrupt_message": "Interrupted by user",
-  "unexpected_error": "Unexpected error: {error}"
+  "unexpected_error": "Unexpected error: {error}",
+  "messages_embed": {
+    "model_id": "Model ID: {model_id}",
+    "embed_url_label": "Embed URL:",
+    "iframe_label": "iFrame Code:",
+    "copied": "\u2713 Copied to clipboard!",
+    "install_pyperclip": "(Install pyperclip to enable clipboard copy: pip install pyperclip)"
+  },
+  "messages_config": {
+    "config_saved": "Config saved to: {path}"
+  },
+  "messages_api": {
+    "supported_actions": "Supported actions: {actions}"
+  },
+  "messages_stats": {
+    "fetching": "Fetching stats for model: {model_id}",
+    "error_fetching": "Error fetching model: {error}"
+  },
+  "messages_search": {
+    "searching": "Searching for: {query}",
+    "error_searching": "Error searching: {error}"
+  },
+  "messages_user": {
+    "looking_up": "Looking up user: {username}",
+    "error_fetching": "Error fetching user: {error}"
+  },
+  "messages_thumbnail": {
+    "could_not_fetch": "Could not fetch actual thumbnails: {error}",
+    "default_thumb": "Default: {url}",
+    "square_thumb": "Square: {url}"
+  },
+  "messages_categories": {
+    "slug_label": "Slug: {slug}"
+  },
+  "messages_licenses": {
+    "license_label": "License: {name}"
+  },
+  "messages_dates": {
+    "from_now_example": "e.g., '2 hours ago'"
+  },
+  "embed_params": {
+    "autostart": "autostart",
+    "autospin": "autospin",
+    "ui_controls": "ui_controls",
+    "ui_infos": "ui_infos",
+    "ui_inspector": "ui_inspector",
+    "ui_watermark": "ui_watermark",
+    "transparent": "transparent",
+    "scrollwheel": "scrollwheel",
+    "animation_autoplay": "animation_autoplay",
+    "annotation": "annotation",
+    "preload": "preload"
+  },
+  "config_keys": {
+    "renderer": "renderer",
+    "antialias": "antialias",
+    "alpha": "alpha",
+    "power_preference": "powerPreference",
+    "camera": "camera",
+    "fov": "fov",
+    "near": "near",
+    "far": "far",
+    "controls": "controls",
+    "enabled": "enabled",
+    "auto_rotate": "autoRotate",
+    "enable_pan": "enablePan",
+    "enable_zoom": "enableZoom",
+    "lighting": "lighting",
+    "environment": "environment",
+    "exposure": "exposure",
+    "shadows_enabled": "shadowsEnabled",
+    "post_processing": "postProcessing",
+    "ssao_enabled": "ssaoEnabled",
+    "bloom_enabled": "bloomEnabled",
+    "quality": "quality"
+  },
+  "api_keys": {
+    "model_id": "{model_id}",
+    "username": "{username}"
+  },
+  "data_keys": {
+    "name": "name",
+    "uid": "uid",
+    "user": "user",
+    "username": "username",
+    "display_name": "displayName",
+    "view_count": "viewCount",
+    "like_count": "likeCount",
+    "comment_count": "commentCount",
+    "download_count": "downloadCount",
+    "is_downloadable": "isDownloadable",
+    "is_animated": "isAnimated",
+    "staffpicked_at": "staffpickedAt",
+    "license": "license",
+    "label": "label",
+    "categories": "categories",
+    "tags": "tags",
+    "results": "results",
+    "total_count": "totalCount",
+    "bio": "bio",
+    "location": "location",
+    "website": "website",
+    "model_count": "modelCount",
+    "follower_count": "followerCount",
+    "following_count": "followingCount",
+    "is_verified": "isVerified",
+    "is_pro": "isPro",
+    "is_staff": "isStaff",
+    "thumbnails": "thumbnails",
+    "images": "images",
+    "width": "width",
+    "height": "height",
+    "url": "url",
+    "badge_color": "badgeColor",
+    "features": "features",
+    "type": "type",
+    "default": "default",
+    "desc": "desc",
+    "stiffness": "stiffness",
+    "damping": "damping",
+    "required": "required",
+    "description": "description",
+    "actions": "actions",
+    "allows": "allows",
+    "requires": "requires",
+    "title": "title",
+    "message": "message",
+    "suggestions": "suggestions",
+    "columns": "columns",
+    "breakpoint": "breakpoint",
+    "min": "min",
+    "max": "max",
+    "font_size": "fontSize",
+    "font_weight": "fontWeight",
+    "line_height": "lineHeight",
+    "syntax": "syntax",
+    "shortcut": "shortcut",
+    "url_template": "url_template",
+    "id": "id"
+  },
+  "search_params": {
+    "q": "q",
+    "type": "type",
+    "sort_by": "sort_by",
+    "downloadable": "downloadable",
+    "animated": "animated",
+    "staffpicked": "staffpicked",
+    "categories": "categories",
+    "count": "count",
+    "relevance": "relevance",
+    "true": "true"
+  },
+  "content_types": {
+    "text_html": "text/html",
+    "application_json": "application/json"
+  },
+  "file_extensions": {
+    "js": ".js",
+    "json": ".json"
+  },
+  "url_prefixes": {
+    "http": "http://",
+    "https": "https://",
+    "double_slash": "//"
+  },
+  "css_selectors": {
+    "script": "script",
+    "style": "style",
+    "a_href": "a"
+  },
+  "html_parser": "html.parser",
+  "placeholders": {
+    "model_id": "{model_id}",
+    "username": "{username}",
+    "url": "{url}",
+    "text": "{text}",
+    "theme": "{theme}"
+  },
+  "root_selector": ":root",
+  "css_class_prefix": {
+    "text": ".text-",
+    "color": "--color-",
+    "spacing": "--spacing-"
+  },
+  "scss_syntax": {
+    "map_start": "(",
+    "map_end": ");",
+    "variable_prefix": "$"
+  },
+  "thumbnail_defaults": {
+    "default_file": "default.jpeg",
+    "square_size": "200x200.jpeg"
+  },
+  "direction_names": ["top", "right", "bottom", "left"],
+  "center_label": "center",
+  "theme_suffix": " THEME:",
+  "views_label": "{views} views",
+  "ellipsis": "...",
+  "truncate_suffix": "..."
 }
