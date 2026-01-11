@@ -9,10 +9,10 @@ from pathlib import Path
 from typing import Optional, Tuple
 import json
 
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QSlider, QOpenGLWidget
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QSlider
+from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtCore import Qt, QTimer, QPoint
 from PyQt6.QtGui import QMatrix4x4, QVector3D, QQuaternion
-from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 
 try:
     from OpenGL.GL import *
@@ -22,6 +22,11 @@ except ImportError:
     OPENGL_AVAILABLE = False
 
 from binz_reader import BinzReader, MeshGeometry
+
+try:
+    from model_decryptor import SketchfabDecryptor, CRYPTO_AVAILABLE as DECRYPTION_AVAILABLE
+except ImportError:
+    DECRYPTION_AVAILABLE = False
 
 
 class ModelViewerWidget(QOpenGLWidget):
@@ -57,7 +62,28 @@ class ModelViewerWidget(QOpenGLWidget):
         """Load a .binz model file."""
         try:
             reader = BinzReader()
-            data = reader.read_file(binz_path)
+            
+            # Try to decrypt if encrypted and params available
+            if params_path and Path(params_path).exists() and DECRYPTION_AVAILABLE:
+                try:
+                    decryptor = SketchfabDecryptor()
+                    with open(params_path, 'r') as f:
+                        import json
+                        params = json.load(f)
+                    
+                    # Check if encrypted
+                    if params and isinstance(params, list) and params[0].get('d', False):
+                        print("Model is encrypted, decrypting...")
+                        data = decryptor.decrypt_and_decompress(binz_path, params)
+                    else:
+                        # Not encrypted, just decompress
+                        data = reader.read_file(binz_path)
+                except Exception as e:
+                    print(f"Decryption failed: {e}, trying raw read...")
+                    data = reader.read_file(binz_path)
+            else:
+                # No params or decryption not available
+                data = reader.read_file(binz_path)
             
             # Try to parse the geometry
             # If we have params, use them; otherwise try to parse raw data
