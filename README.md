@@ -87,6 +87,13 @@ from src.sketchfab_fetcher import SketchfabFetcher
 fetcher = SketchfabFetcher()
 result = fetcher.fetch_model("https://sketchfab.com/3d-models/model-name-abc123")
 downloaded = fetcher.download_model_files(result['model_id'], output_dir='downloads')
+
+# downloaded dict contains:
+# 'binz': path to encrypted .binz file
+# 'params': path to encryption params JSON
+# 'model_file': path to model_file.binz
+# 'wireframe': path to wireframe.binz (if available)
+# 'thumbnail': path to thumbnail image
 ```
 
 **What gets downloaded:**
@@ -122,9 +129,10 @@ Parses the OSGJS scene format to extract triangle geometry:
 ```python
 from src.osgjs_decoder import decode_scene_to_triangles
 
+# file_map uses just the base filename as the key
 triangles, vertex_count = decode_scene_to_triangles(
-    'downloads/model.osgjs.json',
-    {'model_file.binz': decrypted_data}
+    'downloads/model_id_file_uid.osgjs.json',
+    {'model_file.binz': decrypted_geometry_data}
 )
 ```
 
@@ -142,7 +150,10 @@ Converts triangles to binary STL format:
 from src.export_stl import ModelSTLExporter
 
 exporter = ModelSTLExporter()
-exporter.load_from_osgjs('model.osgjs.json', ['model_file.binz'])
+exporter.load_from_osgjs(
+    'downloads/model_id_file_uid.osgjs.json',
+    ['downloads/model_id_model_file.binz']
+)
 exporter.export_stl('output.stl')
 exporter.render_preview('preview.png')  # Optional
 ```
@@ -189,6 +200,8 @@ exporter.export_stl('output.stl', repair=True, verbose=True)
 ### Full Pipeline Example
 
 ```python
+from pathlib import Path
+import json
 from src.sketchfab_fetcher import SketchfabFetcher
 from src.model_decryptor import SketchfabDecryptor
 from src.export_stl import ModelSTLExporter
@@ -196,16 +209,31 @@ from src.export_stl import ModelSTLExporter
 # 1. Fetch
 fetcher = SketchfabFetcher()
 result = fetcher.fetch_model("https://sketchfab.com/3d-models/...")
-fetcher.download_model_files(result['model_id'], 'downloads')
+downloaded = fetcher.download_model_files(result['model_id'], 'downloads')
 
-# 2. Decrypt + Decode + Export
-exporter = ModelSTLExporter()
-exporter.load_from_osgjs(
-    'downloads/model.osgjs.json',
-    ['downloads/model_file.binz'],
-    params_files=['downloads/model_params.json']
-)
-exporter.export_stl('output.stl')
+# 2. Decrypt the .binz file to create .osgjs.json
+if 'binz' in downloaded and 'params' in downloaded:
+    decryptor = SketchfabDecryptor()
+    
+    # Read params
+    with open(downloaded['params'], 'r') as f:
+        params = json.load(f)
+    
+    # Decrypt
+    decrypted_data = decryptor.decrypt_file(downloaded['binz'], params)
+    
+    # Save as .osgjs.json
+    osgjs_path = Path(downloaded['binz']).with_suffix('.osgjs.json')
+    with open(osgjs_path, 'wb') as f:
+        f.write(decrypted_data)
+    
+    # 3. Export to STL
+    exporter = ModelSTLExporter()
+    exporter.load_from_osgjs(
+        str(osgjs_path),
+        [downloaded['model_file']]
+    )
+    exporter.export_stl('output.stl')
 ```
 
 ## API Endpoints Used
