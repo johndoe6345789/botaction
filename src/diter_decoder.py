@@ -118,7 +118,8 @@ def _parse_params(params_path: Path) -> DiterParams:
 @dataclass
 class _DiterRuntime:
     runtime: "pywasm.Runtime"
-    memory: "pywasm.Memory"
+    mod_inst: "pywasm.ModuleInst"
+    memory: "pywasm.MemInst"
     heap_ptr: int
 
 
@@ -127,16 +128,16 @@ def _build_runtime(wasm_bytes: bytes) -> _DiterRuntime:
     module = pywasm.ModuleDesc.from_reader(io.BytesIO(wasm_bytes))
 
     import_min = 1
-    for imp in module.import_list:
+    for imp in module.imps:
         if isinstance(imp.desc, pywasm.MemType):
             import_min = imp.desc.limits.n
             break
 
     heap_base = 65536
-    for global_def in module.global_list:
-        if not global_def.expr.data:
+    for global_def in module.glob:
+        if not global_def.init.data:
             continue
-        op = global_def.expr.data[0]
+        op = global_def.init.data[0]
         if op.opcode == pywasm.opcode.i32_const:
             heap_base = op.args[0]
             break
@@ -146,16 +147,17 @@ def _build_runtime(wasm_bytes: bytes) -> _DiterRuntime:
     total_pages = total_bytes >> 16
     initial_pages = max(import_min, total_pages - import_min)
 
-    limits = pywasm.Limits()
-    limits.n = initial_pages
-    limits.m = 0
-    mem_type = pywasm.MemType()
-    mem_type.limits = limits
-    memory = pywasm.MemInst(mem_type)
+    runtime = pywasm.Runtime()
+    
+    limits = pywasm.Limits(initial_pages, 0)
+    mem_type = pywasm.MemType(limits)
+    memory_extern = runtime.allocate_memory(mem_type)
+    memory = runtime.machine.store.mems[memory_extern.data]  # Get the MemInst from store
 
     heap_ptr = {"value": heap_base}
 
-    def sbrk(store, n):  # pylint: disable=unused-argument
+    def sbrk(store, args):  # pylint: disable=unused-argument
+        n = args[0]
         old = heap_ptr["value"]
         new = old + n
         if new > len(memory.data):
@@ -163,27 +165,33 @@ def _build_runtime(wasm_bytes: bytes) -> _DiterRuntime:
             pages = (need + 65535) >> 16
             memory.grow(pages)
         heap_ptr["value"] = new
-        return old
+        return [old]
 
-    def abort(store):  # pylint: disable=unused-argument
+    def abort(store, args):  # pylint: disable=unused-argument
         raise RuntimeError("WASM abort called")
 
-    runtime = pywasm.Runtime(
-        module,
-        {"env": {"abort": abort, "sbrk": sbrk, "memory": memory}},
-    )
+    # Create function types for imports
+    sbrk_type = pywasm.FuncType([pywasm.ValType.i32()], [pywasm.ValType.i32()])
+    abort_type = pywasm.FuncType([], [])
+    
+    # Allocate host functions
+    sbrk_func = runtime.allocate_func_host(sbrk_type, sbrk)
+    abort_func = runtime.allocate_func_host(abort_type, abort)
+    
+    runtime.imports = {"env": {"abort": abort_func, "sbrk": sbrk_func, "memory": memory_extern}}
+    mod_inst = runtime.instance(module)
 
     try:
-        runtime.exec(DITER_EXPORTS["ctor"], [])
+        runtime.invocate(mod_inst, DITER_EXPORTS["ctor"], [])
     except Exception:
         # ctor is optional for this module
         pass
 
-    return _DiterRuntime(runtime=runtime, memory=memory, heap_ptr=heap_base)
+    return _DiterRuntime(runtime=runtime, mod_inst=mod_inst, memory=memory, heap_ptr=heap_base)
 
 
 def _write_key(runtime: _DiterRuntime, key_hex: str) -> None:
-    ptr = runtime.runtime.exec(DITER_EXPORTS["set_key"], [0, 40])
+    ptr = runtime.runtime.invocate(runtime.mod_inst, DITER_EXPORTS["set_key"], [0, 40])[0]
     key_hex = _clean_hex(key_hex).lower().ljust(40, "0")[:40]
     for i in range(10):
         chunk = key_hex[i * 4:(i + 1) * 4].rjust(4, "0")
@@ -212,28 +220,29 @@ def decode_diter_bytes(
 
     rt = runtime.runtime
     mem = runtime.memory.data
+    mod_inst = runtime.mod_inst
 
-    rt.exec(DITER_EXPORTS["init"], [])
-    dict_ptr = rt.exec(DITER_EXPORTS["load_dict"], [len(params.b)])
+    rt.invocate(mod_inst, DITER_EXPORTS["init"], [])
+    dict_ptr = rt.invocate(mod_inst, DITER_EXPORTS["load_dict"], [len(params.b)])[0]
     mem[dict_ptr:dict_ptr + len(params.b)] = params.b
-    rt.exec(DITER_EXPORTS["pump"], [])
+    rt.invocate(mod_inst, DITER_EXPORTS["pump"], [])
 
     output = bytearray()
     for offset in range(0, len(binz_bytes), 10240):
         chunk = binz_bytes[offset:offset + 10240]
         if not chunk:
             continue
-        chunk_ptr = rt.exec(DITER_EXPORTS["load_chunk"], [len(chunk)])
+        chunk_ptr = rt.invocate(mod_inst, DITER_EXPORTS["load_chunk"], [len(chunk)])[0]
         mem[chunk_ptr:chunk_ptr + len(chunk)] = chunk
 
-        has_output = rt.exec(DITER_EXPORTS["pump"], [])
+        has_output = rt.invocate(mod_inst, DITER_EXPORTS["pump"], [])[0]
         while has_output:
-            out_ptr = rt.exec(DITER_EXPORTS["out_ptr"], [])
-            out_len = rt.exec(DITER_EXPORTS["out_len"], [])
+            out_ptr = rt.invocate(mod_inst, DITER_EXPORTS["out_ptr"], [])[0]
+            out_len = rt.invocate(mod_inst, DITER_EXPORTS["out_len"], [])[0]
             if out_len:
                 output.extend(mem[out_ptr:out_ptr + out_len])
-            rt.exec(DITER_EXPORTS["out_advance"], [])
-            has_output = rt.exec(DITER_EXPORTS["pump"], [])
+            rt.invocate(mod_inst, DITER_EXPORTS["out_advance"], [])
+            has_output = rt.invocate(mod_inst, DITER_EXPORTS["pump"], [])[0]
 
     return bytes(output)
 
