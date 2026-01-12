@@ -236,7 +236,8 @@
       "error_params_not_found": "Error: params file not found: {path}",
       "error_decode_failed": "Error: DITER decode failed: {error}",
       "decoded_bytes": "Decoded {count:,} bytes",
-      "saved_to": "Saved to: {path}"
+      "saved_to": "Saved to: {path}",
+      "decoded": "Successfully decoded to: {path}"
     },
     "inspect": {
       "inspecting": "Inspecting: {name}",

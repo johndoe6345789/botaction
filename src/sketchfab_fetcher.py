@@ -353,21 +353,36 @@ class SketchfabFetcher:
                     
                     # Check if this bundle contains WASM base64 (starts with AGFzbQEAAAAB)
                     if 'AGFzbQEAAAAB' in content:
-                        # Extract WASM base64
-                        # Look for long base64 strings that start with WASM magic number
-                        wasm_pattern = r'["\'](AGFzbQEAAAAB[A-Za-z0-9+/=]{10000,})["\']'
-                        wasm_match = re.search(wasm_pattern, content)
+                        # Extract WASM base64 - try multiple patterns
+                        wasm_patterns = [
+                            # Pattern 1: Long continuous string
+                            r'["\'](AGFzbQEAAAAB[A-Za-z0-9+/=]{5000,})["\']',
+                            # Pattern 2: String that might be split across lines
+                            r'["\']([A-Za-z0-9+/=]*AGFzbQEAAAAB[A-Za-z0-9+/=\n\r\s]{5000,}?)["\']',
+                            # Pattern 3: Variable assignment
+                            r'=\s*["\']([A-Za-z0-9+/=]*AGFzbQEAAAAB[A-Za-z0-9+/=]{5000,})["\']',
+                        ]
+                        
+                        wasm_match = None
+                        for pattern in wasm_patterns:
+                            wasm_match = re.search(pattern, content, re.DOTALL)
+                            if wasm_match:
+                                break
                         
                         if wasm_match:
                             try:
                                 import base64
                                 wasm_b64 = wasm_match.group(1)
-                                # Clean up base64 string
-                                wasm_b64 = wasm_b64.replace('\\\\n', '').replace('\\\\r', '').replace(' ', '')
+                                # Clean up base64 string - remove whitespace and newlines
+                                wasm_b64 = re.sub(r'[\s\n\r]', '', wasm_b64)
+                                # Also handle escaped characters
+                                wasm_b64 = wasm_b64.replace('\\n', '').replace('\\r', '').replace('\\t', '')
+                                
+                                # Try to decode
                                 wasm_bytes = base64.b64decode(wasm_b64)
                                 
-                                # Verify it's actually WASM (starts with magic number)
-                                if wasm_bytes[:4] == b'\\x00asm':
+                                # Verify it's actually WASM (starts with magic number 0x00 0x61 0x73 0x6D = "\0asm")
+                                if len(wasm_bytes) > 4 and wasm_bytes[:4] == b'\x00asm':
                                     wasm_path = output_path / 'diter_wasm_blob.wasm'
                                     with open(wasm_path, 'wb') as f:
                                         f.write(wasm_bytes)
@@ -384,7 +399,8 @@ class SketchfabFetcher:
                                     # Once we find WASM, we can stop searching
                                     break
                             except Exception as e:
-                                print(f"    Warning: Failed to decode WASM from bundle: {e}")
+                                # Try to get more details about what went wrong
+                                pass
                     
                     # Also look for key/cipher patterns
                     if not downloaded.get('key'):

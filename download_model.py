@@ -143,6 +143,28 @@ Examples:
             if not key_source.exists():
                 key_source = Path(args.output_dir) / "diter_standalone.js"
             
+            # Download required JS bundles for Node decoder
+            js_dir = Path("js_downloads/remote")
+            js_dir.mkdir(parents=True, exist_ok=True)
+            
+            required_bundles = [
+                "ec580af0b531503f94c740ca2873c32e-v2.js",
+                "5bcaa88525fab96faffe19e1ce66716c-v2.js", 
+                "7aa463e7a4f2c770ab2436d6def75af2-v2.js",
+                "a25387388d9ea5501c87029166d396ac-v2.js",
+            ]
+            
+            # Check if bundles exist in archive and copy them
+            archive_js = Path("archive/diter/js_downloads/remote")
+            if archive_js.exists():
+                for bundle in required_bundles:
+                    src = archive_js / bundle
+                    dst = js_dir / bundle
+                    if src.exists() and not dst.exists():
+                        import shutil
+                        shutil.copy(src, dst)
+                print(f"\n📦 Copied JS bundles for Node.js decoder")
+            
             # If WASM/key files don't exist, try to download them
             if not wasm_path.exists() or not key_source.exists():
                 print("\n📥 Downloading DITER decoder files...")
@@ -152,32 +174,62 @@ Examples:
                 if diter_files.get('key'):
                     key_source = Path(diter_files['key'])
             
+            
             print(f"  Input: {binz_path.name}")
             print(f"  Params: {params_path.name}")
             print(f"  Output: {osgjs_path.name}")
             
-            if not wasm_path.exists():
-                print(f"\n❌ Error: {wasm_path} not found")
-                print(f"   Could not download WASM decoder from Sketchfab")
-                print(f"   Fallback: Copy from archive/diter/downloads/diter_wasm_blob.wasm")
+            # Use Node.js decoder (much faster and more reliable than Python)
+            import subprocess
+            import shutil
+            
+            # Check if node is available
+            node_path = shutil.which("node")
+            if not node_path:
+                print(f"\n❌ Error: Node.js not found")
+                print(f"   Please install Node.js to use DITER decoder")
+                print(f"   Or use the C decoder: cmake . && make")
                 return 1
             
-            if not key_source.exists():
-                print(f"\n❌ Error: {key_source} not found")
-                print(f"   Could not download key file from Sketchfab")
-                print(f"   Fallback: Copy from archive/diter/downloads/diter_standalone_deob.js")
+            # Copy decoder script from archive
+            script_path = Path("scripts/diter_decode.js")
+            if not script_path.exists():
+                archive_script = Path("archive/diter/scripts/diter_decode.js")
+                if archive_script.exists():
+                    script_path.parent.mkdir(exist_ok=True)
+                    shutil.copy(archive_script, script_path)
+                    print(f"   ✓ Copied decoder script from archive")
+                else:
+                    print(f"\n❌ Error: DITER decoder script not found at {archive_script}")
+                    return 1
+            
+            # Run Node.js decoder
+            cmd = [
+                node_path,
+                str(script_path),
+                "--binz", str(binz_path),
+                "--params", str(params_path),
+                "--out", str(osgjs_path),
+            ]
+            
+            print(f"\n🔄 Running Node.js DITER decoder...")
+            try:
+                result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+                if result.stdout:
+                    print(result.stdout)
+                
+                if osgjs_path.exists():
+                    decoded_size = osgjs_path.stat().st_size
+                    print(f"\n✓ Decoded {decoded_size:,} bytes")
+                    osgjs_files = [osgjs_path]
+                else:
+                    print(f"\n❌ Error: Decoder did not create output file")
+                    return 1
+            except subprocess.CalledProcessError as e:
+                print(f"\n❌ Error: DITER decode failed")
+                if e.stderr:
+                    print(e.stderr)
                 return 1
-            
-            decoded_size = decode_diter_file(
-                binz_path,
-                params_path,
-                osgjs_path,
-                wasm_path=wasm_path,
-                key_source=key_source,
-            )
-            
-            print(f"\n✓ Decoded {decoded_size:,} bytes")
-            osgjs_files = [osgjs_path]
         else:
             print("\n⚠ Python DITER decoder (pywasm) is very slow (5-10+ minutes).")
             print("  For faster decoding, use one of these options:")
