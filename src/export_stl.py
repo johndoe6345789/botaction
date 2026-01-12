@@ -1,17 +1,101 @@
 #!/usr/bin/env python3
 """
-Export Sketchfab OSGJS geometry to STL format.
+Export Sketchfab OSGJS geometry to STL format with optional mesh repair.
 """
 
 from __future__ import annotations
 
 import struct
 from pathlib import Path
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Tuple, Optional
 
 import numpy as np
 
 from .osgjs_decoder import decode_scene_to_triangles
+
+
+def repair_mesh(triangles: List[np.ndarray], verbose: bool = False) -> List[np.ndarray]:
+    """
+    Repair a triangle mesh to make it watertight and printable.
+
+    Uses trimesh library to:
+    - Merge duplicate vertices
+    - Remove degenerate triangles
+    - Fill holes
+    - Fix winding order (normals)
+    - Remove unreferenced vertices
+
+    Args:
+        triangles: List of triangles, each as (3, 3) numpy array of vertices
+        verbose: Print repair statistics
+
+    Returns:
+        Repaired list of triangles
+    """
+    try:
+        import trimesh
+    except ImportError:
+        raise ImportError("trimesh is required for mesh repair. Install with: pip install trimesh")
+
+    if not triangles:
+        return triangles
+
+    # Convert triangle list to vertices and faces arrays
+    tri_array = np.array(triangles, dtype=np.float64)
+    num_triangles = tri_array.shape[0]
+
+    # Reshape to (N*3, 3) vertices
+    vertices = tri_array.reshape(-1, 3)
+    # Create faces as indices into vertices: [[0,1,2], [3,4,5], ...]
+    faces = np.arange(num_triangles * 3).reshape(-1, 3)
+
+    # Create trimesh object
+    mesh = trimesh.Trimesh(vertices=vertices, faces=faces, process=False)
+
+    if verbose:
+        print(f"Before repair: {len(mesh.vertices)} vertices, {len(mesh.faces)} faces")
+        print(f"  Watertight: {mesh.is_watertight}")
+        print(f"  Volume: {mesh.volume if mesh.is_watertight else 'N/A (not watertight)'}")
+
+    # Merge duplicate vertices (within tolerance)
+    mesh.merge_vertices()
+
+    # Remove degenerate faces (zero area)
+    mesh.remove_degenerate_faces()
+
+    # Remove duplicate faces
+    mesh.remove_duplicate_faces()
+
+    # Remove unreferenced vertices
+    mesh.remove_unreferenced_vertices()
+
+    # Remove infinite values
+    mesh.remove_infinite_values()
+
+    # Fix face winding to be consistent
+    trimesh.repair.fix_winding(mesh)
+
+    # Fix inverted faces (normals pointing inward)
+    trimesh.repair.fix_inversion(mesh)
+
+    # Fill holes to make watertight
+    trimesh.repair.fill_holes(mesh)
+
+    if verbose:
+        print(f"After repair: {len(mesh.vertices)} vertices, {len(mesh.faces)} faces")
+        print(f"  Watertight: {mesh.is_watertight}")
+        if mesh.is_watertight:
+            print(f"  Volume: {mesh.volume:.2f}")
+
+    # Convert back to triangle list
+    repaired_triangles = []
+    for face in mesh.faces:
+        v0 = mesh.vertices[face[0]].astype(np.float32)
+        v1 = mesh.vertices[face[1]].astype(np.float32)
+        v2 = mesh.vertices[face[2]].astype(np.float32)
+        repaired_triangles.append(np.array([v0, v1, v2]))
+
+    return repaired_triangles
 
 
 class ModelSTLExporter:
@@ -36,7 +120,34 @@ class ModelSTLExporter:
         self.triangles, self.vertex_count = decode_scene_to_triangles(osgjs_path, file_map)
         return self
 
-    def export_stl(self, output_path: str | Path) -> Path:
+    def repair(self, verbose: bool = False) -> "ModelSTLExporter":
+        """
+        Repair the mesh to make it watertight and printable.
+
+        Args:
+            verbose: Print repair statistics
+
+        Returns:
+            self for method chaining
+        """
+        self.triangles = repair_mesh(self.triangles, verbose=verbose)
+        return self
+
+    def export_stl(self, output_path: str | Path, repair: bool = False, verbose: bool = False) -> Path:
+        """
+        Export triangles to binary STL format.
+
+        Args:
+            output_path: Path to write STL file
+            repair: If True, repair mesh before export (requires trimesh)
+            verbose: Print repair statistics if repair=True
+
+        Returns:
+            Path to written file
+        """
+        if repair:
+            self.repair(verbose=verbose)
+
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "wb") as f:

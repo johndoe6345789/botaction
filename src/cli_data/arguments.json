@@ -67,7 +67,9 @@
         {"name": "--params", "help": "Path to params.json for DITER decode (STL)"},
         {"name": "--force-decode", "action": "store_true", "help": "Force re-decode file.binz with DITER"},
         {"name": "--decoder", "default": "node", "choices": ["node", "python", "c"], "help": "DITER decoder to use"},
-        {"name": "--screenshot", "help": "Output PNG path for STL preview"}
+        {"name": "--screenshot", "help": "Output PNG path for STL preview"},
+        {"name": "--repair", "action": "store_true", "help": "Repair mesh to make it watertight (requires trimesh)"},
+        {"name": "--verbose", "action": "store_true", "help": "Show verbose output (repair statistics)"}
       ]
     },
     "demo": {

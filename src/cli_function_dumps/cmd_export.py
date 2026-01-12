@@ -175,7 +175,14 @@ def cmd_export(args):
     try:
         exporter = ModelSTLExporter()
         exporter.load_from_osgjs(osgjs_path, [geometry_to_use])
-        exporter.export_stl(output_path)
+
+        repair = getattr(args, 'repair', False)
+        verbose = getattr(args, 'verbose', False)
+
+        if repair:
+            print("Repairing mesh to make it watertight...")
+
+        exporter.export_stl(output_path, repair=repair, verbose=verbose)
 
         print(f"{symbols['checkmark']} {msgs.get('stl_exported', 'STL saved to: {path}').format(path=output_path)}")
         print(f"  {msgs['vertices'].format(count=exporter.vertex_count)}")

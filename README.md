@@ -34,7 +34,7 @@ This project implements a complete pipeline for converting encrypted Sketchfab 3
 ### Installation
 
 ```bash
-pip install requests numpy pycryptodome matplotlib
+pip install requests numpy pycryptodome matplotlib trimesh
 ```
 
 ### Convert a Sketchfab Model to STL
@@ -57,6 +57,14 @@ python -m src export \
     --params downloads/model_params.json \
     --output model.stl \
     --screenshot preview.png
+
+# Recommended: Repair mesh for 3D printing (makes it watertight)
+python -m src export \
+    --osgjs downloads/model.osgjs.json \
+    --geometry downloads/model_file.binz \
+    --params downloads/model_params.json \
+    --output model.stl \
+    --repair --verbose
 ```
 
 ### GUI Application
@@ -143,6 +151,29 @@ exporter.render_preview('preview.png')  # Optional
 - 80-byte ASCII header
 - 4-byte triangle count (little-endian uint32)
 - For each triangle: normal vector (3 floats) + 3 vertices (9 floats) + attribute (2 bytes)
+
+### Stage 5: Mesh Repair (optional)
+
+The raw exported mesh may have artifacts or not be watertight (required for 3D printing). Use the `--repair` flag or call the repair method directly:
+
+```python
+from src.export_stl import ModelSTLExporter
+
+exporter = ModelSTLExporter()
+exporter.load_from_osgjs('model.osgjs.json', ['model_file.binz'])
+exporter.repair(verbose=True)  # Fix mesh issues
+exporter.export_stl('output.stl')
+
+# Or combine in one call:
+exporter.export_stl('output.stl', repair=True, verbose=True)
+```
+
+**Repair operations (using trimesh):**
+- Merge duplicate vertices
+- Remove degenerate/duplicate faces
+- Fix face winding (consistent normals)
+- Fill holes to make watertight
+- Remove infinite values
 
 ## File Formats
 
