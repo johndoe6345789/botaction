@@ -81,6 +81,44 @@ rapidjson::Document load_json(const std::string &path) {
   return doc;
 }
 
+void ensure_memory(VmState &state, size_t size) {
+  if (state.memory.size() < size) {
+    state.memory.resize(size, 0);
+  }
+}
+
+void load_data_segments(VmState &state, const std::string &path) {
+  auto doc = load_json(path);
+  if (!doc.IsObject()) {
+    return;
+  }
+  auto segs_it = doc.FindMember("segments");
+  if (segs_it == doc.MemberEnd() || !segs_it->value.IsArray()) {
+    return;
+  }
+  for (const auto &seg : segs_it->value.GetArray()) {
+    if (!seg.IsObject()) {
+      continue;
+    }
+    auto off_it = seg.FindMember("offset");
+    auto bytes_it = seg.FindMember("bytes");
+    if (off_it == seg.MemberEnd() || bytes_it == seg.MemberEnd()) {
+      continue;
+    }
+    if (!off_it->value.IsUint64() || !bytes_it->value.IsArray()) {
+      continue;
+    }
+    uint64_t offset = off_it->value.GetUint64();
+    uint64_t base = state.linear_mem_base + offset;
+    ensure_memory(state, base + bytes_it->value.Size());
+    for (rapidjson::SizeType i = 0; i < bytes_it->value.Size(); i++) {
+      if (bytes_it->value[i].IsUint()) {
+        state.memory[base + i] = static_cast<uint8_t>(bytes_it->value[i].GetUint());
+      }
+    }
+  }
+}
+
 std::string op_from_text(const std::string &text) {
   if (!text.empty() && text.back() == ':') {
     return "label";
@@ -277,12 +315,6 @@ Value parse_operand(const std::unordered_map<std::string, Value> &regs,
     }
   }
   return {};
-}
-
-void ensure_memory(VmState &state, size_t size) {
-  if (state.memory.size() < size) {
-    state.memory.resize(size, 0);
-  }
 }
 
 void store_u32(VmState &state, uint64_t addr, uint32_t value) {
@@ -647,6 +679,7 @@ DiterVm* diter_vm_create(const char* runbook_path) {
   try {
     vm->state = load_workflow(runbook_path);
     init_instance_layout(vm->state);
+    load_data_segments(vm->state, "build/diter_core_data_segments.json");
   } catch (...) {
     delete vm;
     return nullptr;

@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 def parse_segment_bytes(text: str, name: str) -> list[int]:
-    match = re.search(rf"{name}\\[\\]\\s*=\\s*\\{{(.*?)\\}};", text, re.S)
+    match = re.search(rf"{re.escape(name)}\[\]\s*=\s*\{{(.*?)\}};", text, re.S)
     if not match:
         raise ValueError(f"Missing segment {name}")
     blob = match.group(1)
