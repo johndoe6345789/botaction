@@ -55,8 +55,8 @@ Examples:
     print("Sketchfab Model Downloader & Converter")
     print("=" * 70)
 
-# 1. Fetch
-fetcher = SketchfabFetcher()
+    # 1. Fetch
+    fetcher = SketchfabFetcher()
     result = fetcher.fetch_model(args.url)
     downloaded = fetcher.download_model_files(result['model_id'], args.output_dir)
 
@@ -69,25 +69,25 @@ fetcher = SketchfabFetcher()
     # 2. Decrypt the .binz file using DITER if needed
     model_id = result['model_id']
     osgjs_files = list(Path(args.output_dir).glob(f'{model_id}*.osgjs.json'))
-    # Check if it's valid JSON
-    osgjs_path = osgjs_files[0]
-    try:
-        import json
-        with open(osgjs_path, 'r') as f:
-            json.load(f)
-        print(f"\n✓ Found valid OSGJS file: {osgjs_path.name}")
-    except:
-        print(f"\n⚠ OSGJS file exists but is corrupted, re-decoding...")
-        osgjs_files = []
 
-if not osgjs_files and downloaded.get('binz') and downloaded.get('params'):
-    print("\n" + "=" * 70)
-    print("DITER Decryption Needed")
-    print("=" * 70)
-    print("The .osgjs.json file needs to be decrypted from the .binz file.")
-    
-    if FORCE_DITER:
-        print("\n🔄 Attempting DITER decoding (this may take several minutes)...")
+    if osgjs_files:
+        # Check if it's valid JSON
+        osgjs_path = osgjs_files[0]
+        try:
+            import json
+            with open(osgjs_path, 'r') as f:
+                json.load(f)
+            print(f"\n✓ Found valid OSGJS file: {osgjs_path.name}")
+        except:
+            print(f"\n⚠ OSGJS file exists but is corrupted, re-decoding...")
+            osgjs_files = []
+
+    if not osgjs_files and downloaded.get('binz') and downloaded.get('params'):
+        print("\n" + "=" * 70)
+        print("DITER Decryption Needed")
+        print("=" * 70)
+        print("The .osgjs.json file needs to be decrypted from the .binz file.")
+        
         if args.decode_diter:
             print("\n🔄 Attempting DITER decoding (this may take several minutes)...")
             try:
@@ -157,22 +157,22 @@ if not osgjs_files and downloaded.get('binz') and downloaded.get('params'):
             return 0
     elif not osgjs_files:
         print("\n❌ Error: No OSGJS file found")
-        return 1    print(f"OSGJS: {osgjs_path.name}")
-    print(f"Geometry: {Path(downloaded['model_file']).name}")
-    
-    exporter = ModelSTLExporter()
-    exporter.load_from_osgjs(
-        str(osgjs_path),
-        [downloaded['model_file']]
-    )
-    exporter.export_stl('output.stl')
-    
-    print(f"\n✓ Success! Exported to: output.stl")
-    print(f"  Vertices: {exporter.vertex_count:,}")
-    print(f"  Triangles: {len(exporter.triangles):,}")
-else:
-    print("❌ Error: model_file.binz not found")
-    exit(1)
+        return 1
+
+    # 3. Export to STL
+    print("\n" + "=" * 70)
+    print("Exporting to STL")
+    print("=" * 70)
+
+    if 'model_file' in downloaded:
+        print(f"OSGJS: {osgjs_path.name}")
+        print(f"Geometry: {Path(downloaded['model_file']).name}")
+        
+        exporter = ModelSTLExporter()
+        exporter.load_from_osgjs(
+            str(osgjs_path),
+            [downloaded['model_file']]
+        )
         exporter.export_stl(args.output, repair=args.repair, verbose=args.repair)
         
         print(f"\n✓ Success! Exported to: {args.output}")
