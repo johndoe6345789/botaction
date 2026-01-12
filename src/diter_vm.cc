@@ -3,6 +3,7 @@
 #include <rapidjson/document.h>
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -36,6 +37,7 @@ struct Frame {
   std::string func;
   size_t pc = 0;
   std::unordered_map<std::string, Value> regs;
+  std::unordered_map<std::string, std::vector<Value>> aggregates;
   std::string last_label;
   std::string prev_label;
   std::string ret_dest;
@@ -267,6 +269,8 @@ size_t type_size_bytes(const std::string &type) {
   if (type == "i32") return 4;
   if (type == "i64") return 8;
   if (type == "ptr") return 8;
+  if (type == "float") return 4;
+  if (type == "double") return 8;
   if (!type.empty() && type[0] == '[') {
     auto x = type.find('x');
     auto end = type.find(']');
@@ -278,6 +282,90 @@ size_t type_size_bytes(const std::string &type) {
     }
   }
   return 8;
+}
+
+uint64_t type_bit_mask(const std::string &type) {
+  size_t size = type_size_bytes(type);
+  if (size >= 8) {
+    return ~0ull;
+  }
+  return (1ull << (size * 8)) - 1;
+}
+
+int64_t sign_extend(uint64_t value, const std::string &type) {
+  size_t bits = type_size_bytes(type) * 8;
+  if (bits >= 64) {
+    return static_cast<int64_t>(value);
+  }
+  uint64_t mask = (1ull << bits) - 1;
+  uint64_t v = value & mask;
+  uint64_t sign_bit = 1ull << (bits - 1);
+  if (v & sign_bit) {
+    uint64_t extend = ~mask;
+    v |= extend;
+  }
+  return static_cast<int64_t>(v);
+}
+
+Value parse_float_operand(const std::unordered_map<std::string, Value> &regs,
+                          const std::string &token,
+                          const std::string &type) {
+  if (token.empty()) {
+    return {};
+  }
+  if (token[0] == '%') {
+    auto it = regs.find(token);
+    if (it != regs.end()) {
+      return it->second;
+    }
+    return {};
+  }
+  if (token.rfind("0x", 0) == 0) {
+    uint64_t bits = std::strtoull(token.c_str(), nullptr, 0);
+    if (type == "float") {
+      return {static_cast<uint32_t>(bits)};
+    }
+    return {bits};
+  }
+  char *end = nullptr;
+  double d = std::strtod(token.c_str(), &end);
+  if (end && end != token.c_str()) {
+    if (type == "float") {
+      float f = static_cast<float>(d);
+      uint32_t bits = 0;
+      std::memcpy(&bits, &f, sizeof(bits));
+      return {bits};
+    }
+    uint64_t bits = 0;
+    std::memcpy(&bits, &d, sizeof(bits));
+    return {bits};
+  }
+  return {};
+}
+
+double value_to_double(Value value, const std::string &type) {
+  if (type == "float") {
+    float f = 0.0f;
+    uint32_t bits = static_cast<uint32_t>(value.u & 0xffffffffu);
+    std::memcpy(&f, &bits, sizeof(f));
+    return static_cast<double>(f);
+  }
+  double d = 0.0;
+  uint64_t bits = value.u;
+  std::memcpy(&d, &bits, sizeof(d));
+  return d;
+}
+
+Value double_to_value(double d, const std::string &type) {
+  if (type == "float") {
+    float f = static_cast<float>(d);
+    uint32_t bits = 0;
+    std::memcpy(&bits, &f, sizeof(bits));
+    return {bits};
+  }
+  uint64_t bits = 0;
+  std::memcpy(&bits, &d, sizeof(bits));
+  return {bits};
 }
 
 std::string normalize_label(const std::string &label) {
@@ -355,7 +443,7 @@ void init_instance_layout(VmState &state) {
   store_u64(state, state.env_mem_addr + 8, state.linear_mem_base + state.linear_mem_size);
   store_u32(state, state.env_mem_addr + 16, 65536);
   store_u64(state, state.env_mem_addr + 24, state.linear_mem_size / 65536);
-  store_u64(state, state.env_mem_addr + 32, 8192);
+  store_u64(state, state.env_mem_addr + 32, 65536);
   store_u64(state, state.env_mem_addr + 40, state.linear_mem_size);
   state.memory[state.env_mem_addr + 48] = 0;
 
@@ -576,9 +664,10 @@ void execute_instruction(VmState &state, Frame &frame, const Instruction &inst) 
 
   if (inst.op == "add" || inst.op == "sub" || inst.op == "and" || inst.op == "xor") {
     // "%x = add i32 %a, %b"
-    if (tokens.size() < 5) return;
-    Value lhs = parse_operand(frame.regs, tokens[3]);
-    std::string rhs_token = tokens[4];
+    if (tokens.size() < 6) return;
+    std::string type = strip_punct(tokens[3]);
+    Value lhs = parse_operand(frame.regs, strip_punct(tokens[4]));
+    std::string rhs_token = tokens[5];
     if (rhs_token.back() == ',') rhs_token.pop_back();
     Value rhs = parse_operand(frame.regs, rhs_token);
     uint64_t result = 0;
@@ -586,15 +675,16 @@ void execute_instruction(VmState &state, Frame &frame, const Instruction &inst) 
     if (inst.op == "sub") result = lhs.u - rhs.u;
     if (inst.op == "and") result = lhs.u & rhs.u;
     if (inst.op == "xor") result = lhs.u ^ rhs.u;
-    frame.regs[inst.dest] = {result};
+    frame.regs[inst.dest] = {result & type_bit_mask(type)};
     return;
   }
 
   if (inst.op == "mul" || inst.op == "or" || inst.op == "shl" ||
       inst.op == "lshr" || inst.op == "ashr") {
-    if (tokens.size() < 5) return;
-    Value lhs = parse_operand(frame.regs, tokens[3]);
-    std::string rhs_token = tokens[4];
+    if (tokens.size() < 6) return;
+    std::string type = strip_punct(tokens[3]);
+    Value lhs = parse_operand(frame.regs, strip_punct(tokens[4]));
+    std::string rhs_token = tokens[5];
     if (rhs_token.back() == ',') rhs_token.pop_back();
     Value rhs = parse_operand(frame.regs, rhs_token);
     uint64_t result = 0;
@@ -602,8 +692,11 @@ void execute_instruction(VmState &state, Frame &frame, const Instruction &inst) 
     if (inst.op == "or") result = lhs.u | rhs.u;
     if (inst.op == "shl") result = lhs.u << rhs.u;
     if (inst.op == "lshr") result = lhs.u >> rhs.u;
-    if (inst.op == "ashr") result = static_cast<uint64_t>(static_cast<int64_t>(lhs.u) >> rhs.u);
-    frame.regs[inst.dest] = {result};
+    if (inst.op == "ashr") {
+      int64_t signed_lhs = sign_extend(lhs.u, type);
+      result = static_cast<uint64_t>(signed_lhs >> rhs.u);
+    }
+    frame.regs[inst.dest] = {result & type_bit_mask(type)};
     return;
   }
 
@@ -625,7 +718,12 @@ void execute_instruction(VmState &state, Frame &frame, const Instruction &inst) 
   if (inst.op == "sext" || inst.op == "trunc") {
     if (tokens.size() < 4) return;
     Value val = parse_operand(frame.regs, tokens[3]);
-    frame.regs[inst.dest] = val;
+    if (tokens.size() >= 6) {
+      std::string dst_type = strip_punct(tokens.back());
+      frame.regs[inst.dest] = {val.u & type_bit_mask(dst_type)};
+    } else {
+      frame.regs[inst.dest] = val;
+    }
     return;
   }
 
@@ -646,10 +744,11 @@ void execute_instruction(VmState &state, Frame &frame, const Instruction &inst) 
 
   if (inst.op == "icmp") {
     // "%x = icmp eq i32 %a, %b"
-    if (tokens.size() < 6) return;
-    std::string pred = tokens[2];
-    Value lhs = parse_operand(frame.regs, tokens[4]);
-    std::string rhs_token = tokens[5];
+    if (tokens.size() < 7) return;
+    std::string pred = tokens[3];
+    std::string type = strip_punct(tokens[4]);
+    Value lhs = parse_operand(frame.regs, strip_punct(tokens[5]));
+    std::string rhs_token = tokens[6];
     if (rhs_token.back() == ',') rhs_token.pop_back();
     Value rhs = parse_operand(frame.regs, rhs_token);
     uint64_t result = 0;
@@ -659,12 +758,146 @@ void execute_instruction(VmState &state, Frame &frame, const Instruction &inst) 
     else if (pred == "ugt") result = lhs.u > rhs.u;
     else if (pred == "ule") result = lhs.u <= rhs.u;
     else if (pred == "uge") result = lhs.u >= rhs.u;
-    else if (pred == "slt") result = static_cast<int64_t>(lhs.u) < static_cast<int64_t>(rhs.u);
-    else if (pred == "sgt") result = static_cast<int64_t>(lhs.u) > static_cast<int64_t>(rhs.u);
-    else if (pred == "sle") result = static_cast<int64_t>(lhs.u) <= static_cast<int64_t>(rhs.u);
-    else if (pred == "sge") result = static_cast<int64_t>(lhs.u) >= static_cast<int64_t>(rhs.u);
+    else if (pred == "slt") result = sign_extend(lhs.u, type) < sign_extend(rhs.u, type);
+    else if (pred == "sgt") result = sign_extend(lhs.u, type) > sign_extend(rhs.u, type);
+    else if (pred == "sle") result = sign_extend(lhs.u, type) <= sign_extend(rhs.u, type);
+    else if (pred == "sge") result = sign_extend(lhs.u, type) >= sign_extend(rhs.u, type);
     frame.regs[inst.dest] = {result};
     return;
+  }
+
+  if (inst.op == "udiv" || inst.op == "sdiv" || inst.op == "srem") {
+    if (tokens.size() < 6) return;
+    std::string type = strip_punct(tokens[3]);
+    Value lhs = parse_operand(frame.regs, strip_punct(tokens[4]));
+    std::string rhs_token = tokens[5];
+    if (rhs_token.back() == ',') rhs_token.pop_back();
+    Value rhs = parse_operand(frame.regs, rhs_token);
+    uint64_t result = 0;
+    if (rhs.u == 0) {
+      result = 0;
+    } else if (inst.op == "udiv") {
+      result = (lhs.u & type_bit_mask(type)) / (rhs.u & type_bit_mask(type));
+    } else if (inst.op == "sdiv") {
+      int64_t a = sign_extend(lhs.u, type);
+      int64_t b = sign_extend(rhs.u, type);
+      result = static_cast<uint64_t>(a / b);
+    } else if (inst.op == "srem") {
+      int64_t a = sign_extend(lhs.u, type);
+      int64_t b = sign_extend(rhs.u, type);
+      result = static_cast<uint64_t>(a % b);
+    }
+    frame.regs[inst.dest] = {result & type_bit_mask(type)};
+    return;
+  }
+
+  if (inst.op == "fadd" || inst.op == "fsub" || inst.op == "fmul" || inst.op == "fdiv") {
+    if (tokens.size() < 6) return;
+    std::string type = strip_punct(tokens[3]);
+    Value lhs_val = parse_float_operand(frame.regs, strip_punct(tokens[4]), type);
+    std::string rhs_token = tokens[5];
+    if (rhs_token.back() == ',') rhs_token.pop_back();
+    Value rhs_val = parse_float_operand(frame.regs, rhs_token, type);
+    double lhs = value_to_double(lhs_val, type);
+    double rhs = value_to_double(rhs_val, type);
+    double result = 0.0;
+    if (inst.op == "fadd") result = lhs + rhs;
+    if (inst.op == "fsub") result = lhs - rhs;
+    if (inst.op == "fmul") result = lhs * rhs;
+    if (inst.op == "fdiv") result = lhs / rhs;
+    frame.regs[inst.dest] = double_to_value(result, type);
+    return;
+  }
+
+  if (inst.op == "fcmp") {
+    if (tokens.size() < 7) return;
+    std::string pred = tokens[3];
+    std::string type = strip_punct(tokens[4]);
+    Value lhs_val = parse_float_operand(frame.regs, strip_punct(tokens[5]), type);
+    std::string rhs_token = tokens[6];
+    if (rhs_token.back() == ',') rhs_token.pop_back();
+    Value rhs_val = parse_float_operand(frame.regs, rhs_token, type);
+    double lhs = value_to_double(lhs_val, type);
+    double rhs = value_to_double(rhs_val, type);
+    bool lhs_nan = std::isnan(lhs);
+    bool rhs_nan = std::isnan(rhs);
+    bool unordered = lhs_nan || rhs_nan;
+    uint64_t result = 0;
+    if (pred == "oeq") result = (!unordered) && (lhs == rhs);
+    else if (pred == "one") result = (!unordered) && (lhs != rhs);
+    else if (pred == "olt") result = (!unordered) && (lhs < rhs);
+    else if (pred == "ogt") result = (!unordered) && (lhs > rhs);
+    else if (pred == "ole") result = (!unordered) && (lhs <= rhs);
+    else if (pred == "oge") result = (!unordered) && (lhs >= rhs);
+    else if (pred == "ueq") result = unordered || (lhs == rhs);
+    else if (pred == "une") result = unordered || (lhs != rhs);
+    else if (pred == "ult") result = unordered || (lhs < rhs);
+    else if (pred == "ugt") result = unordered || (lhs > rhs);
+    else if (pred == "ule") result = unordered || (lhs <= rhs);
+    else if (pred == "uge") result = unordered || (lhs >= rhs);
+    else if (pred == "ord") result = !unordered;
+    else if (pred == "uno") result = unordered;
+    frame.regs[inst.dest] = {result};
+    return;
+  }
+
+  if (inst.op == "fptosi" || inst.op == "fptoui") {
+    if (tokens.size() < 6) return;
+    std::string src_type = strip_punct(tokens[3]);
+    std::string dst_type = strip_punct(tokens.back());
+    Value src_val = parse_float_operand(frame.regs, strip_punct(tokens[4]), src_type);
+    double value = value_to_double(src_val, src_type);
+    uint64_t result = 0;
+    if (inst.op == "fptosi") {
+      result = static_cast<uint64_t>(static_cast<int64_t>(value));
+    } else {
+      result = static_cast<uint64_t>(value);
+    }
+    frame.regs[inst.dest] = {result & type_bit_mask(dst_type)};
+    return;
+  }
+
+  if (inst.op == "sitofp" || inst.op == "uitofp") {
+    if (tokens.size() < 6) return;
+    std::string src_type = strip_punct(tokens[3]);
+    std::string dst_type = strip_punct(tokens.back());
+    Value src_val = parse_operand(frame.regs, strip_punct(tokens[4]));
+    double value = 0.0;
+    if (inst.op == "sitofp") {
+      value = static_cast<double>(sign_extend(src_val.u, src_type));
+    } else {
+      value = static_cast<double>(src_val.u & type_bit_mask(src_type));
+    }
+    frame.regs[inst.dest] = double_to_value(value, dst_type);
+    return;
+  }
+
+  if (inst.op == "extractvalue") {
+    std::string src_reg;
+    for (const auto &tok : tokens) {
+      if (!tok.empty() && tok[0] == '%' && tok != inst.dest) {
+        src_reg = strip_punct(tok);
+        break;
+      }
+    }
+    uint64_t index = 0;
+    if (!tokens.empty()) {
+      std::string idx_token = strip_punct(tokens.back());
+      index = std::strtoull(idx_token.c_str(), nullptr, 0);
+    }
+    if (!src_reg.empty()) {
+      auto it = frame.aggregates.find(src_reg);
+      if (it != frame.aggregates.end() && index < it->second.size()) {
+        frame.regs[inst.dest] = it->second[index];
+        return;
+      }
+    }
+    frame.regs[inst.dest] = {0};
+    return;
+  }
+
+  if (inst.op == "unreachable") {
+    throw std::runtime_error("VM unreachable");
   }
 
   if (inst.op == "phi") {
@@ -831,6 +1064,19 @@ void diter_vm_execute(DiterVm* vm) {
         continue;
       }
       if (callee == "wasm_rt_allocate_funcref_table") {
+        if (args.size() >= 3) {
+          Value table_ptr = parse_last_token(frame.regs, args[0]);
+          Value elements = parse_last_token(frame.regs, args[1]);
+          Value max_elements = parse_last_token(frame.regs, args[2]);
+          const uint64_t elem_size = 32;
+          uint64_t data_ptr = vm->state.heap_ptr;
+          uint64_t alloc_bytes = max_elements.u * elem_size;
+          vm->state.heap_ptr += alloc_bytes;
+          ensure_memory(vm->state, vm->state.heap_ptr + 16);
+          store_u64(vm->state, table_ptr.u + 0, data_ptr);
+          store_u32(vm->state, table_ptr.u + 8, static_cast<uint32_t>(max_elements.u));
+          store_u32(vm->state, table_ptr.u + 12, static_cast<uint32_t>(elements.u));
+        }
         if (!inst.dest.empty()) frame.regs[inst.dest] = {0};
         continue;
       }
@@ -851,6 +1097,16 @@ void diter_vm_execute(DiterVm* vm) {
         ensure_memory(vm->state, dest.u + len.u);
         std::memset(&vm->state.memory[dest.u], static_cast<int>(val.u & 0xff), len.u);
         if (!inst.dest.empty()) frame.regs[inst.dest] = {0};
+        continue;
+      }
+      if (callee.find("llvm.uadd.with.overflow.i64") != std::string::npos && args.size() >= 2) {
+        Value lhs = parse_last_token(frame.regs, args[0]);
+        Value rhs = parse_last_token(frame.regs, args[1]);
+        uint64_t sum = lhs.u + rhs.u;
+        uint64_t overflow = sum < lhs.u ? 1 : 0;
+        if (!inst.dest.empty()) {
+          frame.aggregates[inst.dest] = {Value{sum}, Value{overflow}};
+        }
         continue;
       }
 
@@ -891,6 +1147,54 @@ void diter_vm_execute(DiterVm* vm) {
         auto it = func.labels.find(target);
         if (it != func.labels.end()) {
           frame.pc = it->second;
+        }
+      }
+      continue;
+    }
+
+    if (inst.op == "switch") {
+      auto tokens = split_tokens(inst.text);
+      std::string type = tokens.size() > 2 ? strip_punct(tokens[2]) : "i32";
+      std::string value_token = tokens.size() > 3 ? strip_punct(tokens[3]) : "";
+      Value value = parse_operand(frame.regs, value_token);
+      std::string default_label;
+      auto label_pos = inst.text.find("label");
+      if (label_pos != std::string::npos) {
+        auto start = inst.text.find('%', label_pos);
+        if (start != std::string::npos) {
+          auto end = inst.text.find_first_of(" ,]", start);
+          default_label = inst.text.substr(start, end - start);
+        }
+      }
+      std::string target = default_label;
+      auto list_start = inst.text.find('[');
+      auto list_end = inst.text.rfind(']');
+      if (list_start != std::string::npos && list_end != std::string::npos && list_end > list_start) {
+        std::string list = inst.text.substr(list_start + 1, list_end - list_start - 1);
+        std::istringstream iss(list);
+        std::string tok;
+        while (iss >> tok) {
+          if (tok == type) {
+            std::string val_tok;
+            std::string label_tok;
+            if (!(iss >> val_tok)) break;
+            if (!(iss >> tok)) break;
+            if (tok != "label") continue;
+            if (!(iss >> label_tok)) break;
+            uint64_t case_val = std::strtoull(strip_punct(val_tok).c_str(), nullptr, 0);
+            if ((value.u & type_bit_mask(type)) == (case_val & type_bit_mask(type))) {
+              target = strip_punct(label_tok);
+              break;
+            }
+          }
+        }
+      }
+      if (!target.empty()) {
+        frame.prev_label = frame.last_label;
+        target = normalize_label(target);
+        auto it_label = func.labels.find(target);
+        if (it_label != func.labels.end()) {
+          frame.pc = it_label->second;
         }
       }
       continue;
@@ -991,6 +1295,19 @@ uint64_t diter_vm_call(DiterVm* vm, const char* func, const uint64_t* args, size
         continue;
       }
       if (callee == "wasm_rt_allocate_funcref_table") {
+        if (call_args.size() >= 3) {
+          Value table_ptr = parse_last_token(frame.regs, call_args[0]);
+          Value elements = parse_last_token(frame.regs, call_args[1]);
+          Value max_elements = parse_last_token(frame.regs, call_args[2]);
+          const uint64_t elem_size = 32;
+          uint64_t data_ptr = vm->state.heap_ptr;
+          uint64_t alloc_bytes = max_elements.u * elem_size;
+          vm->state.heap_ptr += alloc_bytes;
+          ensure_memory(vm->state, vm->state.heap_ptr + 16);
+          store_u64(vm->state, table_ptr.u + 0, data_ptr);
+          store_u32(vm->state, table_ptr.u + 8, static_cast<uint32_t>(max_elements.u));
+          store_u32(vm->state, table_ptr.u + 12, static_cast<uint32_t>(elements.u));
+        }
         if (!inst.dest.empty()) frame.regs[inst.dest] = {0};
         continue;
       }
@@ -1011,6 +1328,16 @@ uint64_t diter_vm_call(DiterVm* vm, const char* func, const uint64_t* args, size
         ensure_memory(vm->state, dest.u + len.u);
         std::memset(&vm->state.memory[dest.u], static_cast<int>(val.u & 0xff), len.u);
         if (!inst.dest.empty()) frame.regs[inst.dest] = {0};
+        continue;
+      }
+      if (callee.find("llvm.uadd.with.overflow.i64") != std::string::npos && call_args.size() >= 2) {
+        Value lhs = parse_last_token(frame.regs, call_args[0]);
+        Value rhs = parse_last_token(frame.regs, call_args[1]);
+        uint64_t sum = lhs.u + rhs.u;
+        uint64_t overflow = sum < lhs.u ? 1 : 0;
+        if (!inst.dest.empty()) {
+          frame.aggregates[inst.dest] = {Value{sum}, Value{overflow}};
+        }
         continue;
       }
       if (!callee.empty() && vm->state.functions.find(callee) != vm->state.functions.end()) {
@@ -1043,6 +1370,54 @@ uint64_t diter_vm_call(DiterVm* vm, const char* func, const uint64_t* args, size
         std::string true_label = tokens[4];
         std::string false_label = tokens[6];
         target = (cond.u != 0) ? true_label : false_label;
+      }
+      if (!target.empty()) {
+        frame.prev_label = frame.last_label;
+        target = normalize_label(target);
+        auto it_label = func_state.labels.find(target);
+        if (it_label != func_state.labels.end()) {
+          frame.pc = it_label->second;
+        }
+      }
+      continue;
+    }
+
+    if (inst.op == "switch") {
+      auto tokens = split_tokens(inst.text);
+      std::string type = tokens.size() > 2 ? strip_punct(tokens[2]) : "i32";
+      std::string value_token = tokens.size() > 3 ? strip_punct(tokens[3]) : "";
+      Value value = parse_operand(frame.regs, value_token);
+      std::string default_label;
+      auto label_pos = inst.text.find("label");
+      if (label_pos != std::string::npos) {
+        auto start = inst.text.find('%', label_pos);
+        if (start != std::string::npos) {
+          auto end = inst.text.find_first_of(" ,]", start);
+          default_label = inst.text.substr(start, end - start);
+        }
+      }
+      std::string target = default_label;
+      auto list_start = inst.text.find('[');
+      auto list_end = inst.text.rfind(']');
+      if (list_start != std::string::npos && list_end != std::string::npos && list_end > list_start) {
+        std::string list = inst.text.substr(list_start + 1, list_end - list_start - 1);
+        std::istringstream iss(list);
+        std::string tok;
+        while (iss >> tok) {
+          if (tok == type) {
+            std::string val_tok;
+            std::string label_tok;
+            if (!(iss >> val_tok)) break;
+            if (!(iss >> tok)) break;
+            if (tok != "label") continue;
+            if (!(iss >> label_tok)) break;
+            uint64_t case_val = std::strtoull(strip_punct(val_tok).c_str(), nullptr, 0);
+            if ((value.u & type_bit_mask(type)) == (case_val & type_bit_mask(type))) {
+              target = strip_punct(label_tok);
+              break;
+            }
+          }
+        }
       }
       if (!target.empty()) {
         frame.prev_label = frame.last_label;
