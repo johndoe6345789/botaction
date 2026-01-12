@@ -1,236 +1,196 @@
-# Sketchfab Utilities
+# Sketchfab to STL Converter
 
-✅ **Successfully reverse-engineered and decrypted Sketchfab model encryption!**
+Python tools for converting Sketchfab 3D models to STL format.
 
-Python tools for working with Sketchfab 3D models and their file formats.
+## Overview
 
-## 🎉 Major Achievement
+This project implements a complete pipeline for converting encrypted Sketchfab 3D models to STL (Stereolithography) format. The process involves:
 
-**Decryption Working!** Successfully implemented AES-256-CBC decryption for Sketchfab's encrypted `.binz` files.
-
-- ✅ Full decryption implementation
-- ✅ Working demo with Annihilator 2000 model  
-- ✅ Raw geometry data extraction
-- 📚 Complete documentation in [docs/SOLUTION_SUMMARY.md](docs/SOLUTION_SUMMARY.md)
+1. **Fetching** - Download model files and encryption keys from Sketchfab
+2. **Decrypting** - Decrypt `.binz` geometry files using AES-256-CBC
+3. **Decoding** - Parse the OSGJS scene format and extract triangle geometry
+4. **Exporting** - Generate binary STL files with calculated surface normals
 
 ## Project Structure
 
 ```
 .
-├── src/              # Main source code package
-│   ├── __init__.py           # Package initialization
-│   ├── __main__.py           # Module entry point
-│   ├── binz_reader.py        # Parse .binz binary files
-│   ├── model_decryptor.py    # Decrypt Sketchfab models
-│   ├── model_viewer.py       # 3D viewer (PyQt6 + OpenGL)
-│   ├── sketchfab_fetcher.py  # Fetch from Sketchfab API
-│   ├── sketchfab_gui.py      # GUI application
-│   ├── sketchfab_utils.py    # Utility functions
+├── src/
+│   ├── sketchfab_fetcher.py  # Fetch models from Sketchfab API
+│   ├── model_decryptor.py    # AES-256-CBC decryption
+│   ├── osgjs_decoder.py      # OSGJS scene format decoder
+│   ├── binz_reader.py        # Binary geometry parser
+│   ├── export_stl.py         # STL export with preview rendering
 │   ├── cli.py                # Command-line interface
-│   └── export_3mf.py         # Export to 3MF format
-├── tests/            # Test scripts
-├── demos/            # Demo scripts
-├── docs/             # Documentation
-├── data/             # Data files
-└── downloads/        # Downloaded models
-```
-├── data/             # Data files
-└── downloads/        # Downloaded models
+│   ├── sketchfab_gui.py      # GUI application
+│   └── sketchfab_utils.py    # Utility functions
+├── downloads/                 # Downloaded and exported models
+├── docs/                      # Additional documentation
+└── demos/                     # Demo scripts
 ```
 
 ## Quick Start
 
+### Installation
+
 ```bash
-# Install dependencies
-pip install requests numpy pycryptodome PyQt6
+pip install requests numpy pycryptodome matplotlib
+```
 
-# Use the command-line interface
-python -m src --help
+### Convert a Sketchfab Model to STL
 
-# Fetch a model
+```bash
+# Step 1: Fetch model files from Sketchfab
 python -m src fetch "https://sketchfab.com/3d-models/model-name-abc123" --download
 
-# Decrypt a downloaded model
-python -m src decrypt downloads/model.binz --params-file downloads/model_params.json --output model_decrypted.bin
+# Step 2: Export to STL
+python -m src export \
+    --osgjs downloads/model.osgjs.json \
+    --geometry downloads/model_file.binz \
+    --params downloads/model_params.json \
+    --output model.stl
 
-# Inspect a model file
-python -m src inspect downloads/model.binz
-
-# Export to 3MF format
-python -m src export model_decrypted.bin --output model.3mf
-
-# Launch GUI application
-python -m src.sketchfab_gui
-
-# Or run demos
-python demos/demo_decryption.py
+# Optional: Generate a preview image
+python -m src export \
+    --osgjs downloads/model.osgjs.json \
+    --geometry downloads/model_file.binz \
+    --params downloads/model_params.json \
+    --output model.stl \
+    --screenshot preview.png
 ```
 
-## GUI Application
-
-Launch the graphical interface:
+### GUI Application
 
 ```bash
 python -m src.sketchfab_gui
 ```
 
-Features:
-- Enter any Sketchfab model URL to fetch metadata
-- View model info: name, author, views, likes, face/vertex count
-- See encryption details and key material
-- Browse file URLs and sizes
-- Download model files and thumbnails
-- Dark theme UI
+## How It Works
 
-## Usage
+The conversion pipeline has four stages:
 
-### Fetch a Model
+### Stage 1: Fetching (sketchfab_fetcher.py)
+
+Downloads model files from Sketchfab:
 
 ```python
 from src.sketchfab_fetcher import SketchfabFetcher
 
 fetcher = SketchfabFetcher()
-
-# Fetch model data
-result = fetcher.fetch_model("https://sketchfab.com/3d-models/model-name-abc123...")
-
-# Get model info
-print(result['api_data']['name'])
-print(result['api_data']['user']['username'])
-
-# Download files
+result = fetcher.fetch_model("https://sketchfab.com/3d-models/model-name-abc123")
 downloaded = fetcher.download_model_files(result['model_id'], output_dir='downloads')
 ```
 
-### Command Line
+**What gets downloaded:**
+- `.binz` files - Encrypted binary geometry
+- `.osgjs.json` - Scene description (JSON)
+- `_params.json` - Encryption parameters (Base64-encoded AES key + IV)
+- `_metadata.json` - Model metadata from API
 
-```bash
-python -m src.sketchfab_fetcher
-```
+### Stage 2: Decryption (model_decryptor.py)
 
-This will fetch the example model and save:
-- `model_data.json` - Full API response and metadata
-- `downloads/*.binz` - Encrypted model geometry
-- `downloads/*_params.json` - Encryption parameters
-- `downloads/*_thumbnail.jpeg` - Model preview image
-
-### Analyze a .binz File
+Decrypts the encrypted `.binz` files using AES-256-CBC:
 
 ```python
-from src.binz_reader import BinzReader, inspect_binz
+from src.model_decryptor import SketchfabDecryptor
 
-# Inspect file structure
-info = inspect_binz('model.binz')
-print(info['size_bytes'])
-print(info['sample_floats'])
-
-# Read with layout from .osgjs
-reader = BinzReader()
-data = reader.read_file('model.binz')
-geometry = reader.parse_geometry(data, layout)
+decryptor = SketchfabDecryptor()
+decrypted_data = decryptor.decrypt_and_decompress(
+    'downloads/model_file.binz',
+    encryption_params  # From _params.json
+)
 ```
 
-### Color Space Conversion
+**Encryption details:**
+- Algorithm: AES-256-CBC
+- Key: Bytes 0-31 of Base64-decoded `b` parameter
+- IV: Bytes 32-47 of Base64-decoded `b` parameter
+- Padding: PKCS#7
+
+### Stage 3: Decoding (osgjs_decoder.py)
+
+Parses the OSGJS scene format to extract triangle geometry:
 
 ```python
-from src.sketchfab_utils import linear_to_srgb, srgb_to_linear
+from src.osgjs_decoder import decode_scene_to_triangles
 
-# Convert linear color to sRGB
-srgb_value = linear_to_srgb(0.5)
-
-# Convert RGB tuple
-r, g, b = linear_to_srgb_rgb(0.2, 0.4, 0.6)
+triangles, vertex_count = decode_scene_to_triangles(
+    'downloads/model.osgjs.json',
+    {'model_file.binz': decrypted_data}
+)
 ```
 
-## Sketchfab File Format
+**OSGJS format:**
+- Scene graph hierarchy with transformation matrices
+- Geometry nodes containing vertex positions, normals, UVs, and indices
+- Compression: delta encoding, varint encoding, implicit headers
+- Primitive modes: TRIANGLES or TRIANGLE_STRIP
 
-### .binz Files
+### Stage 4: STL Export (export_stl.py)
 
-Sketchfab stores 3D model geometry in encrypted `.binz` files:
+Converts triangles to binary STL format:
 
-| Property | Description |
-|----------|-------------|
-| Format | AES-encrypted binary data |
-| Compression | May be zlib-compressed after decryption |
-| Contents | Vertex positions, normals, UVs, indices |
+```python
+from src.export_stl import ModelSTLExporter
 
-### Encryption
-
-Models are protected with encryption:
-
-```
-File Config (from API):
-├── osgjsUrl: URL to the .binz file
-├── modelSize: Uncompressed geometry size
-├── osgjsSize: Scene description size
-└── p[]: Encryption parameters
-    ├── v: Version (usually 1)
-    ├── d: true = encrypted
-    └── b: Base64 key material
-        ├── bytes 0-31: AES-256 key
-        ├── bytes 32-47: IV/nonce
-        └── bytes 48+: Additional params
+exporter = ModelSTLExporter()
+exporter.load_from_osgjs('model.osgjs.json', ['model_file.binz'])
+exporter.export_stl('output.stl')
+exporter.render_preview('preview.png')  # Optional
 ```
 
-### .osgjs Files
+**STL format:**
+- 80-byte ASCII header
+- 4-byte triangle count (little-endian uint32)
+- For each triangle: normal vector (3 floats) + 3 vertices (9 floats) + attribute (2 bytes)
 
-Scene description files (JSON) that define:
-- Scene graph hierarchy
-- Material definitions
-- Buffer layouts and offsets
-- Texture references
+## File Formats
 
-## API Endpoints
+| Format | Description | Contents |
+|--------|-------------|----------|
+| `.binz` | Encrypted geometry | AES-256-CBC encrypted binary vertex/index data |
+| `.osgjs` | Scene description | JSON with scene graph, materials, buffer layouts |
+| `_params.json` | Encryption keys | Base64-encoded AES key (32 bytes) + IV (16 bytes) |
+| `.stl` | Output mesh | Binary STL with triangles and normals |
 
-| Endpoint | Description |
-|----------|-------------|
-| `GET /i/models/{id}` | Internal model config with file URLs |
-| `GET /v3/models/{id}` | Public API model metadata |
-| `GET /models/{id}/embed` | Embed page with viewer config |
+## Python API
 
-## Challenges with Encrypted Models
+### Full Pipeline Example
 
-### Problem Overview
-Encrypted Sketchfab models, such as the "Annihilator 2000," present unique challenges:
-- **Encryption**: Models are protected with AES-256-CBC encryption.
-- **Missing Layout Info**: The `.osgjs` file, which typically provides buffer layout information, is inaccessible (returns an "Access Denied" error).
-- **Binary Parsing**: Decrypted `.binz` files lack clear structure, making it difficult to extract geometry data without layout metadata.
+```python
+from src.sketchfab_fetcher import SketchfabFetcher
+from src.model_decryptor import SketchfabDecryptor
+from src.export_stl import ModelSTLExporter
 
-### Progress
-1. **Decryption Success**:
-   - Implemented AES-256-CBC decryption using PyCryptodome.
-   - Decrypted binary data matches expected file size but lacks recognizable patterns.
+# 1. Fetch
+fetcher = SketchfabFetcher()
+result = fetcher.fetch_model("https://sketchfab.com/3d-models/...")
+fetcher.download_model_files(result['model_id'], 'downloads')
 
-2. **Binary Analysis**:
-   - Compared decrypted data with test models (e.g., `test_cube.binz`).
-   - Identified scattered `float32` values but no clear vertex/index structure.
+# 2. Decrypt + Decode + Export
+exporter = ModelSTLExporter()
+exporter.load_from_osgjs(
+    'downloads/model.osgjs.json',
+    ['downloads/model_file.binz'],
+    params_files=['downloads/model_params.json']
+)
+exporter.export_stl('output.stl')
+```
 
-3. **JS Viewer Investigation**:
-   - Downloaded and analyzed minified JavaScript files from Sketchfab's viewer.
-   - Found references to geometry parsing but blocked by obfuscation.
+## API Endpoints Used
 
-### Next Steps
-- **Reverse-Engineering**:
-  - Analyze decrypted binary data for patterns (e.g., headers, offsets, repeated blocks).
-  - Attempt to infer buffer layout heuristically.
-- **Alternative Approaches**:
-  - Investigate Sketchfab's web viewer for runtime buffer layout extraction.
-  - Explore other models with accessible `.osgjs` files for layout examples.
-
-### Lessons Learned
-- `.osgjs` files are critical for parsing `.binz` geometry.
-- Minified JavaScript files hinder direct extraction of parsing logic.
-- Binary analysis requires careful comparison with known formats (e.g., test models).
-
-For detailed technical notes, see [docs/SOLUTION_SUMMARY.md](docs/SOLUTION_SUMMARY.md).
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /v3/models/{id}` | Public model metadata |
+| `GET /i/models/{id}` | Internal config with file URLs and encryption params |
+| `GET /models/{id}/embed` | Embed page with viewer configuration |
 
 ## Limitations
 
-- Model geometry files are encrypted
-- Decryption requires reverse-engineering the osgjs viewer
-- Some models are not downloadable per author settings
+- Some models have download restrictions set by authors
 - API rate limits may apply
+- Complex models with multiple geometry files may require manual handling
 
 ## License
 
-For educational and research purposes only. Respect content creators' rights.
+For educational and research purposes only. Respect content creators' rights and Sketchfab's terms of service.
