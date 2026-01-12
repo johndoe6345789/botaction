@@ -11,14 +11,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Optional, Sequence
-
-try:
-    import pywasm
-    from pywasm import binary, instruction
-except ImportError:  # pragma: no cover - optional dependency
-    pywasm = None
-    binary = None
-    instruction = None
+from pywasm import binary, instruction
 
 
 DITER_EXPORTS = {
