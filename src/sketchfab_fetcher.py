@@ -311,6 +311,107 @@ class SketchfabFetcher:
 
         return downloaded
 
+    def download_diter_files(self, model_id: str, output_dir: str = "downloads") -> Dict[str, str]:
+        """
+        Download DITER WASM decoder and key files from Sketchfab embed page.
+        
+        Returns:
+            Dictionary with paths to downloaded WASM and key files
+        """
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        downloaded = {}
+        
+        # Fetch embed page to find JS bundle URLs
+        embed_url = f"{self.BASE_URL}/models/{model_id}/embed"
+        try:
+            response = self.session.get(embed_url)
+            if response.status_code != 200:
+                return downloaded
+            
+            html = response.text
+            
+            # Look for JS bundle URLs
+            js_pattern = r'src="(https://static\.sketchfab\.com/[^"]+\.js)"'
+            js_matches = re.findall(js_pattern, html)
+            
+            print(f"  Found {len(js_matches)} JS bundles to search")
+            
+            # Download and search each JS bundle for WASM content
+            for idx, js_url in enumerate(js_matches):
+                try:
+                    # Only show progress for large searches
+                    if idx % 5 == 0 and idx > 0:
+                        print(f"    Searching bundle {idx}/{len(js_matches)}...")
+                    
+                    js_response = self.session.get(js_url, timeout=10)
+                    if js_response.status_code != 200:
+                        continue
+                    
+                    content = js_response.text
+                    
+                    # Check if this bundle contains WASM base64 (starts with AGFzbQEAAAAB)
+                    if 'AGFzbQEAAAAB' in content:
+                        # Extract WASM base64
+                        # Look for long base64 strings that start with WASM magic number
+                        wasm_pattern = r'["\'](AGFzbQEAAAAB[A-Za-z0-9+/=]{10000,})["\']'
+                        wasm_match = re.search(wasm_pattern, content)
+                        
+                        if wasm_match:
+                            try:
+                                import base64
+                                wasm_b64 = wasm_match.group(1)
+                                # Clean up base64 string
+                                wasm_b64 = wasm_b64.replace('\\\\n', '').replace('\\\\r', '').replace(' ', '')
+                                wasm_bytes = base64.b64decode(wasm_b64)
+                                
+                                # Verify it's actually WASM (starts with magic number)
+                                if wasm_bytes[:4] == b'\\x00asm':
+                                    wasm_path = output_path / 'diter_wasm_blob.wasm'
+                                    with open(wasm_path, 'wb') as f:
+                                        f.write(wasm_bytes)
+                                    downloaded['wasm'] = str(wasm_path)
+                                    print(f"  ✓ WASM: {wasm_path.name} ({len(wasm_bytes)} bytes)")
+                                    
+                                    # Save the JS bundle too for reference
+                                    js_filename = js_url.split('/')[-1]
+                                    js_path = output_path / f'diter_{js_filename}'
+                                    with open(js_path, 'w', encoding='utf-8') as f:
+                                        f.write(content)
+                                    downloaded['wasm_js'] = str(js_path)
+                                    
+                                    # Once we find WASM, we can stop searching
+                                    break
+                            except Exception as e:
+                                print(f"    Warning: Failed to decode WASM from bundle: {e}")
+                    
+                    # Also look for key/cipher patterns
+                    if not downloaded.get('key'):
+                        # Look for hex keys (40+ hex characters)
+                        hex_pattern = r'["\']([0-9a-fA-F]{40,})["\']'
+                        hex_matches = re.findall(hex_pattern, content)
+                        
+                        if hex_matches and 'module.exports' in content or 'diter' in content.lower():
+                            # Found potential key material
+                            key_path = output_path / 'diter_standalone_deob.js'
+                            with open(key_path, 'w', encoding='utf-8') as f:
+                                f.write(content)
+                            downloaded['key'] = str(key_path)
+                            print(f"  ✓ Key: {key_path.name}")
+                
+                except Exception as e:
+                    continue
+            
+            # If we didn't find the files, suggest fallback
+            if not downloaded.get('wasm'):
+                print(f"  ⚠ Could not find WASM decoder in JS bundles")
+        
+        except Exception as e:
+            print(f"  Warning: Failed to scrape DITER files: {e}")
+        
+        return downloaded
+
     def get_encryption_info(self, model_id: str) -> Optional[Dict[str, Any]]:
         """
         Extract encryption parameters for a model.

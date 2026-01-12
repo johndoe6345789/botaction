@@ -143,18 +143,29 @@ Examples:
             if not key_source.exists():
                 key_source = Path(args.output_dir) / "diter_standalone.js"
             
+            # If WASM/key files don't exist, try to download them
+            if not wasm_path.exists() or not key_source.exists():
+                print("\n📥 Downloading DITER decoder files...")
+                diter_files = fetcher.download_diter_files(model_id, args.output_dir)
+                if diter_files.get('wasm'):
+                    wasm_path = Path(diter_files['wasm'])
+                if diter_files.get('key'):
+                    key_source = Path(diter_files['key'])
+            
             print(f"  Input: {binz_path.name}")
             print(f"  Params: {params_path.name}")
             print(f"  Output: {osgjs_path.name}")
             
             if not wasm_path.exists():
                 print(f"\n❌ Error: {wasm_path} not found")
-                print(f"   Copy from: archive/diter/downloads/diter_wasm_blob.wasm")
+                print(f"   Could not download WASM decoder from Sketchfab")
+                print(f"   Fallback: Copy from archive/diter/downloads/diter_wasm_blob.wasm")
                 return 1
             
             if not key_source.exists():
                 print(f"\n❌ Error: {key_source} not found")
-                print(f"   Copy from: archive/diter/downloads/diter_standalone_deob.js")
+                print(f"   Could not download key file from Sketchfab")
+                print(f"   Fallback: Copy from archive/diter/downloads/diter_standalone_deob.js")
                 return 1
             
             decoded_size = decode_diter_file(
