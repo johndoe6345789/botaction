@@ -10,8 +10,7 @@ fetcher.download_model_files(result['model_id'], 'downloads')
 # 2. Decrypt + Decode + Export
 exporter = ModelSTLExporter()
 exporter.load_from_osgjs(
-    'downloads/model.osgjs.json',
-    ['downloads/model_file.binz'],
-    params_files=['downloads/model_params.json']
+    f'downloads/{result["model_id"]}.osgjs.json',
+    [f'downloads/{result["model_id"]}_model_file.binz']
 )
 exporter.export_stl('output.stl')
