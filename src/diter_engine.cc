@@ -15,6 +15,7 @@ const char* default_runbook_path() {
 }
 
 const char* kCallCtors = "diter_core_0x5F_wasm_call_ctors";
+const char* kInstantiate = "diter_core_instantiate";
 const char* kInit = "diter_core_mV2ZXIgZ29ubmEgbGV0IHlvdSBkb3duCk5l";
 const char* kAllocKey = "diter_core_Umlja1JvbGxlZDRV";
 const char* kLoadDict = "diter_core_dmVyIGdvbm5hIHJ1biBhcm91bmQgYW5kI";
@@ -29,6 +30,8 @@ const char* kOutAdvance = "diter_core_FrZSB5b3UgY3J5Ck5ldmVyIGdvbm5hIHN";
 struct DiterEngine {
   DiterVm* vm = nullptr;
   uint64_t instance_ptr = 0;
+  uint64_t env_ptr = 0;
+  uint64_t linear_base = 0;
   std::vector<uint8_t> dict;
   std::vector<uint8_t> chunk;
   std::string key_hex;
@@ -49,7 +52,13 @@ DiterEngine* diter_engine_create(void) {
     return nullptr;
   }
   engine->instance_ptr = diter_vm_instance_ptr(engine->vm);
+  engine->env_ptr = diter_vm_env_ptr(engine->vm);
+  engine->linear_base = diter_vm_linear_base(engine->vm);
   if (engine->instance_ptr) {
+    if (engine->env_ptr) {
+      uint64_t init_args[2] = {engine->instance_ptr, engine->env_ptr};
+      diter_vm_call(engine->vm, kInstantiate, init_args, 2);
+    }
     uint64_t args[1] = {engine->instance_ptr};
     diter_vm_call(engine->vm, kCallCtors, args, 1);
   }
@@ -66,6 +75,9 @@ void diter_engine_init(DiterEngine* engine) {
   if (!engine) return;
   engine->executed = false;
   engine->output.clear();
+  if (engine->vm) {
+    diter_vm_load_inputs(engine->vm, nullptr, 0, nullptr, 0, engine->key_hex.c_str());
+  }
   if (engine->instance_ptr) {
     uint64_t args[1] = {engine->instance_ptr};
     diter_vm_call(engine->vm, kInit, args, 1);
@@ -78,6 +90,7 @@ void diter_engine_set_key_hex(DiterEngine* engine, const char* key_hex) {
   if (!engine->instance_ptr) return;
   uint64_t args[3] = {engine->instance_ptr, 0, 40};
   uint64_t ptr = diter_vm_call(engine->vm, kAllocKey, args, 3);
+  ptr += engine->linear_base;
   const uint8_t* memory = diter_vm_memory(engine->vm);
   size_t mem_size = diter_vm_memory_size(engine->vm);
   if (ptr + 40 <= mem_size && memory) {
@@ -93,6 +106,7 @@ int diter_engine_write_dict(DiterEngine* engine, const uint8_t* data, size_t len
   if (!engine->instance_ptr) return 0;
   uint64_t args[2] = {engine->instance_ptr, static_cast<uint64_t>(len)};
   uint64_t ptr = diter_vm_call(engine->vm, kLoadDict, args, 2);
+  ptr += engine->linear_base;
   const uint8_t* memory = diter_vm_memory(engine->vm);
   size_t mem_size = diter_vm_memory_size(engine->vm);
   if (ptr + len > mem_size || !memory) {
@@ -107,6 +121,7 @@ int diter_engine_write_chunk(DiterEngine* engine, const uint8_t* data, size_t le
   if (!engine->instance_ptr) return 0;
   uint64_t args[2] = {engine->instance_ptr, static_cast<uint64_t>(len)};
   uint64_t ptr = diter_vm_call(engine->vm, kLoadChunk, args, 2);
+  ptr += engine->linear_base;
   const uint8_t* memory = diter_vm_memory(engine->vm);
   size_t mem_size = diter_vm_memory_size(engine->vm);
   if (ptr + len > mem_size || !memory) {
@@ -130,6 +145,7 @@ const uint8_t* diter_engine_output(DiterEngine* engine, uint32_t* out_len) {
   uint64_t args[1] = {engine->instance_ptr};
   uint64_t ptr = diter_vm_call(engine->vm, kOutPtr, args, 1);
   uint64_t len = diter_vm_call(engine->vm, kOutLen, args, 1);
+  ptr += engine->linear_base;
   const uint8_t* memory = diter_vm_memory(engine->vm);
   size_t mem_size = diter_vm_memory_size(engine->vm);
   if (!memory || ptr + len > mem_size || len == 0) {

@@ -14,6 +14,8 @@ DiterVm* diter_vm_create(const char* runbook_path);
 void diter_vm_destroy(DiterVm* vm);
 uint64_t diter_vm_call(DiterVm* vm, const char* func, const uint64_t* args, size_t arg_count);
 uint64_t diter_vm_instance_ptr(const DiterVm* vm);
+uint64_t diter_vm_env_ptr(const DiterVm* vm);
+uint64_t diter_vm_linear_base(const DiterVm* vm);
 void diter_vm_load_inputs(DiterVm* vm,
                           const uint8_t* dict,
                           size_t dict_len,
