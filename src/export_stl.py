@@ -105,18 +105,40 @@ class ModelSTLExporter:
         self.triangles: List[np.ndarray] = []
         self.vertex_count: int = 0
 
-    def load_from_osgjs(self, osgjs_path: str | Path, geometry_paths: Iterable[str | Path]) -> "ModelSTLExporter":
+    def load_from_osgjs(self, osgjs_path: str | Path, geometry_paths: Iterable[str | Path], params_path: str | Path | None = None) -> "ModelSTLExporter":
+        from .model_decryptor import SketchfabDecryptor
+        import json
+        
         file_map = {}
         for path in geometry_paths:
             path = Path(path)
-            if path.exists():
+            if not path.exists():
+                continue
+                
+            # Check for pre-decoded version first
+            decoded_path = path.parent / path.name.replace('.binz', '_decoded.binz')
+            if decoded_path.exists():
+                payload = decoded_path.read_bytes()
+            else:
+                # Try to decrypt if params are available
                 payload = path.read_bytes()
-                file_map[path.name] = payload
-                lower_name = path.name.lower()
-                if "model_file_wireframe" in lower_name:
-                    file_map["model_file_wireframe.binz"] = payload
-                elif "model_file" in lower_name:
-                    file_map["model_file.binz"] = payload
+                if params_path and Path(params_path).exists():
+                    try:
+                        with open(params_path) as f:
+                            params = json.load(f)
+                        if params and isinstance(params, list) and params[0].get('d', False):
+                            # File is encrypted, decrypt it
+                            decryptor = SketchfabDecryptor()
+                            payload = decryptor.decrypt_file(path, params)
+                    except Exception as e:
+                        print(f"Warning: Could not decrypt {path.name}: {e}")
+            
+            file_map[path.name] = payload
+            lower_name = path.name.lower()
+            if "model_file_wireframe" in lower_name:
+                file_map["model_file_wireframe.binz"] = payload
+            elif "model_file" in lower_name:
+                file_map["model_file.binz"] = payload
         self.triangles, self.vertex_count = decode_scene_to_triangles(osgjs_path, file_map)
         return self
 

@@ -1,8 +1,34 @@
 from pathlib import Path
 import argparse
+import shutil
 from src.sketchfab_fetcher import SketchfabFetcher
 from src.export_stl import ModelSTLExporter
 from src.diter_decoder import decode_diter_file
+
+def clean_downloads(output_dir: str = 'downloads') -> None:
+    """Remove all downloaded files and temporary outputs."""
+    output_path = Path(output_dir)
+    
+    if not output_path.exists():
+        print(f"✓ Directory {output_dir}/ does not exist, nothing to clean")
+        return
+    
+    # Count files before deletion
+    file_count = sum(1 for _ in output_path.rglob('*') if _.is_file())
+    
+    if file_count == 0:
+        print(f"✓ Directory {output_dir}/ is already empty")
+        return
+    
+    # Remove all files
+    shutil.rmtree(output_path)
+    output_path.mkdir(exist_ok=True)
+    
+    print(f"✓ Cleaned {file_count} files from {output_dir}/")
+    print(f"  - Removed downloaded .binz files")
+    print(f"  - Removed decoded .osgjs.json files")
+    print(f"  - Removed params and thumbnails")
+    print(f"  - Removed any cached outputs")
 
 def main():
     parser = argparse.ArgumentParser(
@@ -21,6 +47,9 @@ Examples:
   
   # Decode and export with repair
   python download_model.py --decode-diter --repair
+  
+  # Clean all downloaded files
+  python download_model.py --clean
         """
     )
     
@@ -49,8 +78,21 @@ Examples:
         default='downloads',
         help='Directory for downloaded files (default: downloads)'
     )
+    parser.add_argument(
+        '--clean',
+        action='store_true',
+        help='Clean downloaded files and temporary outputs'
+    )
     
     args = parser.parse_args()
+    
+    # Handle clean command
+    if args.clean:
+        print("=" * 70)
+        print("Cleaning Downloads")
+        print("=" * 70)
+        clean_downloads(args.output_dir)
+        return 0
 
     print("=" * 70)
     print("Sketchfab Model Downloader & Converter")
@@ -160,7 +202,8 @@ Examples:
         exporter = ModelSTLExporter()
         exporter.load_from_osgjs(
             str(osgjs_path),
-            [downloaded['model_file']]
+            [downloaded['model_file']],
+            params_path=downloaded.get('params')
         )
         exporter.export_stl(args.output, repair=args.repair, verbose=args.repair)
         
