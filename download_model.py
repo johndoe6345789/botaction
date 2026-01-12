@@ -2,6 +2,7 @@ from pathlib import Path
 import argparse
 from src.sketchfab_fetcher import SketchfabFetcher
 from src.export_stl import ModelSTLExporter
+from src.diter_decoder import decode_diter_file
 
 def main():
     parser = argparse.ArgumentParser(
@@ -89,53 +90,41 @@ Examples:
         print("The .osgjs.json file needs to be decrypted from the .binz file.")
         
         if args.decode_diter:
-            print("\n🔄 Attempting DITER decoding (this may take several minutes)...")
-            try:
-                from src.diter_decoder import decode_diter_file
-                
-                binz_path = Path(downloaded['binz'])
-                params_path = Path(downloaded['params'])
-                osgjs_path = binz_path.with_suffix('.osgjs.json')
-                
-                # Look for WASM and key files
-                wasm_path = Path(args.output_dir) / "diter_wasm_blob.wasm"
-                key_source = Path(args.output_dir) / "diter_standalone_deob.js"
-                if not key_source.exists():
-                    key_source = Path(args.output_dir) / "diter_standalone.js"
-                
-                print(f"  Input: {binz_path.name}")
-                print(f"  Params: {params_path.name}")
-                print(f"  Output: {osgjs_path.name}")
-                
-                if not wasm_path.exists():
-                    print(f"\n❌ Error: {wasm_path} not found")
-                    print(f"   Copy from: archive/diter/downloads/diter_wasm_blob.wasm")
-                    return 1
-                
-                if not key_source.exists():
-                    print(f"\n❌ Error: {key_source} not found")
-                    print(f"   Copy from: archive/diter/downloads/diter_standalone_deob.js")
-                    return 1
-                
-                decoded_size = decode_diter_file(
-                    binz_path,
-                    params_path,
-                    osgjs_path,
-                    wasm_path=wasm_path,
-                    key_source=key_source,
-                )
-                
-                print(f"\n✓ Decoded {decoded_size:,} bytes")
-                osgjs_files = [osgjs_path]
-            except ImportError:
-                print("\n❌ Error: pywasm not installed")
-                print("   Install with: pip install pywasm")
+            print("\n🔄 Attempting DITER decoding (this may take several minutes)...")     
+            binz_path = Path(downloaded['binz'])
+            params_path = Path(downloaded['params'])
+            osgjs_path = binz_path.with_suffix('.osgjs.json')
+            
+            # Look for WASM and key files
+            wasm_path = Path(args.output_dir) / "diter_wasm_blob.wasm"
+            key_source = Path(args.output_dir) / "diter_standalone_deob.js"
+            if not key_source.exists():
+                key_source = Path(args.output_dir) / "diter_standalone.js"
+            
+            print(f"  Input: {binz_path.name}")
+            print(f"  Params: {params_path.name}")
+            print(f"  Output: {osgjs_path.name}")
+            
+            if not wasm_path.exists():
+                print(f"\n❌ Error: {wasm_path} not found")
+                print(f"   Copy from: archive/diter/downloads/diter_wasm_blob.wasm")
                 return 1
-            except Exception as e:
-                print(f"\n❌ DITER decoding failed: {e}")
-                import traceback
-                traceback.print_exc()
+            
+            if not key_source.exists():
+                print(f"\n❌ Error: {key_source} not found")
+                print(f"   Copy from: archive/diter/downloads/diter_standalone_deob.js")
                 return 1
+            
+            decoded_size = decode_diter_file(
+                binz_path,
+                params_path,
+                osgjs_path,
+                wasm_path=wasm_path,
+                key_source=key_source,
+            )
+            
+            print(f"\n✓ Decoded {decoded_size:,} bytes")
+            osgjs_files = [osgjs_path]
         else:
             print("\n⚠ Python DITER decoder (pywasm) is very slow (5-10+ minutes).")
             print("  For faster decoding, use one of these options:")
