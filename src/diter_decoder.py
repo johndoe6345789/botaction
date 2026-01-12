@@ -11,7 +11,11 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Optional, Sequence
-from pywasm import binary, instruction
+
+try:
+    import pywasm
+except ImportError:  # pragma: no cover - optional dependency
+    pywasm = None
 
 
 DITER_EXPORTS = {
@@ -120,11 +124,11 @@ class _DiterRuntime:
 
 def _build_runtime(wasm_bytes: bytes) -> _DiterRuntime:
     _require_pywasm()
-    module = binary.Module.from_reader(io.BytesIO(wasm_bytes))
+    module = pywasm.ModuleDesc.from_reader(io.BytesIO(wasm_bytes))
 
     import_min = 1
     for imp in module.import_list:
-        if isinstance(imp.desc, binary.MemoryType):
+        if isinstance(imp.desc, pywasm.MemType):
             import_min = imp.desc.limits.n
             break
 
@@ -133,7 +137,7 @@ def _build_runtime(wasm_bytes: bytes) -> _DiterRuntime:
         if not global_def.expr.data:
             continue
         op = global_def.expr.data[0]
-        if op.opcode == instruction.i32_const:
+        if op.opcode == pywasm.opcode.i32_const:
             heap_base = op.args[0]
             break
 
@@ -145,9 +149,9 @@ def _build_runtime(wasm_bytes: bytes) -> _DiterRuntime:
     limits = pywasm.Limits()
     limits.n = initial_pages
     limits.m = 0
-    mem_type = pywasm.binary.MemoryType()
+    mem_type = pywasm.MemType()
     mem_type.limits = limits
-    memory = pywasm.Memory(mem_type)
+    memory = pywasm.MemInst(mem_type)
 
     heap_ptr = {"value": heap_base}
 
