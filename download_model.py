@@ -17,8 +17,8 @@ if 'binz' in downloaded and 'params' in downloaded:
     with open(downloaded['params'], 'r') as f:
         params = json.load(f)
     
-    # Decrypt
-    decrypted_data = decryptor.decrypt_file(downloaded['binz'], params)
+    # Decrypt and decompress
+    decrypted_data = decryptor.decrypt_and_decompress(downloaded['binz'], params)
     
     # Save as .osgjs.json
     osgjs_path = Path(downloaded['binz']).with_suffix('.osgjs.json')
