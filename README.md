@@ -7,9 +7,19 @@ Python tools for converting Sketchfab 3D models to STL format.
 This project implements a complete pipeline for converting encrypted Sketchfab 3D models to STL (Stereolithography) format. The process involves:
 
 1. **Fetching** - Download model files and encryption keys from Sketchfab
-2. **Decrypting** - Decrypt `.binz` geometry files using AES-256-CBC
-3. **Decoding** - Parse the OSGJS scene format and extract triangle geometry
+2. **Decrypting & Decoding** - Decrypt `.binz` files using AES-256-CBC + DITER decompression
+3. **Parsing** - Parse the OSGJS scene format and extract triangle geometry
 4. **Exporting** - Generate binary STL files with calculated surface normals
+
+### Key Features
+
+- Downloads models directly from Sketchfab URLs
+- Handles AES-256-CBC encryption + DITER compression
+- Supports multiple DITER decoders (Python/C/Node.js)
+- Mesh repair for 3D printing (makes models watertight)
+- Export to STL or 3MF formats
+- Optional preview rendering
+- Command-line interface and GUI
 
 ## Project Structure
 
@@ -18,23 +28,46 @@ This project implements a complete pipeline for converting encrypted Sketchfab 3
 ├── src/
 │   ├── sketchfab_fetcher.py  # Fetch models from Sketchfab API
 │   ├── model_decryptor.py    # AES-256-CBC decryption
+│   ├── diter_decoder.py      # DITER decompression (Python)
 │   ├── osgjs_decoder.py      # OSGJS scene format decoder
 │   ├── binz_reader.py        # Binary geometry parser
 │   ├── export_stl.py         # STL export with preview rendering
+│   ├── export_3mf.py         # 3MF export
 │   ├── cli.py                # Command-line interface
 │   ├── sketchfab_gui.py      # GUI application
 │   └── sketchfab_utils.py    # Utility functions
+├── archive/diter/             # DITER decoder research & implementations
 ├── downloads/                 # Downloaded and exported models
 ├── docs/                      # Additional documentation
-└── demos/                     # Demo scripts
+└── download_model.py          # Simple download & convert script
 ```
 
 ## Quick Start
 
 ### Installation
 
+# Optional: For Python DITER decoder (slow but works)
+pip install pywasm
+
+# Optional: For faster C DITER decoder, build from source
+# (requires cmake and LLVM)
+```
+
+### Simple Download & Convert
+
+Use the included `download_model.py` script:
+
 ```bash
-pip install requests numpy pycryptodome matplotlib trimesh
+python download_model.py
+```
+
+This will:
+1. Download all model files from Sketchfab
+2. Check for existing `.osgjs.json` files
+3. Export to STL if possible
+4. Provide instructions for DITER decoding if needed
+
+### Convert a Sketchfab Model to STL (CLI)ome matplotlib trimesh
 ```
 
 ### Convert a Sketchfab Model to STL
@@ -190,10 +223,37 @@ exporter.export_stl('output.stl', repair=True, verbose=True)
 
 | Format | Description | Contents |
 |--------|-------------|----------|
-| `.binz` | Encrypted geometry | AES-256-CBC encrypted binary vertex/index data |
-| `.osgjs` | Scene description | JSON with scene graph, materials, buffer layouts |
+| `.binz` | Encrypted geometry | AES-256-CBC + DITER compressed binary data |
+| `.osgjs.json` | Scene description | JSON with scene graph, materials, buffer layouts |
 | `_params.json` | Encryption keys | Base64-encoded AES key (32 bytes) + IV (16 bytes) |
 | `.stl` | Output mesh | Binary STL with triangles and normals |
+
+### DITER Decoding
+
+Sketchfab uses DITER (a custom LZ-based compression) in addition to AES encryption.
+The `.binz` files require DITER decoding to produce `.osgjs.json` files.
+
+**Decoding Options:**
+1. **Python** (slow): `from src.diter_decoder import decode_diter_file`
+   - Requires: `pip install pywasm`
+   - Good for: Understanding the algorithm, small files
+   - Performance: Very slow for large models
+
+2. **C** (fast): `from src.diter_decoder_c import decode_diter_file`
+   - Requires: Compiled C binary in `build/diter_decode_c/`
+   - Good for: Production use, large files
+   - Performance: ~100x faster than Python
+
+3. **Node.js** (fast): `node scripts/diter_decode.js`
+   - Requires: Node.js installed
+   - Good for: Cross-platform compatibility
+   - Performance: Fast, similar to C
+
+**Required Files for DITER Decoding:**
+- `downloads/diter_wasm_blob.wasm` - WASM binary module
+- `downloads/diter_standalone_deob.js` - Decryption keys
+
+These files are included in `archive/diter/downloads/`.
 
 ## Python API
 
@@ -201,39 +261,48 @@ exporter.export_stl('output.stl', repair=True, verbose=True)
 
 ```python
 from pathlib import Path
-import json
 from src.sketchfab_fetcher import SketchfabFetcher
-from src.model_decryptor import SketchfabDecryptor
 from src.export_stl import ModelSTLExporter
 
-# 1. Fetch
+# 1. Fetch model files
 fetcher = SketchfabFetcher()
 result = fetcher.fetch_model("https://sketchfab.com/3d-models/...")
 downloaded = fetcher.download_model_files(result['model_id'], 'downloads')
 
-# 2. Decrypt the .binz file to create .osgjs.json
-if 'binz' in downloaded and 'params' in downloaded:
-    decryptor = SketchfabDecryptor()
+print(f"Downloaded files: {list(downloaded.keys())}")
+
+# 2. Decrypt .binz file using DITER decoder (if .osgjs.json doesn't exist)
+model_id = result['model_id']
+osgjs_files = list(Path('downloads').glob(f'{model_id}*.osgjs.json'))
+
+if not osgjs_files:
+    # DITER decoding required - see DITER Decoding section below
+    from src.diter_decoder import decode_diter_file
     
-    # Read params
-    with open(downloaded['params'], 'r') as f:
-        params = json.load(f)
+    binz_path = Path(downloaded['binz'])
+    params_path = Path(downloaded['params'])
+    osgjs_path = binz_path.with_suffix('.osgjs.json')
     
-    # Decrypt
-    decrypted_data = decryptor.decrypt_file(downloaded['binz'], params)
-    
-    # Save as .osgjs.json
-    osgjs_path = Path(downloaded['binz']).with_suffix('.osgjs.json')
-    with open(osgjs_path, 'wb') as f:
-        f.write(decrypted_data)
-    
-    # 3. Export to STL
+    # Note: Python decoder is slow. Consider using C or Node.js version.
+    decode_diter_file(
+        binz_path,
+        params_path,
+        osgjs_path,
+        wasm_path=Path('downloads/diter_wasm_blob.wasm'),
+        key_source=Path('downloads/diter_standalone_deob.js'),
+    )
+else:
+    osgjs_path = osgjs_files[0]
+
+# 3. Export to STL
+if 'model_file' in downloaded:
     exporter = ModelSTLExporter()
     exporter.load_from_osgjs(
         str(osgjs_path),
         [downloaded['model_file']]
     )
     exporter.export_stl('output.stl')
+    print(f"Exported {exporter.vertex_count:,} vertices")
 ```
 
 ## API Endpoints Used
