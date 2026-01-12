@@ -1,0 +1,275 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						5
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20.0"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						3,
+						8,
+						10,
+						11,
+						12
+					]
+				},
+				{
+					"build" : "lib",
+					"childIndexes" : 
+					[
+						2
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-lib-Debug-c12f15c6f888b43a891c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "lib"
+				},
+				{
+					"build" : "lib/Target",
+					"childIndexes" : 
+					[
+						3
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-lib.Target-Debug-87012169081f45ec1170.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20.0"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "lib/Target"
+				},
+				{
+					"build" : "lib/Target/CBackend",
+					"childIndexes" : 
+					[
+						4
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-lib.Target.CBackend-Debug-088e481f40c69c549bf6.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20.0"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 0,
+					"source" : "lib/Target/CBackend",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						4,
+						5
+					]
+				},
+				{
+					"build" : "lib/Target/CBackend/TargetInfo",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-lib.Target.CBackend.TargetInfo-Debug-a9707050385d6cb47ca8.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20.0"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 0,
+					"source" : "lib/Target/CBackend/TargetInfo",
+					"targetIndexes" : 
+					[
+						2,
+						6,
+						7
+					]
+				},
+				{
+					"build" : "tools",
+					"childIndexes" : 
+					[
+						6
+					],
+					"jsonFile" : "directory-tools-Debug-f9645b0170a45a75eff2.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "tools"
+				},
+				{
+					"build" : "tools/llvm-cbe",
+					"jsonFile" : "directory-tools.llvm-cbe-Debug-de2026816b81007830ab.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20.0"
+					},
+					"parentIndex" : 5,
+					"projectIndex" : 0,
+					"source" : "tools/llvm-cbe",
+					"targetIndexes" : 
+					[
+						9
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6
+					],
+					"name" : "llvm-cbe",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 3,
+					"id" : "CBackend::@50fb10fa3328db35050a",
+					"jsonFile" : "target-CBackend-Debug-5c0d057664451887b1ca.json",
+					"name" : "CBackend",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "LLVMCBackendCodeGen::@50fb10fa3328db35050a",
+					"jsonFile" : "target-LLVMCBackendCodeGen-Debug-f3d16523d94a023d01b0.json",
+					"name" : "LLVMCBackendCodeGen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "LLVMCBackendInfo::@e30999bff987577dc88c",
+					"jsonFile" : "target-LLVMCBackendInfo-Debug-2ab2aa11090b46bc016d.json",
+					"name" : "LLVMCBackendInfo",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "acc_gen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-acc_gen-Debug-f7dc60661078161f0c1c.json",
+					"name" : "acc_gen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "install-LLVMCBackendCodeGen::@50fb10fa3328db35050a",
+					"jsonFile" : "target-install-LLVMCBackendCodeGen-Debug-8a67f0f3b1bc8d45dfe6.json",
+					"name" : "install-LLVMCBackendCodeGen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "install-LLVMCBackendCodeGen-stripped::@50fb10fa3328db35050a",
+					"jsonFile" : "target-install-LLVMCBackendCodeGen-stripped-Debug-d7f327a9ac0044923e11.json",
+					"name" : "install-LLVMCBackendCodeGen-stripped",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "install-LLVMCBackendInfo::@e30999bff987577dc88c",
+					"jsonFile" : "target-install-LLVMCBackendInfo-Debug-fab1d297ef297127b2b1.json",
+					"name" : "install-LLVMCBackendInfo",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "install-LLVMCBackendInfo-stripped::@e30999bff987577dc88c",
+					"jsonFile" : "target-install-LLVMCBackendInfo-stripped-Debug-a9f41a3cd082702642dd.json",
+					"name" : "install-LLVMCBackendInfo-stripped",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "intrinsics_gen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-intrinsics_gen-Debug-bb5540b8dc22de22613f.json",
+					"name" : "intrinsics_gen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 6,
+					"id" : "llvm-cbe::@4e0c5450ce97a1389a6a",
+					"jsonFile" : "target-llvm-cbe-Debug-f0abdfc2158b99d36195.json",
+					"name" : "llvm-cbe",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "omp_gen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-omp_gen-Debug-44162d7ec0c4b00c7aa7.json",
+					"name" : "omp_gen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "target_parser_gen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-target_parser_gen-Debug-854ac2919072e0c05f07.json",
+					"name" : "target_parser_gen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vt_gen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vt_gen-Debug-b0760d0efbc963ee0ed0.json",
+					"name" : "vt_gen",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/rewrich/botaction/build",
+		"source" : "/home/rewrich/botaction/tools/llvm-cbe"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

@@ -1,0 +1,47 @@
+{
+	"backtrace" : 2,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target",
+			"add_llvm_component_group"
+		],
+		"files" : 
+		[
+			"/usr/lib64/cmake/llvm/AddLLVM.cmake",
+			"lib/Target/CBackend/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 1,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 891,
+				"parent" : 1
+			}
+		]
+	},
+	"folder" : 
+	{
+		"name" : "LLVM/Component Groups"
+	},
+	"id" : "CBackend::@50fb10fa3328db35050a",
+	"name" : "CBackend",
+	"paths" : 
+	{
+		"build" : "lib/Target/CBackend",
+		"source" : "lib/Target/CBackend"
+	},
+	"sources" : [],
+	"type" : "UTILITY"
+}

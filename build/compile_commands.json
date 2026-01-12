@@ -1,0 +1,26 @@
+[
+{
+  "directory": "/home/rewrich/botaction/build",
+  "command": "/usr/bin/clang++ -I/home/rewrich/botaction/tools/llvm-cbe/lib/Target/CBackend -I/home/rewrich/botaction/build/lib/Target/CBackend -g -std=gnu++17   -D_GNU_SOURCE -DEXPERIMENTAL_KEY_INSTRUCTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o lib/Target/CBackend/CMakeFiles/LLVMCBackendCodeGen.dir/CBackend.cpp.o -c /home/rewrich/botaction/tools/llvm-cbe/lib/Target/CBackend/CBackend.cpp",
+  "file": "/home/rewrich/botaction/tools/llvm-cbe/lib/Target/CBackend/CBackend.cpp",
+  "output": "lib/Target/CBackend/CMakeFiles/LLVMCBackendCodeGen.dir/CBackend.cpp.o"
+},
+{
+  "directory": "/home/rewrich/botaction/build",
+  "command": "/usr/bin/clang++ -I/home/rewrich/botaction/tools/llvm-cbe/lib/Target/CBackend -I/home/rewrich/botaction/build/lib/Target/CBackend -g -std=gnu++17   -D_GNU_SOURCE -DEXPERIMENTAL_KEY_INSTRUCTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o lib/Target/CBackend/CMakeFiles/LLVMCBackendCodeGen.dir/CTargetMachine.cpp.o -c /home/rewrich/botaction/tools/llvm-cbe/lib/Target/CBackend/CTargetMachine.cpp",
+  "file": "/home/rewrich/botaction/tools/llvm-cbe/lib/Target/CBackend/CTargetMachine.cpp",
+  "output": "lib/Target/CBackend/CMakeFiles/LLVMCBackendCodeGen.dir/CTargetMachine.cpp.o"
+},
+{
+  "directory": "/home/rewrich/botaction/build",
+  "command": "/usr/bin/clang++ -I/home/rewrich/botaction/build/lib/Target/CBackend/TargetInfo/.. -I/home/rewrich/botaction/tools/llvm-cbe/lib/Target/CBackend/TargetInfo/.. -g -std=gnu++17   -D_GNU_SOURCE -DEXPERIMENTAL_KEY_INSTRUCTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o lib/Target/CBackend/TargetInfo/CMakeFiles/LLVMCBackendInfo.dir/CBackendTargetInfo.cpp.o -c /home/rewrich/botaction/tools/llvm-cbe/lib/Target/CBackend/TargetInfo/CBackendTargetInfo.cpp",
+  "file": "/home/rewrich/botaction/tools/llvm-cbe/lib/Target/CBackend/TargetInfo/CBackendTargetInfo.cpp",
+  "output": "lib/Target/CBackend/TargetInfo/CMakeFiles/LLVMCBackendInfo.dir/CBackendTargetInfo.cpp.o"
+},
+{
+  "directory": "/home/rewrich/botaction/build",
+  "command": "/usr/bin/clang++ -g -std=gnu++17   -D_GNU_SOURCE -DEXPERIMENTAL_KEY_INSTRUCTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o tools/llvm-cbe/CMakeFiles/llvm-cbe.dir/llvm-cbe.cpp.o -c /home/rewrich/botaction/tools/llvm-cbe/tools/llvm-cbe/llvm-cbe.cpp",
+  "file": "/home/rewrich/botaction/tools/llvm-cbe/tools/llvm-cbe/llvm-cbe.cpp",
+  "output": "tools/llvm-cbe/CMakeFiles/llvm-cbe.dir/llvm-cbe.cpp.o"
+}
+]
