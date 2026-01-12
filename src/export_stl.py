@@ -133,7 +133,7 @@ class ModelSTLExporter:
         self.triangles = repair_mesh(self.triangles, verbose=verbose)
         return self
 
-    def export_stl(self, output_path: str | Path, repair: bool = False, verbose: bool = False) -> Path:
+    def export_stl(self, output_path: str | Path, repair: bool = True, verbose: bool = True) -> Path:
         """
         Export triangles to binary STL format.
 
