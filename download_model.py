@@ -1,6 +1,14 @@
 from pathlib import Path
 import argparse
 import shutil
+import sys
+import io
+
+# Fix Windows console encoding for unicode characters
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 from src.sketchfab_fetcher import SketchfabFetcher
 from src.export_stl import ModelSTLExporter
 from src.diter_decoder import decode_diter_file

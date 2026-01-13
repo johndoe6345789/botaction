@@ -136,12 +136,19 @@ def _decode_varint(data: bytes, count: int, dtype_name: str) -> List[int]:
     signed = not dtype_name.startswith("U")
     out = [0] * count
     pos = 0
+    max_varint_bytes = 10  # Max bytes for a 64-bit varint
     for idx in range(count):
         value = 0
         shift = 0
+        varint_bytes_read = 0
         while True:
+            if pos >= len(data):
+                raise ValueError(f"Varint decode error: ran out of data at index {idx}/{count}")
+            if varint_bytes_read >= max_varint_bytes:
+                raise ValueError(f"Varint decode error: varint too long at index {idx}/{count}")
             byte = data[pos]
             pos += 1
+            varint_bytes_read += 1
             value |= ((byte & 0x7F) << (shift & 31)) & 0xFFFFFFFF
             value &= 0xFFFFFFFF
             if (byte & 0x80) == 0:

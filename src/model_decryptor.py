@@ -89,24 +89,31 @@ class SketchfabDecryptor:
         key, iv = self.decode_encryption_params(params_b64)
         
         # AES requires data to be multiple of 16 bytes
-        # Truncate to aligned size if necessary
-        aligned_size = (len(encrypted_data) // 16) * 16
-        if aligned_size != len(encrypted_data):
-            print(f"Warning: File size {len(encrypted_data)} not aligned to 16 bytes, truncating to {aligned_size}")
-            encrypted_data = encrypted_data[:aligned_size]
+        # Sketchfab may have non-aligned encrypted files - pad with null bytes
+        original_size = len(encrypted_data)
+        if original_size % 16 != 0:
+            padding_needed = 16 - (original_size % 16)
+            print(f"Warning: File size {original_size} not aligned to 16 bytes, padding with {padding_needed} null bytes")
+            # Pad with null bytes (0x00) which is safer than truncating
+            encrypted_data = encrypted_data + b'\x00' * padding_needed
         
         # Decrypt using AES-256-CBC
         cipher = AES.new(key, AES.MODE_CBC, iv)
         decrypted = cipher.decrypt(encrypted_data)
-        
-        # Remove PKCS7 padding
+
+        # Sketchfab files may not use standard PKCS7 padding
+        # Try to remove padding, but don't fail if it's not there
         try:
-            decrypted = unpad(decrypted, AES.block_size)
-        except ValueError:
-            # Data might not be padded, or padding is invalid
-            # Just return as-is
-            pass
-        
+            decrypted_unpadded = unpad(decrypted, AES.block_size)
+            # Check if unpadding made sense (didn't remove too much data)
+            if len(decrypted_unpadded) > len(decrypted) * 0.9:  # Lost less than 10%
+                decrypted = decrypted_unpadded
+            else:
+                print(f"Warning: Unpadding removed {len(decrypted) - len(decrypted_unpadded)} bytes, keeping original")
+        except ValueError as e:
+            # Data is not padded or padding is invalid - keep as-is
+            print(f"Note: No valid PKCS7 padding found, using raw decrypted data ({e})")
+
         return decrypted
     
     def decrypt_and_decompress(

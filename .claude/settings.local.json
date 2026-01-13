@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash($env:PYTHONIOENCODING='utf-8')",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(dir:*)",
+      "Bash(timeout 30 python:*)",
+      "Bash(ls:*)",
+      "Bash(timeout 60 python:*)",
+      "Bash(node scripts/diter_decode.js:*)"
+    ]
+  }
+}
